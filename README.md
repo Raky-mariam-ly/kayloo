@@ -26,7 +26,19 @@ docker compose up -d
 ### 4. Demarrer les migrations existantes
 
 ```bash
-docker exec web alembic migrate head
+docker exec web alembic upgrade head
+```
+
+### 5. Arreter et redemarrer docker
+
+```bash
+docker compose stop && docker compose start
+```
+
+### 4. Vérifier les logs que tout est OK
+
+```bash
+docker logs  web -f
 ```
 
 ## Developpement

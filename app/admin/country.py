@@ -9,8 +9,7 @@ from admin.base import AdminModelView
 class CountryView(AdminModelView):
     fields = [
         # StringField("code", required=True),
-        CountryField("code", required=True),
-        StringField("name", required=True),
+        CountryField("code", required=True, label="Country"),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True),
         StringField("created_by", read_only=True),
@@ -28,8 +27,6 @@ class CountryView(AdminModelView):
         errors: Dict[str, str] = dict()
         if data["code"] is None or len(data["code"]) != 2:
             errors["code"] = "Ensure code has exactly 02 characters"
-        if data["name"] is None or len(data["name"]) < 3:
-            errors["name"] = "Ensure name has at least 03 characters"
         if len(errors) > 0:
             raise FormValidationError(errors)
         return await super().validate(request, data)

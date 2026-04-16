@@ -9,8 +9,7 @@ from starlette_admin.contrib.sqlmodel import Admin
 from starlette_admin import I18nConfig
 from starlette_admin.i18n import SUPPORTED_LOCALES
 
-from core.db import engine, async_session_maker
-from core.config import get_settings
+from core.auth import get_async_session_context
 from public.router import router
 from admin.admin import admin
 from seed import seed_database
@@ -21,14 +20,12 @@ async def lifespan(app: FastAPI):
     # --- Startup Logic ---
     # Initialize DB pools, load ML models, or warm up caches
     print("Application is starting up")
-    # Seed the database with initial data
-    session = async_session_maker()
-    await seed_database(session)
+    # Seed the database with initial data if needed
+    await seed_database()
 
     yield
     # --- Shutdown Logic ---
     # Close connections, flush logs, or release memory
-    await session.close()
     print("Application is shutting down")
 
 

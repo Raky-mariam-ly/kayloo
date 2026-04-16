@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.auth import create_user
+from core.auth import create_user, get_async_session_context
 
 from models.country import Country
 from models.property_rent_type import PropertyRentType
@@ -60,7 +60,7 @@ async def populate_users() -> None:
         await create_user(**user)
 
 
-async def polulate_property_types(session: AsyncSession) -> None:
+async def polulate_property_types() -> None:
     property_types = [
         {"code": "F2", "label": "Studio", "is_active": True},
         {"code": "F3", "label": "Appartement F3", "is_active": True},
@@ -74,14 +74,15 @@ async def polulate_property_types(session: AsyncSession) -> None:
         {"code": "PARKING", "label": "Parking", "is_active": True},
     ]
     try:
-        for pt in property_types:
-            session.add(PropertyType(**pt))
-        await session.commit()
+        async with get_async_session_context() as session:
+            for pt in property_types:
+                session.add(PropertyType(**pt))
+            await session.commit()
     except sqlalchemy.exc.IntegrityError as e:
         print(f"Table already populated: {e}")
 
 
-async def populate_countries(session: AsyncSession) -> None:
+async def populate_countries() -> None:
     countries = [
         {"code": "SN", "name": "Senegal", "is_active": True},
         {"code": "CI", "name": "Côte d'Ivoire", "is_active": True},
@@ -91,14 +92,15 @@ async def populate_countries(session: AsyncSession) -> None:
         # {"code": "BJ", "name": "Benin", "is_active": True},
     ]
     try:
-        for country in countries:
-            session.add(Country(**country))
-        await session.commit()
+        async with get_async_session_context() as session:
+            for country in countries:
+                session.add(Country(**country))
+            await session.commit()
     except sqlalchemy.exc.IntegrityError as e:
         print(f"Table already populated: {e}")
 
 
-async def polulate_property_rent_types(session: AsyncSession) -> None:
+async def polulate_property_rent_types() -> None:
     property_rent_types = [
         {"code": "RENT_EMPTY", "label": "Location Vide", "is_active": True},
         {"code": "RENT_FURNISHED", "label": "Location Meublée", "is_active": True},
@@ -106,15 +108,16 @@ async def polulate_property_rent_types(session: AsyncSession) -> None:
         {"code": "LEASE_AGRO", "label": "Location Agricole", "is_active": True},
     ]
     try:
-        for prt in property_rent_types:
-            session.add(PropertyRentType(**prt))
-        await session.commit()
+        async with get_async_session_context() as session:
+            for prt in property_rent_types:
+                session.add(PropertyRentType(**prt))
+            await session.commit()
     except sqlalchemy.exc.IntegrityError as e:
         print(f"Table already populated: {e}")
 
 
-async def seed_database(session: AsyncSession) -> None:
+async def seed_database() -> None:
     await populate_users()
-    await polulate_property_types(session)
-    await polulate_property_rent_types(session)
-    await populate_countries(session)
+    await polulate_property_types()
+    await polulate_property_rent_types()
+    await populate_countries()

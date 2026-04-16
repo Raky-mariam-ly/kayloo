@@ -58,3 +58,120 @@ docker exec web alembic upgrade head
   - Creer une vue dans `admin/xxx.py`
   - Importer la vue dans `admin/admin.py`
   - Tester les methodes CRUD
+
+## Entité administrative
+
+### Pays `country`
+
+```sql
+table country
+{
+  id uuid [pk]
+  code text [not null, unique]
+  name text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Ville `city`
+
+```sql
+table city
+{
+  id uuid [pk]
+  country text [ref:> country.code]
+  code text [not null, unique]
+  name text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Zone `area`
+
+```sql
+table area
+{
+  id uuid [pk]
+  city text [ref:> city.code]
+  name text [not null]
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Agences `agency`
+
+```sql
+table agency
+{
+  id uuid [pk]
+  country text [ref:> country.code]
+  name text
+  email text
+  phone_number text
+  logo_url text
+  siteweb_url text
+  whatsapp_url text
+  x_url text
+  facebook_url text
+  tiktok_url text
+  youtube_url text
+  instragrm_url text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Agents `agent`
+
+```sql
+table agent
+{
+  id uuid [pk]
+  user_id uuid [ref:> user.id]
+  agency_id uuid [ref:> agency.id]
+  slug text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Partenaires `partner`
+
+```sql
+table partner
+{
+  id uuid [pk]
+  country text [ref:> country.code]
+  name text [not null, unique]
+  email text [not null, unique]
+  phone_number text [not null, unique]
+  logo_url text
+  siteweb_url text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
+### Biens `propertry`
+
+```sql
+table propertry
+{
+
+}
+```

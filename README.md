@@ -35,7 +35,7 @@ docker exec web alembic upgrade head
 docker compose stop && docker compose start
 ```
 
-### 4. Vérifier les logs que tout est OK
+### 6. Vérifier les logs que tout est OK
 
 ```bash
 docker logs  web -f
@@ -51,10 +51,10 @@ Nouvelle entité pour l'interface **Admin**
 
 ```bash
 docker exec web alembic revision --autogenerate -m "Create new xxxx table"
-docker exec web alembic migrate head
+docker exec web alembic upgrade head
 ```
 
 - Creer la vue **Admin** selon les recommendations **starlette-admin**
   - Creer une vue dans `admin/xxx.py`
-  - Importer la vue dans `main.py`
+  - Importer la vue dans `admin/admin.py`
   - Tester les methodes CRUD

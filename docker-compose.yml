@@ -1,0 +1,35 @@
+services:
+  # PostgreSQL database
+  db:
+    image: postgres:18-alpine
+    container_name: db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    container_name: web
+    volumes:
+      - ./app:/app
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-db}
+      SECRET_KEY: ${SECRET_KEY:-7233325a0d07bacca409bf6efeafaa1ebeb84894650a151f86a92ff35310a7c1}
+      ENVIRONMENT: ${ENVIRONMENT:-dev}
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

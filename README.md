@@ -5,8 +5,8 @@
 ### 1. Cloner le projet et se deplacer dans le dossier
 
 ```bash
-git clone https://github.com/groupe-sepro/kayloo_web.git
-cd kayloo_web
+git clone https://github.com/groupe-sepro/kayloo_siteweb.git
+cd kayloo_siteweb
 ```
 
 ### 2. Lancer le build docker

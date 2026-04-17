@@ -140,7 +140,12 @@ class FastapiUsersAuthProvider(AuthProvider):
 
         user = await user_manager.authenticate(OAuth2PasswordRequestForm(username=username, password=password))
 
-        # validate user
+        if user is None or not user.is_active:
+            raise LoginFailed("Email ou mot de passe incorrect")
+
+        if not user.is_superuser:
+            raise LoginFailed("Accès refusé : compte non autorisé")
+
         request.session.update({"session": await token_manager.write_token(user)})
 
         return response

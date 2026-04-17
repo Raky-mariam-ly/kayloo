@@ -1,0 +1,191 @@
+{% extends "edit.html" %}
+
+{% block edit_form %}
+{% set fields = model.get_fields_list(request, 'EDIT' | ra) %}
+
+{# Macro : affiche un champ par son name #}
+{% macro rf(fname, full_width=False, col=None) %}
+  {% for field in fields if field.name == fname %}
+  <div class="{{ col if col else ('col-12' if full_width else 'col-md-6') }} mb-3">
+    {% with action=('EDIT'|ra), data=obj[field.name], error=(errors.get(field.name) if errors else None) %}
+      {% include field.label_template %}
+      {% include field.form_template %}
+    {% endwith %}
+  </div>
+  {% endfor %}
+{% endmacro %}
+
+{# ── Navigation onglets ── #}
+<ul class="nav nav-tabs nav-fill mb-0 border-bottom-0" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active fw-semibold" data-bs-toggle="tab" href="#p-ident" role="tab">
+      <i class="fa fa-tag me-1"></i> Identification
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#p-local" role="tab">
+      <i class="fa fa-map-marker me-1"></i> Localisation
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#p-desc" role="tab">
+      <i class="fa fa-home me-1"></i> Description
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#p-fin" role="tab">
+      <i class="fa fa-money me-1"></i> Financier
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#p-opt" role="tab">
+      <i class="fa fa-cog me-1"></i> Options
+    </a>
+  </li>
+</ul>
+
+{# ── Contenu onglets ── #}
+<div class="tab-content border border-top-0 rounded-bottom p-4">
+
+  {# Onglet 1 — Identification #}
+  <div class="tab-pane fade show active" id="p-ident" role="tabpanel">
+    <p class="tab-section-label">Informations générales</p>
+    <div class="row">
+      {{ rf("code") }}
+      {{ rf("label") }}
+      {{ rf("type") }}
+      {{ rf("usage") }}
+      {{ rf("status") }}
+    </div>
+    <p class="tab-section-label mt-3">Relations</p>
+    <div class="row">
+      {{ rf("agency_id") }}
+      {{ rf("building_id") }}
+    </div>
+  </div>
+
+  {# Onglet 2 — Localisation #}
+  <div class="tab-pane fade" id="p-local" role="tabpanel">
+    <div class="row">
+      {{ rf("country") }}
+      {{ rf("city") }}
+      {{ rf("zone") }}
+      {{ rf("street") }}
+      {{ rf("address", full_width=True) }}
+      {{ rf("level") }}
+      {{ rf("position") }}
+      {{ rf("apartment_number") }}
+    </div>
+    <p class="tab-section-label mt-3">Coordonnées GPS</p>
+    <div class="row">
+      {{ rf("lat") }}
+      {{ rf("lng") }}
+    </div>
+  </div>
+
+  {# Onglet 3 — Description #}
+  <div class="tab-pane fade" id="p-desc" role="tabpanel">
+    <p class="tab-section-label">Caractéristiques physiques</p>
+    <div class="row">
+      {{ rf("surface", col="col-md-4") }}
+      {{ rf("build_year", col="col-md-4") }}
+      {{ rf("bed_room_count", col="col-md-4") }}
+      {{ rf("bath_room_count", col="col-md-4") }}
+      {{ rf("kitchen_count", col="col-md-4") }}
+      {{ rf("living_room_count", col="col-md-4") }}
+    </div>
+    <p class="tab-section-label mt-3">Descriptif &amp; Média</p>
+    <div class="row">
+      {{ rf("description", full_width=True) }}
+      {{ rf("image_url", full_width=True) }}
+      {{ rf("images", full_width=True) }}
+    </div>
+  </div>
+
+  {# Onglet 4 — Financier #}
+  <div class="tab-pane fade" id="p-fin" role="tabpanel">
+    <p class="tab-section-label">Prix</p>
+    <div class="row">
+      {{ rf("currency") }}
+      {{ rf("base_price_type") }}
+      {{ rf("price") }}
+      {{ rf("base_price") }}
+      {{ rf("extra_price") }}
+      {{ rf("sale_price") }}
+      {{ rf("rent_price") }}
+      {{ rf("syndic_amount") }}
+    </div>
+    <p class="tab-section-label mt-3">Taux (%)</p>
+    <div class="row">
+      {{ rf("vat_rate", col="col-md-4") }}
+      {{ rf("tom_rate", col="col-md-4") }}
+      {{ rf("ir_rate", col="col-md-4") }}
+      {{ rf("mgmt_rate", col="col-md-4") }}
+      {{ rf("commission_rate", col="col-md-4") }}
+      {{ rf("deposit_rate", col="col-md-4") }}
+    </div>
+  </div>
+
+  {# Onglet 5 — Options #}
+  <div class="tab-pane fade" id="p-opt" role="tabpanel">
+    <p class="tab-section-label">Location</p>
+    <div class="row">
+      {{ rf("rent_type") }}
+      {{ rf("rental_period") }}
+      {{ rf("managed_by") }}
+      {{ rf("status_before_reserved") }}
+    </div>
+    <p class="tab-section-label mt-3">Acquisition</p>
+    <div class="row">
+      {{ rf("acquisition_date") }}
+      {{ rf("acquisition_price") }}
+      {{ rf("acquisition_fee") }}
+      {{ rf("free_since") }}
+    </div>
+    <p class="tab-section-label mt-3">Visibilité</p>
+    <div class="row align-items-center">
+      {{ rf("is_hidden", col="col-auto") }}
+      {{ rf("is_exposed", col="col-auto") }}
+      {{ rf("is_saleable", col="col-auto") }}
+      {{ rf("is_managed", col="col-auto") }}
+      {{ rf("archived", col="col-auto") }}
+      {{ rf("is_featured", col="col-auto") }}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  .nav-tabs .nav-link {
+    color: #6c757d;
+    border-color: transparent;
+    font-size: 0.85rem;
+  }
+  .nav-tabs .nav-link.active {
+    color: #a80000;
+    border-bottom: 2px solid #a80000;
+    font-weight: 600;
+  }
+  .nav-tabs .nav-link:hover:not(.active) {
+    color: #a80000;
+    border-color: transparent;
+    background: rgba(168,0,0,.05);
+  }
+  .tab-section-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #a80000;
+    border-bottom: 1px solid #f0e0e0;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .tab-content {
+    background: #fff;
+  }
+</style>
+{% endblock %}

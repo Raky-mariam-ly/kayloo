@@ -1,0 +1,137 @@
+/* ── Google Fonts ────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300&display=swap");
+
+/* ── Tailwind v4 Engine ──────────────────────────────────── */
+@import "tailwindcss";
+
+@theme {
+  /* ── Brand Colors ─────────────────────────────────────── */
+  --color-primary: #d60000;
+  --color-primary-hover: #b00000;
+  --color-footer-top: #930000;
+  --color-footer-bottom: #232323;
+  --color-footer-red: #8b0000;
+  --color-hover-blue: #00aeff;
+
+  /* ── Core Neutrals (unified: front + back share these) ─ */
+  --color-dark: #020b1d;
+  --color-dark-blue: #004274;
+  --color-text-body: #3d3d3d;
+  --color-input-muted: #a1a7a8;
+  --color-muted: #636363;
+
+  /* ── Contact Section ──────────────────────────────────── */
+  --color-contact-outer: #1b2631;
+  --color-contact-left: #232323;
+  --color-contact-right: #3c3c3c;
+
+  /* ── Back-Office Surfaces ─────────────────────────────── */
+  --color-surface: #f7f8fa;
+  --color-border-default: #e8ecf0;
+
+  /* ── Borders & Separators ─────────────────────────────── */
+  --color-border-nav: rgba(116, 0, 0, 0.2);
+  --color-border-input: #dce0e0;
+  --color-border-light: #d5d5d5;
+
+  /* ── Accent / Utility ─────────────────────────────────── */
+  --color-cyan: #00aeff;
+  --color-cyan-hover: #33beff;
+  --color-testimonial: #e3f4fc;
+  --color-brand-red: #d60000;
+
+  /* ── Chart Colors (statistiques page) ─────────────────── */
+  --color-chart-blue: #3b82f6;
+  --color-chart-blue-light: #60a5fa;
+  --color-chart-green: #10b981;
+  --color-chart-green-light: #34d399;
+  --color-chart-purple: #8b5cf6;
+  --color-chart-amber: #f59e0b;
+  --color-chart-rose: #f43f5e;
+  --color-chart-slate: #64748b;
+
+  /* ── Font Families ────────────────────────────────────── */
+  --font-poppins: "Poppins", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-noto: "Noto Serif JP", sans-serif;
+
+  /* ── Max Width ────────────────────────────────────────── */
+  --max-width-site: 1170px;
+
+  /* ── Border Radius ────────────────────────────────────── */
+  --radius-search-form: 11px;
+  --radius-btn: 5px;
+  --radius-cta-btn: 4px;
+  --radius-badge: 4px;
+  --radius-input: 5px;
+
+  /* ── Box Shadows ──────────────────────────────────────── */
+  --shadow-img: 0px 20px 40px -4px rgba(0, 0, 0, 0.17);
+  --shadow-card: 0 2px 12px rgba(2, 11, 29, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(2, 11, 29, 0.1);
+  --shadow-admin-box:
+    0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Global Base ─────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Utilities for Repeating Patterns ────────────────────── */
+@utility card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 60%);
+}
+
+@utility max-w-site {
+  max-width: 1170px;
+}
+
+@utility shadow-img {
+  box-shadow: var(--shadow-img);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+@utility search-tab {
+  @apply font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] transition-colors;
+}
+
+@utility search-tab-active {
+  @apply bg-primary text-white;
+}
+
+@utility search-select {
+  @apply w-full h-10 px-3 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red;
+}
+
+/* ── Fade-In Animation (hero + content sections) ────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* ── Chart.js canvas helper (statistiques) ───────────────── */
+@utility chart-canvas {
+  width: 100%;
+  max-height: 380px;
+}

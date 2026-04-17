@@ -1,0 +1,149 @@
+{% macro carousel_card(listing) %}
+    {% if listing.type == "sale" %}
+        {% set tag_label = "À Vendre" %}
+    {% elif listing.type == "rent" %}
+        {% set tag_label = "À Louer" %}
+    {% else %}
+        {% set tag_label = "Location Meublée" %}
+    {% endif %}
+    <a href="{{ listing.link }}"
+    class="relative flex-shrink-0 w-full md:w-[calc(50%-7.21px)] lg:w-[calc(33.333%-9.99px)] rounded-xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden flex flex-col h-[400px]">
+        <img src="{{ listing.bg_image | default('/static/images/placeholder-listing.webp') }}" 
+         alt="{{ listing.title }}"
+         class="absolute inset-0 w-full h-full object-cover object-top">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+    </div>
+    <div class="relative z-10 flex justify-between p-3">
+        <div class="flex items-center gap-2 flex-wrap">
+            {% if listing.is_featured %}
+            <span class="bg-amber-600 text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
+            En vedette
+            </span>
+            {% endif %}
+            <span class="bg-primary text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
+            {{ tag_label }}
+            </span>
+        </div>
+        <button
+            class="bg-white/80 hover:bg-white text-gray-500 hover:text-primary w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm"
+            aria-label="Ajouter aux favoris">
+            <i class="fa-regular fa-heart text-sm"></i>
+        </button>
+    </div>
+    <div
+        class="absolute z-10 inset-x-3 bottom-3 bg-neutral-400/5 backdrop-blur-sm p-3 rounded-lg border border-white/15">
+        <div class="flex items-start justify-between gap-2 mb-2">
+            <h2 class="font-jakarta font-bold text-sm text-white leading-tight">
+            {{ listing.title }}
+            </h2>
+            <div class="shrink-0 flex px-2 py-1 bg-white rounded-md">
+                <p class="font-jakarta font-bold text-primary text-[10px]">
+                {{ listing.price }} {{ listing.currency | default('F CFA') }}
+                </p>
+            </div>
+        </div>
+        <p class="flex items-center gap-1.5 text-[11px] text-gray-200 mb-3"><i
+                class="fa-solid fa-location-dot text-white"></i> {{ listing.location }}</p>
+        <div
+            class="flex items-center gap-3 text-[10px] text-gray-100 border-t border-gray-200/20 pt-3">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-house"></i> {{ listing.property_type }}</span>
+
+            {% if listing.bedroom_nbr %}
+            <span class="flex items-center gap-1"><i class="fa-solid fa-bed"></i> {{ listing.bedroom_nbr }} Ch.</span>
+            {% endif %}
+
+            {% if listing.bthroom_nbr %}
+            <span class="flex items-center gap-1"><i class="fa-solid fa-bath"></i> {{ listing.bthroom_nbr }} SDB</span>
+            {% endif %}
+
+            {% if listing.land_size %}
+            <span class="flex items-center gap-1"><i class="fa-solid fa-vector-square"></i> {{ listing.land_size }} m²</span>
+            {% endif%}
+        </div>
+    </div>
+    </a>
+{% endmacro %}
+
+{% macro property_carousel(listing_list) %}
+    <!-- ========== PROPERTY CAROUSEL ========== -->
+        <div class="max-w-site mx-auto px-4">
+            <!-- Carousel Navigation -->
+            <div class="flex justify-end gap-2 mb-2 pr-3">
+                <button id="carousel-prev"
+                    class="w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button id="carousel-next"
+                    class="w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Cards Container -->
+            <div class="overflow-hidden px-4">
+                <div id="property-carousel" class="flex transition-transform duration-500 ease-in-out gap-4">
+                {% for item in listing_list %}
+                    {{ carousel_card(item) }}
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+{% endmacro %}
+
+{% macro carousel_js() %}
+<script>
+        // ===== Property Carousel =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var carousel = document.getElementById('property-carousel');
+        var prevBtn = document.getElementById('carousel-prev');
+        var nextBtn = document.getElementById('carousel-next');
+        var currentIndex = 0;
+
+        function getCardWidth() {
+            var card = carousel.querySelector('a');
+            if (!card) return 400;
+            console.log(card.offsetWidth);
+            return card.offsetWidth + 16;
+             // 16px gap (gap-4)
+        }
+
+
+
+        function getVisibleCards() {
+            if (window.innerWidth >= 1024) return 3;
+            if (window.innerWidth >= 768) return 2;
+            return 1;
+        }
+
+        function getTotalCards() {
+            return carousel.querySelectorAll('a').length;
+        }
+
+        function updateCarousel() {
+            var maxIndex = getTotalCards() - getVisibleCards();
+            if (currentIndex < 0) currentIndex = 0;
+            if (currentIndex > maxIndex) currentIndex = maxIndex;
+            var offset = currentIndex * getCardWidth();
+            carousel.style.transform = 'translateX(-' + offset + 'px)';
+        }
+
+        prevBtn.addEventListener('click', function () {
+            currentIndex--;
+            updateCarousel();
+            console.log("Prev button clicked!");
+        });
+
+        nextBtn.addEventListener('click', function () {
+            currentIndex++;
+            updateCarousel();
+        });
+
+        window.addEventListener('resize', updateCarousel);
+        });
+        
+    </script>
+{% endmacro %}

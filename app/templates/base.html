@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Accueil{% endblock %} – Kayloo</title>
+    <!-- Design system (Tailwind v4 + tokens) – processed by Vite -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{url_for('static', path='css/output.css')}}">
+    {% endblock %}
+</head>
+
+<body class="font-jakarta text-dark bg-white scroll-smooth">
+
+    <!-- ========== MAIN ========== -->
+    <main>
+        <!-- ========== HEADER (from components/front-end/header.html) ========== -->
+        <header class="relative z-40">
+    <div class="bg-white hidden lg:block">
+        <div class="max-w-site mx-auto px-4">
+            <div class="flex items-center h-[90px] gap-10">
+                <div class="flex-shrink-0">
+                    <a href="/">
+                        <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
+                            class="h-full w-[180px]">
+                    </a>
+                </div>
+                <div class="flex items-center justify-end flex-1">
+                    <div class="flex items-center">
+                        <div class="text-dark-blue text-[30px] pr-5"><i class="fas fa-phone"></i></div>
+                        <div class="text-dark-blue text-sm">
+                            <div class="font-bold"><a href="tel:+221330582949"
+                                    class="no-underline text-dark-blue hover:text-primary">+221 33 058 29 49</a>
+                            </div>
+                            <div><a href="mailto:contact@kayloo.immo"
+                                    class="no-underline text-dark-blue hover:text-primary">contact@kayloo.immo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center pl-[30px]">
+                        <div class="text-dark-blue text-[30px] pr-5"><i class="fas fa-map-pin"></i></div>
+                        <div class="text-dark-blue text-sm">
+                            <div class="font-bold">Kayloo Immobilier Rue des Palmiers,</div>
+                            <div>Quartier des Almadies Dakar, Sénégal</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 pl-[30px] text-dark-blue text-xl">
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-facebook"></i></a>
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-x-twitter"></i></a>
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-instagram"></i></a>
+                        <a href="#"  rel="noopener noreferrer"
+                            class="text-dark-blue hover:text-primary no-underline"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bg-primary border-t border-b border-border-nav hidden lg:block" id="header-nav" data-sticky="1">
+        <div class="max-w-site mx-auto px-4">
+            <div class="flex items-center justify-between h-[54px]">
+                <ul class="flex items-center h-full m-0 p-0 list-none">
+                    <li class="border-l border-r border-border-nav h-full">
+                        <a href="{{ url_for('home')}}"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">Accueil</a>
+                    </li>
+                    <li class="border-r border-border-nav h-full relative group">
+                        <a href="#"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">
+                            Location <i class="fas fa-angle-down text-xs ml-1"></i>
+                        </a>
+                        <ul
+                            class="absolute top-full left-0 bg-white shadow-lg rounded-b min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 list-none p-0 m-0">
+                            <li><a href="{{ url_for('get_locataire') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Je
+                                    suis Locataire</a></li>
+                            <li><a href="{{ url_for('get_bailleur') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Je
+                                    suis Bailleur</a></li>
+                        </ul>
+                    </li>
+                    <li class="border-r border-border-nav h-full relative group">
+                        <a href="{{ url_for('get_acheteur') }}"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">
+                            Vente <i class="fas fa-angle-down text-xs ml-1"></i>
+                        </a>
+                        <ul
+                            class="absolute top-full left-0 bg-white shadow-lg rounded-b min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 list-none p-0 m-0">
+                            <li><a href="{{ url_for('get_acheteur') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Je
+                                    suis Acheteur</a></li>
+                            <li><a href="{{ url_for('get_vendeur') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Je
+                                    suis Vendeur</a></li>
+                        </ul>
+                    </li>
+                    <li class="border-r border-border-nav h-full">
+                        <a href="{{ url_for('get_construire') }}"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">Construire</a>
+                    </li>
+                    <li class="border-r border-border-nav h-full">
+                        <a href="{{ url_for('get_diaspora') }}"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">Diaspora</a>
+                    </li>
+                    <li class="border-r border-border-nav h-full relative group">
+                        <a href="{{ url_for('get_agencies') }}"
+                            class="text-white no-underline font-jakarta text-sm font-medium px-[15px] leading-[54px] block hover:bg-white/10 transition">
+                            Nos Partenaires <i class="fas fa-angle-down text-xs ml-1"></i>
+                        </a>
+                        <ul
+                            class="absolute top-full left-0 bg-white shadow-lg rounded-b min-w-[220px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 list-none p-0 m-0">
+                            <li><a href="{{ url_for('get_agencies') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Agences
+                                    immobilières</a></li>
+                            <li><a href="{{ url_for('get_agents') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Agents
+                                    immobiliers</a></li>
+                            <li><a href="{{ url_for('get_partners') }}"
+                                    class="block px-4 py-2.5 text-sm text-dark hover:text-primary hover:bg-gray-50 no-underline">Partenaires
+                                    de Constructions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="flex items-center h-full">
+                    <a href="/back-office/propriete-creer-qwencode.html"
+                        class="bg-primary border border-primary text-white font-jakarta text-sm font-medium px-[15px] py-2 no-underline hover:bg-white hover:text-primary transition">
+                        Créer une annonce
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="lg:hidden bg-white flex items-center justify-between h-[60px] px-4 shadow-sm">
+        <a href="{{ url_for('home')}}">
+            <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo" class="h-7 w-auto">
+        </a>
+        <button id="mobile-toggle" class="text-dark-blue text-2xl p-2" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    <div id="mobile-nav" class="lg:hidden hidden bg-white border-t shadow-lg">
+        <ul class="list-none m-0 p-0">
+            <li><a href="{{ url_for('home')}}"
+                    class="block px-5 py-3 text-dark-blue text-sm border-b border-gray-100 no-underline hover:bg-gray-50">Accueil</a>
+            </li>
+            <li><a href="#"
+                    class="block px-5 py-3 text-dark-blue text-sm border-b border-gray-100 no-underline hover:bg-gray-50">Location</a>
+            </li>
+            <li><a href="{{ url_for('get_acheteur') }}"
+                    class="block px-5 py-3 text-dark-blue text-sm border-b border-gray-100 no-underline hover:bg-gray-50">Vente</a>
+            </li>
+            <li><a href="{{ url_for('get_construire') }}"
+                    class="block px-5 py-3 text-dark-blue text-sm border-b border-gray-100 no-underline hover:bg-gray-50">Construire</a>
+            </li>
+            <li><a href="{{ url_for('get_diaspora') }}"
+                    class="block px-5 py-3 text-primary text-sm font-semibold border-b border-gray-100 no-underline">Diaspora</a>
+            </li>
+            <li><a href="{{ url_for('get_agencies') }}"
+                    class="block px-5 py-3 text-dark-blue text-sm border-b border-gray-100 no-underline hover:bg-gray-50">Nos
+                    Partenaires</a></li>
+            <li class="p-4">
+                <a href="/back-office/propriete-creer-qwencode.html"
+                    class="block text-center bg-primary text-white text-sm font-medium py-2.5 rounded no-underline hover:bg-primary-hover transition">Créer
+                    une annonce</a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+{% block content %}{% endblock %}
+
+<script>
+    document.getElementById('mobile-toggle').addEventListener('click', function () {
+        document.getElementById('mobile-nav').classList.toggle('hidden');
+    });
+    var nav = document.getElementById('header-nav');
+    if (!nav) return;
+    var offset = nav.offsetTop;
+    window.addEventListener('scroll', function () {
+        if (window.scrollY > offset) {
+            nav.classList.add('fixed', 'top-0', 'left-0', 'right-0', 'z-50', 'shadow-lg');
+        } else {
+            nav.classList.remove('fixed', 'top-0', 'left-0', 'right-0', 'z-50', 'shadow-lg');
+        }
+    });
+</script>
+
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer>
+    <!-- Footer Top -->
+    <div class="bg-footer-top pt-[30px] pb-[15px] lg:pt-[40px] lg:pb-[30px]">
+        <div class="max-w-site mx-auto px-4 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Nos Biens par Ville -->
+                <div>
+                    <h3 class="text-white font-semibold text-lg mb-6">Nos Biens par Ville</h3>
+                    <ul class="list-none p-0 m-0 space-y-2">
+                        <li><a href="{{ url_for('get_search_result') }}"
+                                class="flex items-center gap-2 text-white no-underline hover:text-white/80 text-sm font-medium transition"><i
+                                    class="fas fa-arrow-right text-[10px]"></i>Guediawaye</a></li>
+                        <li><a href="{{ url_for('get_search_result') }}"
+                                class="flex items-center gap-2 text-white no-underline hover:text-white/80 text-sm font-medium transition"><i
+                                    class="fas fa-arrow-right text-[10px]"></i>Saint-Louis</a></li>
+                        <li><a href="{{ url_for('get_search_result') }}"
+                                class="flex items-center gap-2 text-white no-underline hover:text-white/80 text-sm font-medium transition"><i
+                                    class="fas fa-arrow-right text-[10px]"></i>Mbour</a></li>
+                        <li><a href="{{ url_for('get_search_result') }}"
+                                class="flex items-center gap-2 text-white no-underline hover:text-white/80 text-sm font-medium transition"><i
+                                    class="fas fa-arrow-right text-[10px]"></i>Thiès</a></li>
+                        <li><a href="{{ url_for('get_search_result') }}"
+                                class="flex items-center gap-2 text-white no-underline hover:text-white/80 text-sm font-medium transition"><i
+                                    class="fas fa-arrow-right text-[10px]"></i>Koumassi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contactez-nous -->
+                <div>
+                    <h3 class="text-white font-semibold text-lg mb-6">Contactez-nous</h3>
+                    <ul class="list-none p-0 m-0 space-y-3">
+                        <li class="flex items-start gap-2 text-white text-sm">
+                            <i class="fas fa-map-pin mt-0.5"></i>
+                            <span>Kayloo Immobilier Rue des Palmiers, Quartier des Almadies Dakar, Sénégal</span>
+                        </li>
+                        <li class="flex items-center gap-2 text-white text-sm">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+22133888990"
+                                class="text-white no-underline hover:text-white/80 transition">+221 33 888 99
+                                00</a>
+                        </li>
+                        <li class="flex items-center gap-2 text-white text-sm">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:contact@kayloo.immo"
+                                class="text-white no-underline hover:text-white/80 transition">contact@kayloo.immo</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Les Plus Consultés -->
+                <div>
+                    <h3 class="text-white font-semibold text-lg mb-6">Les Plus Consultés</h3>
+                    <div class="space-y-4">
+                        <!-- Property 1 -->
+                        <a href="{{ url_for('get_listing_details') }}"
+                            class="flex gap-3 group no-underline">
+                            <div class="w-[150px] h-[112px] flex-shrink-0 rounded overflow-hidden">
+                                <img src="https://picsum.photos/150/112?random=8" alt="Equestrian Villa"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                    loading="lazy">
+                            </div>
+                            <div>
+                                <h4
+                                    class="text-white text-sm font-semibold m-0 mb-1 group-hover:text-white/80 transition">
+                                    Equestrian
+                                    Villa</h4>
+                                <div class="flex items-center gap-2 text-white text-xs mb-1">
+                                    <span><i class="fas fa-ruler-triangle mr-0.5"></i>1200 m2</span>
+                                    <span><i class="fas fa-bed mr-0.5"></i>4</span>
+                                    <span><i class="fas fa-bath mr-0.5"></i>2</span>
+                                </div>
+                                <span class="text-xs text-white/70">Villa</span>
+                                <p class="text-white font-bold text-sm m-0 mt-1">1 599 000 FCFA</p>
+                            </div>
+                        </a>
+                        <!-- Property 2 -->
+                        <a href="{{ url_for('get_listing_details') }}"
+                            class="flex gap-3 group no-underline">
+                            <div class="w-[150px] h-[112px] flex-shrink-0 rounded overflow-hidden">
+                                <img src="https://picsum.photos/150/112?random=9" alt="Historic villa"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                    loading="lazy">
+                            </div>
+                            <div>
+                                <h4
+                                    class="text-white text-sm font-semibold m-0 mb-1 group-hover:text-white/80 transition">
+                                    Historic
+                                    villa</h4>
+                                <div class="flex items-center gap-2 text-white text-xs mb-1">
+                                    <span><i class="fas fa-ruler-triangle mr-0.5"></i>2170 m2</span>
+                                    <span><i class="fas fa-bed mr-0.5"></i>2</span>
+                                    <span><i class="fas fa-bath mr-0.5"></i>2</span>
+                                </div>
+                                <span class="text-xs text-white/70">Villa</span>
+                                <p class="text-white font-bold text-sm m-0 mt-1">3 700 000 FCFA</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="bg-footer-bottom py-4">
+        <div class="max-w-site mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p class="text-white text-sm m-0">
+                &copy; Copyright - KAYLOO.IMMO - 2025 - Tous Droits Réservés
+            </p>
+            <nav class="flex items-center gap-4" aria-label="Social links">
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="Facebook"><i
+                        class="fab fa-facebook"></i></a>
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="Instagram"><i
+                        class="fab fa-instagram"></i></a>
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="LinkedIn"><i
+                        class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="YouTube"><i
+                        class="fab fa-youtube"></i></a>
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="WhatsApp"><i
+                        class="fab fa-whatsapp"></i></a>
+                <a href="#" class="text-white hover:text-white/80 no-underline transition" aria-label="TikTok"><i
+                        class="fab fa-tiktok"></i></a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+    <!-- Back to top -->
+    <button id="scroll-top"
+        class="fixed bottom-6 right-6 w-10 h-10 bg-primary text-white rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity z-50"
+        aria-label="Retour en haut">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+    <script>
+        // ===== Scroll to Top =====
+        var scrollTopBtn = document.getElementById('scroll-top');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 400) {
+                scrollTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                scrollTopBtn.classList.add('opacity-100');
+            } else {
+                scrollTopBtn.classList.add('opacity-0', 'pointer-events-none');
+                scrollTopBtn.classList.remove('opacity-100');
+            }
+        });
+        scrollTopBtn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

@@ -1,10 +1,1039 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
+{% import "public/components/property-carousel.html" as carousel_feature %}
+{% import "public/components/search-form.html" as search_form %}
+{% block title %}Accueil{% endblock %}
 
-{% block title %}Bienvenue sur Kayloo{% endblock %}
+{% block content%}
+    <!-- ========== HERO SECTION ========== -->
+    <section class="relative min-h-150 lg:min-h-[700px] flex items-center justify-center bg-gray-900">
+        <!-- Background slideshow placeholder -->
+        <div class="absolute inset-0">
+            <img src="{{ url_for('static', path='images/pages/homepage/slider_1.png') }}"
+                class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy" alt="Hero background">
+        </div>
+        <!-- Dark overlay -->
+        <div class="absolute inset-0 bg-black/65"></div>
 
-{% block content %}
-<h1>Welcome to Kayloo</h1>
-<p>
-  {{ message }}
-</p>
+        <div class="relative z-10 w-full max-w-site mx-auto px-4 py-16 text-center">
+
+            <!-- Title -->
+            <h1 class="font-poppins font-light text-4xl md:text-5xl lg:text-[54px] text-white mb-4 animate-fade-in">
+                Bienvenue sur Kayloo
+            </h1>
+            <p class="font-poppins text-lg md:text-xl text-white leading-relaxed mb-4 animate-fade-in">
+                LA PORTE D'ENTRÉE DE L'IMMOBILIER INNOVANT EN AFRIQUE
+            </p>
+            <h2
+                class="hidden lg:block font-poppins font-normal text-3xl lg:text-[39px] text-white mb-10 animate-fade-in">
+                Votre futur chez-vous à portée de clic
+            </h2>
+<!-- Search Form -->
+                <div class="max-w-[90%] mx-auto mt-10">
+                    <form id="houzez-search-form" action="{{ url_for('get_search_result') }}"
+                        method="GET">
+                        <!-- Hidden field for status -->
+                        <input type="hidden" name="status" id="search-status" value="a-vendre">
+
+                        <!-- Tabs -->
+                        <ul class="flex justify-center gap-1 mb-0 text-dark" role="tablist">
+                            <li>
+                                <button type="button"
+                                    class="search-tab active font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
+                                    data-val="a-vendre">À Vendre</button>
+                            </li>
+                            <li>
+                                <button type="button"
+                                    class="search-tab font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
+                                    data-val="location">Location</button>
+                            </li>
+                            <li>
+                                <button type="button"
+                                    class="search-tab font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
+                                    data-val="location-meublee">Location Meublée</button>
+                            </li>
+                        </ul>
+
+                        <!-- Search Fields -->
+                        <div class="bg-white rounded-xl p-5 shadow-xl">
+                            <div class="flex gap-2 justify-center items-end">
+                                <!-- Type de bien -->
+                                <div class="flex-1 w-full relative">
+                                    <label class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Type
+                                        de bien</label>
+                                    <!-- Hidden multi-select (keeps form submission working) -->
+                                    <select name="type[]" id="field-types" multiple class="hidden">
+                                        <option value="appartement">Appartement</option>
+                                        <option value="bureau">Bureau</option>
+                                        <option value="espace-coworking">Espace de Coworking</option>
+                                        <option value="local-commercial">Local Commercial</option>
+                                        <option value="studio">Studio</option>
+                                        <option value="terrain">Terrain</option>
+                                        <option value="terrain-agricole">Terrain Agricole</option>
+                                        <option value="villa">Villa</option>
+                                    </select>
+                                    <!-- Trigger field -->
+                                    <div id="type-trigger"
+                                        class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-xs text-left text-input-muted font-poppins bg-white cursor-pointer relative bg-no-repeat bg-[right_12px_center] flex items-center"
+                                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);">
+                                        <span id="type-placeholder">Sélectionner</span>
+                                    </div>
+                                    <!-- Dropdown panel -->
+                                    <div id="type-dropdown"
+                                        class="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-b min-w-full opacity-0 invisible transition-all duration-200 z-50 p-2">
+                                        <div data-val="appartement"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Appartement</div>
+                                        <div data-val="bureau"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Bureau</div>
+                                        <div data-val="espace-coworking"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Espace de Coworking</div>
+                                        <div data-val="local-commercial"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Local Commercial</div>
+                                        <div data-val="studio"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Studio</div>
+                                        <div data-val="terrain"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Terrain</div>
+                                        <div data-val="terrain-agricole"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Terrain Agricole</div>
+                                        <div data-val="villa"
+                                            class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer">
+                                            Villa</div>
+                                    </div>
+                                </div>
+
+                                <!-- Pays -->
+                                <div class="flex-1 w-full">
+                                    <label
+                                        class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Pays</label>
+                                    <select name="country[]" id="field-country"
+                                        class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
+                                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);">
+                                        <option value="">Tous les pays</option>
+                                        <option value="ci" data-ref="ci">Côte d'Ivoire</option>
+                                        <option value="gh" data-ref="gh">Ghana</option>
+                                        <option value="ng" data-ref="ng">Nigéria</option>
+                                        <option value="sn" data-ref="sn">Sénégal</option>
+                                    </select>
+                                </div>
+
+                                <!-- Régions -->
+                                <div class="flex-1 w-full">
+                                    <label
+                                        class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Régions</label>
+                                    <select name="states[]" id="field-regions"
+                                        class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
+                                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);">
+                                        <option value="">Toutes les régions</option>
+                                        <option value="abidjan" data-belong="ci">Abidjan</option>
+                                        <option value="accra" data-belong="gh">Accra</option>
+                                        <option value="dakar-rg" data-belong="sn">Dakar Région</option>
+                                        <option value="diourbel-rg" data-belong="sn">Diourbel Région</option>
+                                        <option value="lagos" data-belong="ng">Lagos</option>
+                                        <option value="louga-rg" data-belong="sn">Louga Région</option>
+                                        <option value="matam-rg" data-belong="sn">Matam Région</option>
+                                        <option value="saint-louis-rg" data-belong="sn">Saint-Louis Région</option>
+                                        <option value="thies-rg" data-belong="sn">Thies Région</option>
+                                    </select>
+                                </div>
+
+                                <!-- Villes -->
+                                <!-- <div class="flex-1">
+
+                                    <label
+                                        class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Villes</label>
+                                    <select name="location[]" id="field-cities"
+                                        class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
+                                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);">
+                                        <option value="">Toutes les villes</option>
+                                        <option value="guediawaye" data-belong="thies-rg">Guediawaye</option>
+                                        <option value="ikeja" data-belong="lagos">Ikeja</option>
+                                        <option value="keur-massar" data-belong="dakar-rg">Keur Massar</option>
+                                        <option value="koumassi" data-belong="abidjan">Koumassi</option>
+                                        <option value="linguere" data-belong="louga-rg">Linguère</option>
+                                        <option value="marcory" data-belong="abidjan">Marcory</option>
+                                        <option value="mataheko" data-belong="accra">Mataheko</option>
+                                        <option value="matam" data-belong="matam-rg">Matam</option>
+                                        <option value="mbacke" data-belong="diourbel-rg">Mbacké</option>
+                                        <option value="mbour" data-belong="diourbel-rg">Mbour</option>
+                                        <option value="pikine" data-belong="dakar-rg">Pikine</option>
+                                        <option value="rufisque" data-belong="dakar-rg">Rufisque</option>
+                                        <option value="saint-louis" data-belong="saint-louis-rg">Saint-Louis</option>
+                                        <option value="thies" data-belong="thies-rg">Thiès</option>
+                                        <option value="yopougon" data-belong="abidjan">Yopougon</option>
+                                    </select>
+                                </div>
+ -->
+
+                                <!-- Pièces -->
+                                <!-- <div class="flex-1">
+                                    <label
+                                        class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Pièces</label>
+                                    <select name="rooms" id="field-rooms"
+                                        class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
+                                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);">
+                                        <option value="">Sélectionner</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="any">Tout</option>
+                                    </select>
+                                </div> -->
+
+                                <!-- Prix max -->
+                                <div class="flex-1 w-full">
+                                    <label class="block font-poppins text-xs font-medium text-dark mb-1 text-left">Prix
+                                        max</label>
+                                    <input type="text" name="max-price" placeholder="Montant"
+                                        class="w-full h-10 px-3 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red">
+                                </div>
+
+                                <!-- Search Button -->
+                                <div class="flex-1">
+                                    <button type="submit"
+                                        class="w-full h-10 bg-primary hover:bg-primary-hover text-white rounded-[5px] flex items-center justify-center transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <circle cx="11" cy="11" r="8" />
+                                            <path d="m21 21-4.35-4.35" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+        </div>
+    </section>
+
+    <!-- ========== DISCOVER SECTION ========== -->
+    <section id="content-start" class="pt-16 lg:pt-20 pb-4 lg:pb-6 bg-white">
+        <div class="max-w-site mx-auto px-4 text-center animate-fade-in">
+            <h2
+                class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-6">
+                Découvrez nos dernières offres
+            </h2>
+            <p class="font-poppins text-base lg:text-lg text-black max-w-3xl mx-auto leading-relaxed">
+                Vous êtes à la recherche du bien parfait ?<br>
+                Vous êtes au bon endroit !<br>
+                Notre moteur de recherche avancé vous permet de trouver rapidement et facilement le bien qui
+                correspond à vos critères.
+            </p>
+        </div>
+    </section>
+
+    <!-- ========== PROPERTY CAROUSEL ========== -->
+    <section class="pb-16 bg-white">
+        {{ carousel_feature.property_carousel(listings) }}
+    </section>
+    
+    
+
+    <!-- ========== NOS SERVICES ========== -->
+    <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-site mx-auto px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <!-- Left: Title & Description -->
+    <div class="animate-fade-in">
+        <h2
+            class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-6">
+            NOS Services
+        </h2>
+        <p class="text-base leading-relaxed text-gray-700">
+            Chez <strong>Kayloo</strong>, nous offrons une <strong>gamme complète de services
+                immobiliers</strong> pour répondre à tous vos besoins.<br>
+            Notre <strong>expertise</strong> couvre l'<strong>achat</strong>, la <strong>vente</strong>,
+            la location, la <strong>construction</strong>, les <strong>biens immobiliers</strong> pour
+            les <strong>vacances</strong> et bien plus.
+        </p>
+    </div>
+
+    <!-- Middle: 2 cards -->
+    <div class="flex flex-col gap-5">
+        <a href="{{ url_for('get_acheteur') }}" 
+            class="relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+            <div class="absolute inset-0">
+                <img src="{{ url_for('static', path='images/pages/homepage/acheter.png') }}"
+                    class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                    alt="Acheter un bien">
+            </div>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+            <div class="relative z-10 flex items-end p-6 h-full">
+                <span class="font-poppins text-xl font-medium text-white uppercase">Acheter un
+                    bien</span>
+            </div>
+        </a>
+        <a href="{{ url_for('get_locataire') }}" 
+            class="relative aspect-video rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+            <div class="absolute inset-0">
+                <img src="{{ url_for('static', path='images/pages/homepage/louer.png') }}"
+                    class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                    alt="Louer un bien">
+            </div>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+            <div class="relative z-10 flex items-end p-6 h-full">
+                <span class="font-poppins text-xl font-medium text-white uppercase">Louer un bien</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Right: 2 cards -->
+    <div class="flex flex-col gap-5">
+        <a href="{{ url_for('get_vendeur') }}" 
+            class="relative aspect-video rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+            <div class="absolute inset-0">
+                <img src="{{ url_for('static', path='images/pages/homepage/vendre.png') }}"
+                    class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                    alt="Vendre mon bien">
+            </div>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+            <div class="relative z-10 flex items-end p-6 h-full">
+                <span class="font-poppins text-xl font-medium text-white uppercase">Vendre mon
+                    bien</span>
+            </div>
+        </a>
+        <a href="{{ url_for('get_construire') }}" 
+            class="relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+            <div class="absolute inset-0">
+                <img src="{{ url_for('static', path='images/pages/homepage/construire.jpg') }}"
+                    class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                    alt="Construire un bien">
+            </div>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+            <div class="relative z-10 flex items-end p-6 h-full">
+                <span class="font-poppins text-xl font-medium text-white uppercase">Construire un
+                    bien</span>
+            </div>
+        </a>
+    </div>
+    </div>
+    </div>
+    </section>
+
+    <!-- ========== ANNONCEURS CTA ========== -->
+    <section class="py-16 lg:py-20 bg-gray-50">
+    <div class="max-w-[800px] mx-auto px-4 text-center">
+    <h2
+    class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-6">
+    Vous êtes Annonceurs ?
+    </h2>
+    <p class="font-poppins text-base lg:text-lg text-black leading-relaxed mb-8">
+    Vous avez un bien à vendre ou à louer ?<br>
+    Kayloo vous offre une plateforme simple et efficace pour créer votre annonce en quelques étapes
+    seulement.
+    </p>
+    <a href="/back-office/propriete-creer-qwencode.html"
+    class="inline-block bg-primary hover:bg-primary-hover text-white font-poppins font-semibold text-[17px] px-[30px] py-[15px] rounded transition-colors">
+    Poster sur Kayloo
+    </a>
+    </div>
+    </section>
+
+    <!-- ========== NOS LOGEMENTS ========== -->
+    <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-site mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <!-- Col 1: Title + Terrain Agricole -->
+            <div>
+                <h2
+                    class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-4">
+                    Nos Logements
+                </h2>
+                <p class="text-base text-gray-700 leading-relaxed mb-6">
+                    Découvrez nos logements, votre destination pour trouver le foyer parfait.<br>
+                    Parcourez une sélection diversifiée de biens immobiliers correspondant à vos besoins et
+                    aspirations.
+                </p>
+                <hr class="border-border-input mb-6">
+                <a href="{{ url_for('get_search_result') }}"
+                    class="block relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+                    <div class="absolute inset-0">
+                        <img src="https://test.kayloo.immo/wp-content/uploads/2025/03/Senegal_-_Copyright_©_2023_UNDP_WACA-1024x684.jpg"
+                            class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                            alt="Terrain Agricole">
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                    <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                        <div>
+                            <p class="text-xs font-light mb-1">11 Propriétés</p>
+                            <h3 class="font-poppins text-xl font-medium uppercase">Terrain Agricole</h3>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Plus de détails</span>
+                            <span>&rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Col 2: Studio (tall) -->
+            <div>
+                <a href="{{ url_for('get_search_result') }}"
+                    class="block relative rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]"
+                    style="aspect-ratio: 3/4;">
+                    <div class="absolute inset-0">
+                        <img src="https://test.kayloo.immo/wp-content/uploads/2025/03/d8df3a_9e93eed00f9448d2ab21c261f27d69c0mv2_d_2500_1250_s_2-1024x512.jpg"
+                            class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy" alt="Studio">
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                    <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                        <div>
+                            <p class="text-xs font-light mb-1">7 Propriétés</p>
+                            <h3 class="font-poppins text-xl font-medium uppercase">Studio</h3>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Plus de détails</span>
+                            <span>&rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Col 3: Appartement + Villa -->
+            <div class="flex flex-col gap-5">
+                <a href="{{ url_for('get_search_result') }}"
+                    class="block relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+                    <div class="absolute inset-0">
+                        <img src="https://test.kayloo.immo/wp-content/uploads/2016/03/205.jpg"
+                            class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                            alt="Appartement">
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                    <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                        <div>
+                            <p class="text-xs font-light mb-1">15 Propriétés</p>
+                            <h3 class="font-poppins text-xl font-medium uppercase">Appartement</h3>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Plus de détails</span>
+                            <span>&rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('get_search_result') }}"
+                    class="block relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+                    <div class="absolute inset-0">
+                        <img src="https://test.kayloo.immo/wp-content/uploads/2025/03/webaliser-_TPTXZd9mOo-unsplash-1-1024x768.jpg"
+                            class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy" alt="Villa">
+                    </div>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                    <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                        <div>
+                            <p class="text-xs font-light mb-1">10 Propriétés</p>
+                            <h3 class="font-poppins text-xl font-medium uppercase">Villa</h3>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm">Plus de détails</span>
+                            <span>&rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    </section>
+
+    <!-- ========== ESPACES D'AFFAIRES ========== -->
+    <section class="py-16 lg:py-20 bg-gray-50">
+    <div class="max-w-site mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <!-- Title -->
+            <div>
+                <h2
+                    class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-4">
+                    Espaces d'affaires
+                </h2>
+                <p class="text-base text-gray-700 leading-relaxed">
+                    Explorez notre gamme de biens à usage commercial et trouvez l'espace idéal pour faire
+                    prospérer votre entreprise.<br>
+                    Des bureaux modernes aux locaux commerciaux polyvalents, découvrez des opportunités uniques
+                    pour développer votre activité.
+                </p>
+            </div>
+
+            <!-- Local Commercial -->
+            <a href="{{ url_for('get_search_result') }}"
+                class="block relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+                <div class="absolute inset-0">
+                    <img src="https://test.kayloo.immo/wp-content/uploads/2025/03/white-box-1024x435.jpg"
+                        class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy"
+                        alt="Local Commercial">
+                </div>
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                    <div>
+                        <p class="text-xs font-light mb-1">4 Propriétés</p>
+                        <h3 class="font-poppins text-xl font-medium uppercase">Local Commercial</h3>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Plus de détails</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Bureau -->
+            <a href="{{ url_for('get_search_result') }}"
+                class="block relative aspect-square rounded-xl overflow-hidden group transition-[box-shadow,transform] duration-300 hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:-translate-y-[2px]">
+                <div class="absolute inset-0">
+                    <img src="https://test.kayloo.immo/wp-content/uploads/2025/03/nastuh-abootalebi-eHD8Y1Znfpk-unsplash-1024x684.jpg"
+                        class="absolute inset-0 w-full h-full object-cover z-0" loading="lazy" alt="Bureau">
+                </div>
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors"></div>
+                <div class="relative z-10 flex flex-col justify-between p-6 h-full text-white">
+                    <div>
+                        <p class="text-xs font-light mb-1">3 Propriétés</p>
+                        <h3 class="font-poppins text-xl font-medium uppercase">Bureaux</h3>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Plus de détails</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    </section>
+
+    <!-- =========== POURQUOI KAYLOO =========== -->
+    <section id="contact-section" class="relative py-20 lg:py-20 overflow-hidden">
+    <!-- Background image -->
+    
+    <img src="{{ url_for('static', path='images/pages/homepage/form-bg.png') }}" class="absolute inset-0 -z-10 h-full w-full object-cover object-center">
+    <div class="max-w-site mx-auto px-4 relative z-10">
+
+    <!-- 3-column grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-6">
+
+    <!-- Col 1: 01 Sélection diversifiée -->
+
+    <!-- Section title -->
+    <div class="flex flex-col justify-center gap-12">
+    <div class="flex flex-col items-start">
+        <h2 class="font-poppins text-2xl lg:text-3xl font-semibold text-white mb-4">
+            Pourquoi Kayloo est le choix idéal ?
+        </h2>
+        <div class="w-12 h-[2px] bg-primary"></div>
+    </div>
+
+    <div class="space-y-4">
+        <span class="inline-block font-poppins text-5xl font-bold text-primary/60">01.</span>
+        <h3 class="font-poppins text-2xl font-semibold text-white">Sélection diversifiée</h3>
+        <div class="w-12 h-[2px] bg-primary"></div>
+        <p class="text-gray-300 text-sm leading-relaxed">
+            Avec une vaste gamme de biens immobiliers, Kayloo offre un choix incomparable pour
+            répondre
+            à tous les besoins, des appartements urbains aux maisons de campagne en passant par les
+            locaux commerciaux.
+        </p>
+    </div>
+    </div>
+
+    <!-- Col 2: 02 Convivialité -->
+    <div class="flex flex-col justify-center gap-12">
+    <div class="space-y-4">
+        <span class="inline-block font-poppins text-5xl font-bold text-primary/60">02.</span>
+        <h3 class="font-poppins text-2xl font-semibold text-white">Convivialité et simplicité</h3>
+        <div class="w-12 h-[2px] bg-primary"></div>
+        <p class="text-gray-300 text-sm leading-relaxed">
+            Notre interface conviviale et nos outils de recherche avancés garantissent une
+            expérience
+            utilisateur fluide, permettant aux visiteurs de trouver rapidement et facilement le bien
+            qui
+            leur convient.
+        </p>
+    </div>
+
+    <div>
+        <span class="inline-block font-poppins text-5xl font-bold text-primary/60 mb-4">03.</span>
+        <h3 class="font-poppins text-2xl font-semibold text-white mb-2">Support dédié</h3>
+        <div class="w-12 h-[2px] bg-primary mb-6"></div>
+        <p class="text-gray-300 text-sm leading-relaxed mb-8">
+            Notre équipe d'experts est toujours là pour vous aider. Des conseils pour la création
+            d'annonces efficaces à l'assistance pour les utilisateurs, nous sommes engagés à offrir
+            un
+            service client exceptionnel.
+        </p>
+    </div>
+    </div>
+
+    <!-- Col 3: Form -->
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+
+
+    <h4 class="font-poppins text-xl font-semibold text-white mb-2">Demande Immobilière</h4>
+    <p class="text-gray-300 text-xs leading-relaxed mb-6">
+        Besoin de plus d'informations ? Remplissez ce formulaire et notre équipe vous contactera
+        rapidement.
+    </p>
+
+    <form id="houzez-inquiry-form" method="post"
+        action="https://test.kayloo.immo/wp-admin/admin-ajax.php" novalidate>
+        <input type="hidden" name="form_id" value="28b887f">
+        <input type="hidden" name="action" value="houzez_ele_inquiry_form">
+        <input type="hidden" name="source_link" value="https://test.kayloo.immo/">
+        <input type="hidden" name="lead_page_id" value="18202">
+        <input type="hidden" name="is_estimation" value="yes">
+        <input type="hidden" name="webhook" value="false">
+
+        <div class="space-y-4">
+            <div>
+                <label for="inquiry-name" class="block text-xs font-medium text-gray-300 mb-1">Nom
+                    complet <span class="text-primary">*</span></label>
+                <input type="text" name="name" id="inquiry-name" required
+                    class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+            </div>
+
+            <div>
+                <label for="inquiry-email"
+                    class="block text-xs font-medium text-gray-300 mb-1">Adresse mail <span
+                        class="text-primary">*</span></label>
+                <input type="email" name="email" id="inquiry-email" required
+                    class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="inquiry-type"
+                        class="block text-xs font-medium text-gray-300 mb-1">Type de demande <span
+                            class="text-primary">*</span></label>
+                    <select name="enquiry_type" id="inquiry-type" required
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
+                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                        <option value="">Sélectionner</option>
+                        <option value="Purchase">Purchase</option>
+                        <option value="Rent">Rent</option>
+                        <option value="Sell">Sell</option>
+                        <option value="Miss">Miss</option>
+                        <option value="Evaluation">Evaluation</option>
+                        <option value="Mortgage">Mortgage</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="inquiry-property-type"
+                        class="block text-xs font-medium text-gray-300 mb-1">Type de bien</label>
+                    <select name="e_meta[property_type]" id="inquiry-property-type"
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
+                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                        <option value="appartement">Appartement</option>
+                        <option value="bureau">Bureau</option>
+                        <option value="espace-coworking">Espace de Coworking</option>
+                        <option value="local-commercial">Local Commercial</option>
+                        <option value="studio">Studio</option>
+                        <option value="terrain">Terrain</option>
+                        <option value="terrain-agricole">Terrain Agricole</option>
+                        <option value="villa">Villa</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="inquiry-region"
+                        class="block text-xs font-medium text-gray-300 mb-1">Région <span
+                            class="text-primary">*</span></label>
+                    <select name="e_meta[region]" id="inquiry-region" required
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
+                        style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                        <option value="abidjan">Abidjan</option>
+                        <option value="accra">Accra</option>
+                        <option value="dakar-rg">Dakar Région</option>
+                        <option value="diourbel-rg">Diourbel Région</option>
+                        <option value="lagos">Lagos</option>
+                        <option value="louga-rg">Louga Région</option>
+                        <option value="matam-rg">Matam Région</option>
+                        <option value="saint-louis-rg">Saint-Louis Région</option>
+                        <option value="thies-rg">Thies Région</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="inquiry-price"
+                        class="block text-xs font-medium text-gray-300 mb-1">Prix max. <span
+                            class="text-primary">*</span></label>
+                    <input type="number" name="e_meta[price]" id="inquiry-price" required min="0"
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label for="inquiry-area"
+                        class="block text-xs font-medium text-gray-300 mb-1">Surface min.</label>
+                    <input type="number" name="e_meta[area-size]" id="inquiry-area" min="0"
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+                </div>
+
+                <div>
+                    <label for="inquiry-beds"
+                        class="block text-xs font-medium text-gray-300 mb-1">Nbr. Chambres</label>
+                    <input type="number" name="e_meta[beds]" id="inquiry-beds" min="0"
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+                </div>
+
+                <div>
+                    <label for="inquiry-baths"
+                        class="block text-xs font-medium text-gray-300 mb-1">Nbr. SdB</label>
+                    <input type="number" name="e_meta[baths]" id="inquiry-baths" min="0"
+                        class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" name="gdpr_agreement" id="inquiry-gdpr" required
+                        class="mt-1 w-4 h-4 rounded border-white/30 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0">
+                    <span class="text-xs text-gray-400 leading-tight">Je consens à ce que ce site
+                        web stocke les informations que j'ai fournies.</span>
+                </label>
+            </div>
+
+            <button type="submit"
+                class="w-full h-11 bg-primary hover:bg-primary-hover text-white font-poppins text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-paper-plane text-xs"></i>
+                Envoyer
+            </button>
+        </div>
+
+        <div class="ele-form-messages mt-4"></div>
+        <div class="error-container mt-4"></div>
+    </form>
+    </div>
+
+    </div>
+    </div>
+
+    <div class="absolute inset-0 bg-gradient-to-br from-black/75 to-black/50"></div>
+    </section>
+
+    <!-- ======== DECOUVREZ DES MILLIERS DE BIENS ======== -->
+    <section class="py-16 lg:py-20 bg-linear-to-b from-gray-50 to-white">
+    <div class="max-w-site mx-auto px-4">
+    <!-- Section Header -->
+    <div class="text-center max-w-3xl mx-auto mb-6">
+    <h2 class="text-3xl md:text-4xl font-jakarta font-bold text-dark mb-4">Découvrez notre sélection des
+    meilleurs biens immobiliers</h2>
+    <p class="text-text-body text-base leading-relaxed">Explorez notre sélection exclusive des meilleurs
+    biens immobiliers disponibles sur le marché. <br class="hidden md:block"> Que vous cherchiez
+    votre prochain chez-vous ou un investissement lucratif, notre assortiment répondra à toutes vos
+    exigences en matière d'immobilier.</p>
+    </div>
+
+
+    <!-- City Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Card 1: Guediawaye -->
+    <a href="{{ url_for('get_search_result') }}"
+    class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-cover bg-center min-h-[280px]"
+    style="background-image: url(https://test.kayloo.immo/wp-content/uploads/2016/03/chicago.jpg);">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-between h-full p-6">
+        <div>
+            <span class="inline-block text-white/80 text-sm font-poppins mb-2">9 Propriétés</span>
+            <h4 class="text-white text-xl font-jakarta font-bold">Guediawaye</h4>
+        </div>
+        <div class="flex items-center justify-between">
+            <span
+                class="text-white text-sm font-poppins group-hover:text-hover-blue transition-colors duration-200">Plus
+                de Details</span>
+            <i
+                class="fa-solid fa-arrow-right-long text-white text-lg group-hover:text-hover-blue group-hover:translate-x-1 transition-all duration-200"></i>
+        </div>
+    </div>
+    </a>
+
+    <!-- Card 2: Guediawaye -->
+    <a href="{{ url_for('get_search_result') }}"
+    class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-cover bg-center min-h-[280px]"
+    style="background-image: url(https://test.kayloo.immo/wp-content/uploads/2016/03/chicago.jpg);">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-between h-full p-6">
+        <div>
+            <span class="inline-block text-white/80 text-sm font-poppins mb-2">9 Propriétés</span>
+            <h4 class="text-white text-xl font-jakarta font-bold">Guediawaye</h4>
+        </div>
+        <div class="flex items-center justify-between">
+            <span
+                class="text-white text-sm font-poppins group-hover:text-hover-blue transition-colors duration-200">Plus
+                de Details</span>
+            <i
+                class="fa-solid fa-arrow-right-long text-white text-lg group-hover:text-hover-blue group-hover:translate-x-1 transition-all duration-200"></i>
+        </div>
+    </div>
+    </a>
+
+    <!-- Card 3: Mbour -->
+    <a href="{{ url_for('get_search_result') }}"
+    class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-cover bg-center min-h-[280px]"
+    style="background-image: url(https://test.kayloo.immo/wp-content/uploads/2016/03/new-york.jpg);">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-between h-full p-6">
+        <div>
+            <span class="inline-block text-white/80 text-sm font-poppins mb-2">4 Propriétés</span>
+            <h4 class="text-white text-xl font-jakarta font-bold">Mbour</h4>
+        </div>
+        <div class="flex items-center justify-between">
+            <span
+                class="text-white text-sm font-poppins group-hover:text-hover-blue transition-colors duration-200">Plus
+                de Details</span>
+            <i
+                class="fa-solid fa-arrow-right-long text-white text-lg group-hover:text-hover-blue group-hover:translate-x-1 transition-all duration-200"></i>
+        </div>
+    </div>
+    </a>
+
+    <!-- Card 4: Saint-Louis -->
+    <a href="{{ url_for('get_search_result') }}"
+    class="group relative block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-cover bg-center min-h-[280px]"
+    style="background-image: url(https://test.kayloo.immo/wp-content/uploads/2016/03/miami-beach.jpg);">
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+    <div class="relative z-10 flex flex-col justify-between h-full p-6">
+        <div>
+            <span class="inline-block text-white/80 text-sm font-poppins mb-2">5 Propriétés</span>
+            <h4 class="text-white text-xl font-jakarta font-bold">Saint-Louis</h4>
+        </div>
+        <div class="flex items-center justify-between">
+            <span
+                class="text-white text-sm font-poppins group-hover:text-hover-blue transition-colors duration-200">Plus
+                de Details</span>
+            <i
+                class="fa-solid fa-arrow-right-long text-white text-lg group-hover:text-hover-blue group-hover:translate-x-1 transition-all duration-200"></i>
+        </div>
+    </div>
+    </a>
+    </div>
+    </div>
+    </section>
+
+    <!-- ======== BLOG ======== -->
+    <section class="py-16 lg:py-20 bg-neutral-50">
+    <div class="max-w-site mx-auto px-4">
+    <!-- Section Header -->
+    <div class="text-center max-w-3xl mx-auto mb-12">
+    <h2 class="text-3xl md:text-4xl font-jakarta font-bold text-dark mb-4">Nos derniers articles Blog
+    </h2>
+    <p class="text-text-body text-base leading-relaxed">Découvrez nos dernières actualités et conseils
+    immobiliers pour vous aider à réussir vos projets avec Kayloo !</p>
+    </div>
+
+    <!-- Blog Posts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <!-- Left: Featured Post (spans 2 cols) -->
+    <div class="lg:col-span-2">
+    <a href="#" class="group block transition-all duration-300">
+        <div class="overflow-hidden">
+            <img loading="lazy" decoding="async" width="1500" height="1000"
+                src="https://test.kayloo.immo/wp-content/uploads/2025/07/stock-photo-african-couple-viewing-real-estate-house-with-realtor-2355977067-1-e1753699032396.jpg"
+                class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                alt="">
+        </div>
+        <div class="p-5">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-body/70 mb-3">
+                <span>
+                    <i class="fa-regular fa-calendar mr-1"></i>
+                    28 juillet 2025
+                </span>
+                <div class="flex flex-wrap gap-0.5">
+                    <i class="fa-solid fa-tags block"></i>
+                    <span class="hover:text-hover-blue transition-colors">Achat</span>
+                    <span class="hover:text-hover-blue transition-colors">Immobilier</span>
+                    <span class="hover:text-hover-blue transition-colors">Location</span>
+                    <span class="hover:text-hover-blue transition-colors">Vente</span>
+                </div>
+            </div>
+            <h3
+                class="text-lg font-jakarta font-bold text-dark mb-2 group-hover:text-primary transition-colors duration-200 line-clamp-2">
+                Le marché immobilier en 2025 : Quelles tendances ?</h3>
+            <p class="text-text-body text-sm leading-relaxed line-clamp-3">
+                Le marché immobilier est en pleine mutation. Entre taux d'intérêt en hausse,
+                évolution des prix au m², et nouvelles réglementations, 2025...
+                <span
+                    class="inline-block mt-1 text-primary font-poppins text-sm group-hover:text-hover-blue transition-colors">continuer
+                    la lecture <i class="fa-solid fa-angle-double-right"></i></span>
+            </p>
+        </div>
+    </a>
+    </div>
+
+    <!-- Right: 3 Stacked Posts (spans 3 cols) -->
+    <div class="lg:col-span-3 flex flex-col gap-6">
+    <!-- Post 2 -->
+    <a href="#"
+        class="group flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+        <div class="sm:w-48 sm:min-h-full shrink-0 overflow-hidden">
+            <img loading="lazy" decoding="async" width="2048" height="1152"
+                src="https://test.kayloo.immo/wp-content/uploads/2025/07/wmremove-transformed-3.jpeg"
+                class="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                alt="">
+        </div>
+        <div class="p-5 flex flex-col justify-center flex-1">
+            <h3
+                class="text-base font-jakarta font-bold text-dark mb-2 group-hover:text-primary transition-colors duration-200 line-clamp-2">
+                Acheter ou louer en 2025 : Quelle est la meilleure option ?</h3>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-body/70 mb-2">
+                <span>
+                    <i class="fa-regular fa-calendar mr-1"></i>
+                    28 juillet 2025
+                </span>
+                <div class="flex flex-wrap gap-1">
+                    <i class="fa-solid fa-tags mr-1"></i>
+                    <span href="#" class="hover:text-hover-blue transition-colors">Achat</span>,
+                    <span href="#" class="hover:text-hover-blue transition-colors">Location</span>
+                </div>
+            </div>
+            <p class="text-text-body text-sm leading-relaxed line-clamp-2">
+                Vous hésitez entre acheter et louer votre résidence principale ? Chaque option a ses
+                avantages...
+            </p>
+        </div>
+    </a>
+
+    <!-- Post 3 -->
+    <a href="#"
+        class="group flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+        <div class="sm:w-48 sm:min-h-full shrink-0 overflow-hidden">
+            <img loading="lazy" decoding="async" width="1280" height="853"
+                src="https://test.kayloo.immo/wp-content/uploads/2025/07/DeWatermark.ai_1753697850020-e1753697907650.jpg"
+                class="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                alt="">
+        </div>
+        <div class="p-5 flex flex-col justify-center flex-1">
+            <h3
+                class="text-base font-jakarta font-bold text-dark mb-2 group-hover:text-primary transition-colors duration-200 line-clamp-2">
+                Les quartiers les plus recherchés en 2025</h3>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-body/70 mb-2">
+                <span><i class="fa-regular fa-calendar mr-1"></i>28 juillet 2025</span>
+                <div class="flex flex-wrap gap-1">
+                    <i class="fa-solid fa-tags mr-1"></i>
+                    <span href="#" class="hover:text-hover-blue transition-colors">Achat</>,
+                        <span href="#"
+                            class="hover:text-hover-blue transition-colors">Location</span>
+                </div>
+                <p class="text-text-body text-sm leading-relaxed line-clamp-2">
+                    Sicap - Dieupeul - Liberté - Sacré cœur - Keur Gorgui attirent de plus en plus
+                    d'acheteurs...
+                </p>
+            </div>
+        </div>
+    </a>
+
+    <!-- Post 4 -->
+    <a href="#"
+        class="group flex flex-col sm:flex-row bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+        <div class="sm:w-48 sm:min-h-full shrink-0 overflow-hidden">
+            <img loading="lazy" decoding="async" width="1278" height="843"
+                src="https://test.kayloo.immo/wp-content/uploads/2025/07/DeWatermark.ai_1753697315755-e1753697891158.jpeg"
+                class="w-full h-48 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                alt="">
+        </div>
+        <div class="p-5 flex flex-col justify-center flex-1">
+            <h3
+                class="text-base font-jakarta font-bold text-dark mb-2 group-hover:text-primary transition-colors duration-200 line-clamp-2">
+                Comment rédiger une annonce immobilière impactante ?</h3>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-body/70 mb-2">
+                <span><i class="fa-regular fa-calendar mr-1"></i>28 juillet 2025</span>
+                <div class="flex flex-wrap gap-1">
+                    <i class="fa-solid fa-tags mr-1"></i>
+                    <span href="#" class="hover:text-hover-blue transition-colors">Location</span>,
+                    <span href="#" class="hover:text-hover-blue transition-colors">Vente</span>
+                </div>
+            </div>
+            <p class="text-text-body text-sm leading-relaxed line-clamp-2">
+                Titre accrocheur : "Appartement 3 pièces lumineux avec balcon – Quartier...
+            </p>
+        </div>
+    </a>
+    </div>
+    </div>
+    </div>
+    </section>
+
+    <!-- ========== AVIS CLIENTS ========== -->
+    <section class="py-16 lg:py-20 bg-white">
+    <div class="max-w-site mx-auto px-4">
+    <h2
+    class="font-poppins text-3xl lg:text-[35px] font-normal uppercase underline underline-offset-8 decoration-2 text-black mb-12 text-center">
+    Avis Clients
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Testimonial 1 -->
+    <div
+    class="bg-gray-50 rounded-xl p-6 transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div class="text-brand-red text-3xl mb-3">&ldquo;</div>
+    <p class="text-gray-700 text-sm leading-relaxed mb-6">
+        Site très pratique pour publier mes annonces ! L'interface est claire, j'ai trouvé des
+        locataires rapidement. Je recommande à tous les propriétaires qui veulent louer sans prise
+        de tête.
+    </p>
+    <div class="flex items-center gap-4">
+        <div
+            class="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-kayloo-red to-red-400 flex items-center justify-center text-white font-bold text-lg">
+            T</div>
+        <strong class="font-poppins text-sm">Thierno D.</strong>
+    </div>
+    </div>
+
+    <!-- Testimonial 2 -->
+    <div
+    class="bg-gray-50 rounded-xl p-6 transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div class="text-brand-red text-3xl mb-3">&ldquo;</div>
+    <p class="text-gray-700 text-sm leading-relaxed mb-6">
+        J'ai testé plusieurs sites, mais celui-ci m'a donné le plus de contacts sérieux. Mon
+        appartement a été loué en moins d'une semaine. Super visibilité et plateforme facile à
+        utiliser !
+    </p>
+    <div class="flex items-center gap-4">
+        <div
+            class="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-kayloo-red to-red-400 flex items-center justify-center text-white font-bold text-lg">
+            C</div>
+        <strong class="font-poppins text-sm">Coura M.</strong>
+    </div>
+    </div>
+
+    <!-- Testimonial 3 -->
+    <div
+    class="bg-gray-50 rounded-xl p-6 transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div class="text-brand-red text-3xl mb-3">&ldquo;</div>
+    <p class="text-gray-700 text-sm leading-relaxed mb-6">
+        J'ai trouvé mon nouvel appart grâce à ce site ! Les annonces sont à jour et bien détaillées.
+        La prise de contact avec les propriétaires est rapide, et j'ai pu visiter plusieurs biens en
+        quelques jours.
+    </p>
+    <div class="flex items-center gap-4">
+        <div
+            class="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-kayloo-red to-red-400 flex items-center justify-center text-white font-bold text-lg">
+            D</div>
+        <strong class="font-poppins text-sm">Daouda W.</strong>
+    </div>
+    </div>
+
+    <!-- Testimonial 4 (hidden on md, visible on lg) -->
+    <div
+    class="bg-gray-50 rounded-xl p-6 md:col-span-2 lg:col-span-3 lg:max-w-[380px] transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div class="text-brand-red text-3xl mb-3">&ldquo;</div>
+    <p class="text-gray-700 text-sm leading-relaxed mb-6">
+        Site d'annonce au top ! Dès que j'ai une question, l'équipe me répond rapidement. Ils sont
+        efficaces, transparents et à l'écoute. Mes biens sont entre de bonnes mains.
+    </p>
+    <div class="flex items-center gap-4">
+        <div
+            class="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-kayloo-red to-red-400 flex items-center justify-center text-white font-bold text-lg">
+            N</div>
+        <strong class="font-poppins text-sm">Nadia K.</strong>
+    </div>
+    </div>
+    </div>
+    </div>
+    </section>
+    {{ carousel_feature.carousel_js() }}
 {% endblock %}

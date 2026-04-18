@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+{% block title %}Local commercial à louer – Sacré-Cœur 3, Dakar – Kayloo{% endblock %}
+
+{% block content%}
+  <!-- ===================================================
+       SECTION 2: PROPERTY GALLERY
+  ==================================================== -->
+  <section class="bg-white pt-4 pb-2">
+    <div class="max-w-site mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="grid [grid-template-columns:2fr_1fr] gap-2 h-[420px]">
+        <img src="https://picsum.photos/seed/sacrecoeur-main/1200/800" alt="Local commercial – vue principale"
+          class="w-full h-[420px] object-cover rounded-md">
+        <img src="https://picsum.photos/seed/sacrecoeur-sec/600/800" alt="Local commercial – vue secondaire"
+          class="w-full h-[420px] object-cover rounded-md">
+      </div>
+
+      <div class="mt-3 flex items-center gap-2 text-sm text-gray-600">
+        <i class="fa-solid fa-building-user text-hover-blue"></i>
+        <span>Type de bien : <strong>Local Commercial</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SECTION 3: MAIN CONTENT + SIDEBAR
+  ==================================================== -->
+  <section class="py-8">
+    <div class="max-w-site mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row gap-8">
+
+        <!-- LEFT COLUMN -->
+        <div class="lg:w-2/3 flex flex-col gap-8">
+
+          <!-- Description -->
+          <article class="bg-white rounded-xl shadow-sm p-6" id="description">
+            <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-2 border-b-2 border-gray-200 mb-4">
+              Description
+            </h2>
+            <div class="text-text-body leading-relaxed space-y-3 text-sm">
+              <p>
+                Ce local commercial lumineux et bien situé est idéal pour une boutique, un showroom, un bureau ou une
+                activité de services. Il se trouve dans un quartier dynamique, à proximité de commerces, banques et
+                axes routiers.
+              </p>
+              <p>Le local comprend :</p>
+              <ul class="list-disc list-inside space-y-1 pl-2">
+                <li>Une grande pièce principale avec vitrine sur rue</li>
+                <li>Un espace bureau ou réserve à l'arrière</li>
+                <li>Une salle d'eau avec WC</li>
+                <li>Une entrée sécurisée avec rideau métallique</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Amenities -->
+          <article class="bg-white rounded-xl shadow-sm p-6" id="amenities">
+            <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-2 border-b-2 border-gray-200 mb-4">
+              Commodités
+            </h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
+              <li class="flex items-center gap-2 text-text-body">
+                <i class="fa-solid fa-wifi text-hover-blue"></i>
+                <a href="{{ url_for('get_search_result') }}"
+                  class="hover:text-hover-blue transition-colors">Accès Internet</a>
+              </li>
+              <li class="flex items-center gap-2 text-text-body">
+                <i class="fa-solid fa-snowflake text-hover-blue"></i>
+                <a href="{{ url_for('get_search_result') }}"
+                  class="hover:text-hover-blue transition-colors">Climatisation</a>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Address -->
+          <article class="bg-white rounded-xl shadow-sm p-6" id="address">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h2 class="font-jakarta text-[1.1rem] font-bold text-dark">Adresse</h2>
+              <a href="http://maps.google.com/?q=Rue%2012,%20Sacr%C3%A9-C%C5%93ur%203,%20Dakar" target="_blank"
+                class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors self-start">
+                <i class="fa-solid fa-map-location-dot"></i> Ouvrir sur Google Maps
+              </a>
+            </div>
+            <ul class="divide-y divide-gray-200 grid grid-cols-1 sm:grid-cols-2 text-sm">
+              <li class="flex justify-between py-2 px-1">
+                <strong class="text-gray-500 font-medium">Département</strong>
+                <span>Dakar</span>
+              </li>
+              <li class="flex justify-between py-2 px-1">
+                <strong class="text-gray-500 font-medium">Région</strong>
+                <span>Dakar Région</span>
+              </li>
+              <li class="flex justify-between py-2 px-1">
+                <strong class="text-gray-500 font-medium">Zone</strong>
+                <span>Sacré Coeur</span>
+              </li>
+              <li class="flex justify-between py-2 px-1">
+                <strong class="text-gray-500 font-medium">Pays</strong>
+                <span>Sénégal</span>
+              </li>
+            </ul>
+            <div
+              class="w-full h-[280px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-[0.9rem] mt-5">
+              <div class="text-center">
+                <i class="fa-solid fa-map text-4xl text-gray-400 mb-2 block"></i>
+                <span>Carte interactive – Rue 12, Sacré-Cœur 3, Dakar</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Property Details -->
+          <article class="bg-white rounded-xl shadow-sm p-6" id="details">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+              <h2 class="font-jakarta text-[1.1rem] font-bold text-dark">Détails</h2>
+              <span class="text-xs text-gray-400 flex items-center gap-1">
+                <i class="fa-solid fa-rotate"></i>
+                Mis à jour le avril 6, 2026 à 12:55
+              </span>
+            </div>
+            <div class="bg-[rgba(0,174,255,0.06)] border border-hover-blue rounded-md p-4">
+              <ul class="divide-y divide-gray-200 grid grid-cols-1 sm:grid-cols-2 text-sm">
+                <li class="flex justify-between py-2 px-1">
+                  <strong class="text-gray-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-money-bill-wave text-hover-blue"></i> Prix
+                  </strong>
+                  <span class="font-semibold text-primary">450 000 FCFA/mois</span>
+                </li>
+                <li class="flex justify-between py-2 px-1">
+                  <strong class="text-gray-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-ruler-combined text-hover-blue"></i> Superficie
+                  </strong>
+                  <span>80 m²</span>
+                </li>
+                <li class="flex justify-between py-2 px-1">
+                  <strong class="text-gray-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-door-open text-hover-blue"></i> Pièce
+                  </strong>
+                  <span>1</span>
+                </li>
+                <li class="flex justify-between py-2 px-1">
+                  <strong class="text-gray-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-building text-hover-blue"></i> Type de bien
+                  </strong>
+                  <span>Local Commercial</span>
+                </li>
+                <li class="flex justify-between py-2 px-1">
+                  <strong class="text-gray-500 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-hover-blue"></i> Statut
+                  </strong>
+                  <span>Location</span>
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Gallery Photos -->
+          <article class="bg-white rounded-xl shadow-sm p-6" id="gallery">
+            <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-2 border-b-2 border-gray-200 mb-4">
+              Photos
+            </h2>
+            <div class="grid grid-cols-2 gap-3">
+              <a href="#" class="block overflow-hidden rounded-lg group">
+                <img src="https://picsum.photos/seed/local-photo-1/800/600" alt="Photo 1"
+                  class="w-full h-48 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
+              </a>
+              <a href="#" class="block overflow-hidden rounded-lg group">
+                <img src="https://picsum.photos/seed/local-photo-2/800/600" alt="Photo 2"
+                  class="w-full h-48 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
+              </a>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Sidebar -->
+        <aside class="lg:w-1/3">
+          <div class="lg:sticky lg:top-6">
+
+            <div class="bg-white rounded-xl shadow-sm p-6">
+
+              <!-- Agent info -->
+              <div class="flex items-center gap-3 mb-5">
+                <div class="relative">
+                  <img src="https://picsum.photos/seed/agent-dswade/400/400" alt="Agent dswade"
+                    class="w-[70px] h-[70px] rounded-full object-cover shadow-img">
+                  <span class="absolute -bottom-1 -right-1 bg-[#25D366] text-white text-[10px] rounded-full p-1">
+                    <i class="fa-solid fa-check"></i>
+                  </span>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Agent</p>
+                  <p class="font-jakarta font-semibold text-dark flex items-center gap-1">
+                    <i class="fa-solid fa-user text-hover-blue text-sm"></i> dswade
+                  </p>
+                </div>
+              </div>
+
+              <form method="post" action="#" class="flex flex-col gap-3">
+
+                <input type="text" name="name" placeholder="Prénom"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-[0.9rem] font-poppins outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10">
+
+                <input type="text" name="mobile" placeholder="Téléphone"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-[0.9rem] font-poppins outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10">
+
+                <input type="email" name="email" placeholder="Email"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-[0.9rem] font-poppins outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10">
+
+                <textarea name="message" rows="4" placeholder="Message"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-[0.9rem] font-poppins outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none">Bonjour, je suis intéressé(e) par [Local commercial à louer – Sacré-Cœur 3, Dakar]</textarea>
+
+                <select name="user_type"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-[0.9rem] font-poppins outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10 text-gray-500">
+                  <option value="">Sélectionner un type de contact</option>
+                  <option value="buyer">Je suis un acheteur</option>
+                  <option value="tennant">Je suis un locataire</option>
+                  <option value="agent">Je suis un agent</option>
+                  <option value="other">Autre</option>
+                </select>
+
+                <label class="flex items-start gap-2 text-xs text-gray-500 cursor-pointer">
+                  <input type="checkbox" class="mt-0.5 accent-primary">
+                  <span>
+                    En soumettant ce formulaire, j'accepte les
+                    <a href="/terms-and-conditions/" target="_blank"
+                      class="text-primary underline hover:text-primary-hover transition-colors">
+                      Conditions d'utilisation
+                    </a>
+                  </span>
+                </label>
+
+                <button type="button"
+                  class="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-[0.9rem] font-poppins cursor-pointer transition-colors">
+                  <i class="fa-brands fa-whatsapp"></i> Contacter par WhatsApp
+                </button>
+
+                <button type="submit"
+                  class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-[0.9rem] font-poppins cursor-pointer transition-colors">
+                  <i class="fa-solid fa-paper-plane"></i> Envoyer le message
+                </button>
+
+              </form>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SECTION 4: SIMILAR LISTINGS
+  ==================================================== -->
+  <section class="py-10 bg-gray-50" id="similar-listings">
+    <div class="max-w-site mx-auto px-4 sm:px-6 lg:px-8">
+
+      <h2 class="font-jakarta text-xl font-bold text-dark mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-list-ul text-primary"></i>
+        Annonces similaires
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1: Immeuble OPERA -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/immeuble-opera/800/600" alt="Immeuble OPERA"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              2 300 000 FCFA<span class="font-normal">/Mois</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Immeuble OPERA</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Dakar Plateau, Dakar, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-table-cells-large text-hover-blue"></i> 5 pièces
+              </li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 2 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 1 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Appartement</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 2: Le Nid des Lumières -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/nid-lumieres/800/600" alt="Le Nid des Lumières"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              1 800 000 FCFA<span class="font-normal">/mois</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Le Nid des
+                Lumières</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Dakar, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-table-cells-large text-hover-blue"></i> 7 pièces
+              </li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 3 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 2 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Villa</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 3: Propriété de Test -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/propriete-test/800/600" alt="Propriété de Test"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span class="bg-hover-blue text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold">Coups de
+                Cœur</span>
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              5 000 000 FCFA<span class="font-normal">/mois</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Propriété de Test</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Liberté 6 Extension, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-ruler-combined text-hover-blue"></i> 250 m²</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 3 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 2 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Local Commercial</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 4: Renovated apartment -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/renovated-apt/800/600" alt="Renovated apartment at last floor"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span class="bg-hover-blue text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold">Coups de
+                Cœur</span>
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              450 000 FCFA<span class="font-normal">/mois</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Renovated apartment
+                at last floor</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Grand Dakar, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-ruler-combined text-hover-blue"></i> 150 m²</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 5 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 3 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Appartement</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 5: Comfortable Villa -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/comfortable-villa/800/600" alt="Comfortable Villa in Green"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              1 900 FCFA<span class="font-normal">/mo</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Comfortable Villa in Green</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Grand Dakar, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-ruler-combined text-hover-blue"></i> 2 180 m²
+              </li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 3 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 1 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Terrain Agricole</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 6: Contemporary apartment -->
+        <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+          <div class="relative">
+            <img src="https://picsum.photos/seed/contemporary-apt/800/600" alt="Contemporary apartment"
+              class="w-full h-[220px] object-cover rounded-t-xl">
+            <div class="absolute top-3 left-3 flex gap-1">
+              <span
+                class="bg-primary text-white text-[0.7rem] px-2 py-0.5 rounded font-semibold tracking-[0.03em]">Location</span>
+            </div>
+            <div class="absolute top-3 right-3 bg-dark text-white text-xs font-bold font-jakarta px-2 py-1 rounded">
+              13 000 FCFA<span class="font-normal">/mo</span>
+            </div>
+          </div>
+          <div class="p-4 flex flex-col gap-2 flex-1">
+            <h3 class="font-jakarta font-bold text-dark text-base">
+              <a href="{{ url_for('get_listing_details') }}"
+                class="hover:text-primary transition-colors">Contemporary
+                apartment</a>
+            </h3>
+            <address class="not-italic text-sm text-gray-500 flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-hover-blue text-xs"></i>
+              Marcory Résidentiel, Sénégal
+            </address>
+            <ul class="flex flex-wrap gap-3 text-sm text-text-body mt-1">
+              <li class="flex items-center gap-1"><i class="fa-solid fa-ruler-combined text-hover-blue"></i> 1 200 m²
+              </li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-bed text-hover-blue"></i> 4 lits</li>
+              <li class="flex items-center gap-1"><i class="fa-solid fa-shower text-hover-blue"></i> 2 sdb</li>
+              <li class="w-full text-xs font-semibold text-dark-blue">Appartement</li>
+            </ul>
+            <a href="{{ url_for('get_listing_details') }}"
+              class="inline-block bg-primary hover:bg-primary-hover text-white rounded-md py-[0.55rem] px-[1.2rem] font-semibold text-sm font-poppins cursor-pointer transition-colors mt-auto self-start">
+              Voir
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+{% endblock %}

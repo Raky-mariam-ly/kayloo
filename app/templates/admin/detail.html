@@ -30,7 +30,9 @@
                     <div id="alertContainer"></div>
                     <div class="card-header">
                         <h3 class="card-title">
+                            {% block detail_card_title %}
                             <strong>#{{ obj[pk] }}</strong>
+                            {% endblock %}
                         </h3>
                         <div class="card-actions">
                             {% with pk=obj[pk] %}

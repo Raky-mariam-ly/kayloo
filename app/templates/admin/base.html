@@ -16,20 +16,85 @@
 
         :root {
             --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
-            --tblr-primary: #d63939;
+            --tblr-primary: #a80000;
+            --tblr-primary-rgb: 168, 0, 0;
+            --kayloo-sidebar-bg: #a80000;
+            --kayloo-sidebar-hover: #D60000;
+            --kayloo-sidebar-text: #ffffff;
         }
 
         body {
             font-feature-settings: "cv03", "cv04", "cv11";
         }
 
+        /* ── Logo ── */
         .navbar-logo {
             width: auto;
-            height: 2rem;
+            height: 2.2rem;
         }
+
+        /* ── Sidebar Kayloo ── */
+        .navbar-vertical {
+            background-color: var(--kayloo-sidebar-bg) !important;
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .navbar-vertical .navbar-nav .nav-link {
+            color: var(--kayloo-sidebar-text);
+            border-radius: 6px;
+            margin: 1px 8px;
+            transition: background .15s, color .15s;
+        }
+
+        .navbar-vertical .navbar-nav .nav-link:hover,
+        .navbar-vertical .navbar-nav .nav-link.active {
+            background-color: var(--kayloo-sidebar-hover);
+            color: #fff !important;
+        }
+
+        .navbar-vertical .navbar-nav .nav-link .nav-link-icon {
+            color: inherit;
+        }
+
+        /* ── Header Kayloo ── */
+        .navbar.navbar-expand-md {
+            border-bottom: 1px solid #e6edf5;
+            background: #ffffff;
+        }
+
+        /* ── Boutons ── */
+        .btn-primary,
+        .btn-secondary,
+        .btn-success,
+        .btn-info {
+            background-color: #0E0F21;
+            border-color: #0E0F21;
+            color: #fff;
+        }
+
+        .btn-primary:hover,
+        .btn-secondary:hover,
+        .btn-success:hover,
+        .btn-info:hover {
+            background-color: #1e2040;
+            border-color: #1e2040;
+            color: #fff;
+        }
+
+        /* ── Page header ── */
+        .page-header .page-title {
+            color: #a80000;
+        }
+
+        /* ── Cards ── */
+        .card {
+            border: 1px solid #e6edf5;
+            box-shadow: 0 1px 4px rgba(32, 107, 196, 0.06);
+        }
+
         @media (max-width: 768px) {
             .label {
-                display: none; /* Removes the element from the layout */
+                display: none;
             }
         }
     </style>
@@ -49,7 +114,7 @@
         $(".language-switcher-item").each(function () {
             let el = $(this);
             el.on("click", function () {
-                Cookies.set(String(el.data("cookie-name")), String(el.data("lang")));
+                Cookies.set(String(el.data("cookie-name")), String(el.data("lang")), { path: "/" });
                 window.location.reload();
             });
         });
@@ -57,7 +122,7 @@
         $(".timezone-switcher-item").each(function () {
             let el = $(this);
             el.on("click", function () {
-                Cookies.set(String(el.data("cookie-name")), String(el.data("tz")));
+                Cookies.set(String(el.data("cookie-name")), String(el.data("tz")), { path: "/" });
                 window.location.reload();
             });
         });

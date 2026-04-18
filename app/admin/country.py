@@ -11,7 +11,6 @@ from services.country import CountryService
 
 class CountryView(AdminModelView):
     fields = [
-        # StringField("code", required=True),
         CountryField("code", required=True, label="Country"),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True),
@@ -20,10 +19,8 @@ class CountryView(AdminModelView):
         DateTimeField("updated_at", read_only=True),
     ]
 
-    exclude_fields_from_create = ["created_at",
-                                  "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at",
-                                "updated_at", "created_by", "updated_by"]
+    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
+    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         """Raise FormValidationError to display error in forms"""

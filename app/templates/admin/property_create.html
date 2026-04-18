@@ -1,0 +1,232 @@
+{% extends "create.html" %}
+
+{% block create_form %}
+{% set fields = model.get_fields_list(request, 'CREATE' | ra) %}
+
+{# Macro : affiche un champ par son name #}
+{% macro rf(fname, full_width=False, col=None) %}
+  {% for field in fields if field.name == fname %}
+  <div class="{{ col if col else ('col-12' if full_width else 'col-md-6') }} mb-3">
+    {% with action=('CREATE'|ra), data=(None if not obj else obj[field.name]), error=(errors.get(field.name) if errors else None) %}
+      {% include field.label_template %}
+      {% include field.form_template %}
+    {% endwith %}
+  </div>
+  {% endfor %}
+{% endmacro %}
+
+<div class="prop-fieldsets">
+
+  {# ── Identification ── #}
+  <fieldset class="prop-fieldset">
+    <legend><i class="fa fa-tag me-2"></i>Identification</legend>
+    <p class="fs-label">Informations générales</p>
+    <div class="row">
+      {{ rf("code") }}
+      {{ rf("label") }}
+      {{ rf("type") }}
+      {{ rf("usage") }}
+      {{ rf("status") }}
+    </div>
+    <p class="fs-label mt-3">Relations</p>
+    <div class="row">
+      {{ rf("agency_id") }}
+      {{ rf("building_id") }}
+    </div>
+  </fieldset>
+
+  {# ── Localisation ── #}
+  <fieldset class="prop-fieldset">
+    <legend><i class="fa fa-map-marker me-2"></i>Localisation</legend>
+    <div class="row">
+      {{ rf("country") }}
+      {{ rf("city") }}
+      {{ rf("zone") }}
+      {{ rf("street") }}
+      {{ rf("address", full_width=True) }}
+      {{ rf("level") }}
+      {{ rf("position") }}
+      {{ rf("apartment_number") }}
+    </div>
+    <p class="fs-label mt-3">Coordonnées GPS</p>
+    <div class="row">
+      {{ rf("lat") }}
+      {{ rf("lng") }}
+    </div>
+  </fieldset>
+
+  {# ── Description ── #}
+  <fieldset class="prop-fieldset">
+    <legend><i class="fa fa-home me-2"></i>Description</legend>
+    <p class="fs-label">Caractéristiques physiques</p>
+    <div class="row">
+      {{ rf("surface", col="col-md-4") }}
+      {{ rf("build_year", col="col-md-4") }}
+      {{ rf("bed_room_count", col="col-md-4") }}
+      {{ rf("bath_room_count", col="col-md-4") }}
+      {{ rf("kitchen_count", col="col-md-4") }}
+      {{ rf("living_room_count", col="col-md-4") }}
+    </div>
+    <p class="fs-label mt-3">Descriptif &amp; Média</p>
+    <div class="row">
+      {{ rf("description", full_width=True) }}
+      {{ rf("image_url", full_width=True) }}
+      {{ rf("images", full_width=True) }}
+    </div>
+  </fieldset>
+
+  {# ── Financier ── #}
+  <fieldset class="prop-fieldset">
+    <legend><i class="fa fa-money me-2"></i>Financier</legend>
+    <p class="fs-label">Prix</p>
+    <div class="row">
+      {{ rf("currency") }}
+      {{ rf("base_price_type") }}
+      {{ rf("price") }}
+      {{ rf("base_price") }}
+      {{ rf("extra_price") }}
+      {{ rf("sale_price") }}
+      {{ rf("rent_price") }}
+      {{ rf("syndic_amount") }}
+    </div>
+    <p class="fs-label mt-3">Taux (%)</p>
+    <div class="row">
+      {{ rf("vat_rate", col="col-md-4") }}
+      {{ rf("tom_rate", col="col-md-4") }}
+      {{ rf("ir_rate", col="col-md-4") }}
+      {{ rf("mgmt_rate", col="col-md-4") }}
+      {{ rf("commission_rate", col="col-md-4") }}
+      {{ rf("deposit_rate", col="col-md-4") }}
+    </div>
+  </fieldset>
+
+  {# ── Options ── #}
+  <fieldset class="prop-fieldset">
+    <legend><i class="fa fa-cog me-2"></i>Options</legend>
+    <p class="fs-label">Location</p>
+    <div class="row">
+      {{ rf("rent_type") }}
+      {{ rf("rental_period") }}
+      {{ rf("managed_by") }}
+      {{ rf("status_before_reserved") }}
+    </div>
+    <p class="fs-label mt-3">Acquisition</p>
+    <div class="row">
+      {{ rf("acquisition_date") }}
+      {{ rf("acquisition_price") }}
+      {{ rf("acquisition_fee") }}
+      {{ rf("free_since") }}
+    </div>
+    <p class="fs-label mt-3">Visibilité</p>
+    <div class="row align-items-center">
+      {{ rf("is_hidden", col="col-auto") }}
+      {{ rf("is_exposed", col="col-auto") }}
+      {{ rf("is_saleable", col="col-auto") }}
+      {{ rf("is_managed", col="col-auto") }}
+      {{ rf("archived", col="col-auto") }}
+      {{ rf("is_featured", col="col-auto") }}
+    </div>
+  </fieldset>
+
+</div>
+{% endblock %}
+
+{% block form_footer %}
+<div class="card-footer">
+  <div class="d-flex align-items-center justify-content-between gap-3">
+    <a href="{{ url_for(__name__ ~ ':list', identity=model.identity) }}"
+       class="btn btn-ghost-secondary d-flex align-items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Annuler
+    </a>
+    <div class="d-flex align-items-center gap-2">
+      <button type="submit" name="_add_another"
+              class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Enregistrer et ajouter
+      </button>
+      <button type="submit" name="_continue_editing"
+              class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Enregistrer et modifier
+      </button>
+      <button type="submit"
+              class="btn btn-primary d-flex align-items-center gap-2 px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  /* ── Conteneur ── */
+  .prop-fieldsets {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* ── Fieldset ── */
+  .prop-fieldset {
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 0.75rem 1.1rem 1rem;
+    background: #f8f8f9;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  /* ── Legend ── */
+  .prop-fieldset legend {
+    float: none;
+    width: auto;
+    padding: 0 0.5rem;
+    margin-left: 0.25rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #a80000;
+    background: #fff;
+  }
+
+  /* ── Sous-labels internes ── */
+  .fs-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #9e9e9e;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+
+  /* ── Bouton outline-primary → rouge thème ── */
+  .btn-outline-primary {
+    color: #a80000;
+    border-color: #a80000;
+  }
+  .btn-outline-primary:hover {
+    background-color: #a80000;
+    border-color: #a80000;
+    color: #fff;
+  }
+</style>
+{% endblock %}

@@ -61,6 +61,21 @@ docker exec web alembic upgrade head
 
 ## Entité administrative
 
+### Tags `tags`
+
+```sql
+table tag
+{
+  id uuid [pk]
+  name text [not null, unique]
+  slug text [not null, unique]
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
 ### Pays `country`
 
 ```sql
@@ -167,11 +182,104 @@ table partner
 }
 ```
 
+### Immeuble `building`
+
+```sql
+table building
+{
+  id uuid [pk]
+  agency_id uuid [ref:> agency.id]
+  city_id uuid [ref:> agency.id]
+  name text [not null]
+  address text
+  lat decimal
+  lng decimal
+  slug text
+  image_url text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
+
 ### Biens `propertry`
 
 ```sql
 table propertry
 {
+  id uuid [pk]
+  building_id uuid [ref:> building.id]
+  agency_id uuid [ref:> agency_id]
+  label text
+  code text
+  status_before_reserved text
+  managed_by text
+  base_price_type text
+  description text
+  usage text
+  type text
+  status text
+  rent_type text
+  rental_period text
+  image_url text
+  level text
+  position text
+  apartment_number text
+  country text [ref:> country.code]
+  city text
+  zone text
+  street text
+  address text
+  bath_room_count int
+  bed_room_count int
+  kitchen_count int
+  living_room_count int
+  build_year text
+  lng decimal
+  lat decimal
+  acquisition_date date
+  acquisition_price decimal
+  acquisition_fee decimal
+  surface decimal
+  free_since date
+  currency text
+  vat_rate decimal
+  tom_rate decimal
+  ir_rate decimal
+  mgmt_rate decimal
+  commission_rate decimal
+  deposit_rate decimal
+  sale_price decimal
+  price decimal
+  base_price decimal
+  extra_price decimal
+  rent_price decimal
+  syndic_amount decimal
+  is_hidden boolean default false
+  is_exposed boolean default false
+  is_saleable boolean default true
+  is_managed boolean default false
+  archived boolean default false
+  is_featured boolean
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
+}
+```
 
+### Photos de biens `property_image`
+
+```sql
+table propertry_image
+{
+  id uuid [pk]
+  property_id uuid [ref:> property.id]
+  url text
+  created_at datetime
+  created_by text [ref :> user.email]
+  updated_at datetime
+  updated_by text [ref :> user.email]
 }
 ```

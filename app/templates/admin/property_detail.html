@@ -1,0 +1,254 @@
+{% extends "detail.html" %}
+{% set pk = model.pk_attr %}
+{% set fields = model.get_fields_list(request, 'DETAIL' | ra) %}
+
+{# Macro : affiche un champ en mode lecture (datagrid-item) #}
+{% macro rd(fname) %}
+  {% for field in fields if field.name == fname %}
+  <div class="datagrid-item">
+    <div class="datagrid-title">{{ field.label }}</div>
+    <div class="datagrid-content">
+      {% with data=obj[field.name] %}
+        {% if data == None %}
+          <span class="text-muted">—</span>
+        {% elif (data | is_iter) and (data | length) == 0 %}
+          <span class="text-muted">—</span>
+        {% else %}
+          {% include field.display_template %}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+  {% endfor %}
+{% endmacro %}
+
+{% block detail_card_title %}
+  {% if obj["label"] %}
+    <strong>{{ obj["label"] }}</strong>
+    {% if obj["code"] %}<span class="text-muted ms-2" style="font-size:0.8rem;font-weight:400;">{{ obj["code"] }}</span>{% endif %}
+  {% elif obj["code"] %}
+    <strong>{{ obj["code"] }}</strong>
+  {% else %}
+    <strong>#{{ obj[pk] }}</strong>
+  {% endif %}
+{% endblock %}
+
+{% block details_table %}
+
+{# ── Navigation onglets ── #}
+<ul class="nav nav-tabs nav-fill mb-0 border-bottom-0" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active fw-semibold" data-bs-toggle="tab" href="#d-ident" role="tab">
+      <i class="fa fa-tag me-1"></i> Identification
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#d-local" role="tab">
+      <i class="fa fa-map-marker me-1"></i> Localisation
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#d-desc" role="tab">
+      <i class="fa fa-home me-1"></i> Description
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#d-fin" role="tab">
+      <i class="fa fa-money me-1"></i> Financier
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#d-opt" role="tab">
+      <i class="fa fa-cog me-1"></i> Options
+    </a>
+  </li>
+</ul>
+
+{# ── Contenu onglets ── #}
+<div class="tab-content border border-top-0 rounded-bottom p-4">
+
+  {# Onglet 1 — Identification #}
+  <div class="tab-pane fade show active" id="d-ident" role="tabpanel">
+    <p class="tab-section-label">Informations générales</p>
+    <div class="datagrid">
+      {{ rd("code") }}
+      {{ rd("label") }}
+      {{ rd("type") }}
+      {{ rd("usage") }}
+      {{ rd("status") }}
+    </div>
+    <p class="tab-section-label mt-4">Relations</p>
+    <div class="datagrid">
+      {{ rd("agency_id") }}
+      {{ rd("building_id") }}
+    </div>
+  </div>
+
+  {# Onglet 2 — Localisation #}
+  <div class="tab-pane fade" id="d-local" role="tabpanel">
+    <div class="datagrid">
+      {{ rd("country") }}
+      {{ rd("city") }}
+      {{ rd("zone") }}
+      {{ rd("street") }}
+      {{ rd("address") }}
+      {{ rd("level") }}
+      {{ rd("position") }}
+      {{ rd("apartment_number") }}
+    </div>
+    <p class="tab-section-label mt-4">Coordonnées GPS</p>
+    <div class="datagrid">
+      {{ rd("lat") }}
+      {{ rd("lng") }}
+    </div>
+  </div>
+
+  {# Onglet 3 — Description #}
+  <div class="tab-pane fade" id="d-desc" role="tabpanel">
+    <p class="tab-section-label">Caractéristiques physiques</p>
+    <div class="datagrid">
+      {{ rd("surface") }}
+      {{ rd("build_year") }}
+      {{ rd("bed_room_count") }}
+      {{ rd("bath_room_count") }}
+      {{ rd("kitchen_count") }}
+      {{ rd("living_room_count") }}
+    </div>
+    <p class="tab-section-label mt-4">Descriptif</p>
+    <div class="datagrid">
+      {{ rd("description") }}
+    </div>
+    {% for field in fields if field.name == "image_url" %}
+      {% with data=obj[field.name] %}
+        {% if data != None %}
+        <p class="tab-section-label mt-4">Image de couverture</p>
+        <div class="mt-2">{% include field.display_template %}</div>
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+    {% for field in fields if field.name == "images" %}
+      {% with data=obj[field.name] %}
+        {% if data %}
+        <p class="tab-section-label mt-4">Photos du bien</p>
+        <div class="mt-2">{% include field.display_template %}</div>
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  {# Onglet 4 — Financier #}
+  <div class="tab-pane fade" id="d-fin" role="tabpanel">
+    <p class="tab-section-label">Prix</p>
+    <div class="datagrid">
+      {{ rd("currency") }}
+      {{ rd("base_price_type") }}
+      {{ rd("price") }}
+      {{ rd("base_price") }}
+      {{ rd("extra_price") }}
+      {{ rd("sale_price") }}
+      {{ rd("rent_price") }}
+      {{ rd("syndic_amount") }}
+    </div>
+    <p class="tab-section-label mt-4">Taux (%)</p>
+    <div class="datagrid" style="--tblr-datagrid-item-width: 10rem;">
+      {{ rd("vat_rate") }}
+      {{ rd("tom_rate") }}
+      {{ rd("ir_rate") }}
+      {{ rd("mgmt_rate") }}
+      {{ rd("commission_rate") }}
+      {{ rd("deposit_rate") }}
+    </div>
+  </div>
+
+  {# Onglet 5 — Options #}
+  <div class="tab-pane fade" id="d-opt" role="tabpanel">
+    <p class="tab-section-label">Location</p>
+    <div class="datagrid">
+      {{ rd("rent_type") }}
+      {{ rd("rental_period") }}
+      {{ rd("managed_by") }}
+      {{ rd("status_before_reserved") }}
+    </div>
+    <p class="tab-section-label mt-4">Acquisition</p>
+    <div class="datagrid">
+      {{ rd("acquisition_date") }}
+      {{ rd("acquisition_price") }}
+      {{ rd("acquisition_fee") }}
+      {{ rd("free_since") }}
+    </div>
+    <p class="tab-section-label mt-4">Visibilité</p>
+    <div class="datagrid" style="--tblr-datagrid-item-width: 9rem;">
+      {{ rd("is_hidden") }}
+      {{ rd("is_exposed") }}
+      {{ rd("is_saleable") }}
+      {{ rd("is_managed") }}
+      {{ rd("archived") }}
+      {{ rd("is_featured") }}
+    </div>
+    <p class="tab-section-label mt-4">Audit</p>
+    <div class="datagrid">
+      {{ rd("created_at") }}
+      {{ rd("created_by") }}
+      {{ rd("updated_at") }}
+      {{ rd("updated_by") }}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  /* ── Search bar masquée (inutile en mode lecture) ── */
+  .card-body:has(#searchInput) { display: none; }
+
+  /* ── Onglets ── */
+  .nav-tabs .nav-link {
+    color: #6c757d;
+    border-color: transparent;
+    font-size: 0.85rem;
+  }
+  .nav-tabs .nav-link.active {
+    color: #a80000;
+    border-bottom: 2px solid #a80000;
+    font-weight: 600;
+  }
+  .nav-tabs .nav-link:hover:not(.active) {
+    color: #a80000;
+    border-color: transparent;
+    background: rgba(168,0,0,.05);
+  }
+  .tab-content { background: #fff; }
+
+  /* ── Labels de section ── */
+  .tab-section-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #a80000;
+    border-bottom: 1px solid #f0e0e0;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Datagrid ── */
+  .datagrid {
+    --tblr-datagrid-item-width: 13rem;
+  }
+  .datagrid-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+    margin-bottom: 3px;
+  }
+  .datagrid-content {
+    font-size: 0.92rem;
+    color: #1a1a2e;
+    font-weight: 500;
+  }
+</style>
+{% endblock %}

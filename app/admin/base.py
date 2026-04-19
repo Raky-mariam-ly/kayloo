@@ -1,7 +1,7 @@
 import os
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 from starlette.datastructures import FormData, UploadFile
 from starlette.requests import Request
@@ -141,3 +141,76 @@ class AdminModelView(ModelView):
     page_size = 25
     page_size_options = [10, 25, 50, 100]
     export_types = [ExportType.EXCEL, ExportType.CSV]
+
+    service_class: Optional[Type] = None
+    repository_class: Optional[Type] = None
+
+    def get_service(self, request: Request):
+        """Build a service instance from the request's DB session."""
+        return self.service_class(self.repository_class(request.state.session))
+
+    @property
+    def _has_service(self) -> bool:
+        return self.service_class is not None and self.repository_class is not None
+
+    async def count(
+        self,
+        request: Request,
+        where: Union[Dict[str, Any], str, None] = None,
+    ) -> int:
+        if not self._has_service:
+            return await super().count(request, where)
+        return await self.get_service(request).count(where)
+
+    async def find_all(
+        self,
+        request: Request,
+        skip: int = 0,
+        limit: int = 100,
+        where: Union[Dict[str, Any], str, None] = None,
+        order_by: Optional[List[str]] = None,
+    ) -> list:
+        if not self._has_service:
+            return await super().find_all(request, skip, limit, where, order_by)
+        return await self.get_service(request).list(
+            skip=skip, limit=limit, where=where, order_by=order_by,
+        )
+
+    async def find_by_pk(self, request: Request, pk: Any) -> Any:
+        if not self._has_service:
+            return await super().find_by_pk(request, pk)
+        return await self.get_service(request).get(pk)
+
+    async def find_by_pks(self, request: Request, pks: List[Any]) -> list:
+        if not self._has_service:
+            return await super().find_by_pks(request, pks)
+        svc = self.get_service(request)
+        return [r for pk in pks if (r := await svc.get(pk))]
+
+    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
+        if not self._has_service:
+            return await super().create(request, data)
+        await self.validate(request, data)
+        obj = self.model(**data)
+        setattr(obj, "_current_user_id",
+                request.state.user.email if request.state.user else None)
+        return await self.get_service(request).create(obj)
+
+    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+        if not self._has_service:
+            return await super().edit(request, pk, data)
+        await self.validate(request, data)
+        data["_current_user_id"] = (
+            request.state.user.email if request.state.user else None
+        )
+        return await self.get_service(request).update(pk, data)
+
+    async def delete(self, request: Request, pks: List[Any]) -> Optional[int]:
+        if not self._has_service:
+            return await super().delete(request, pks)
+        svc = self.get_service(request)
+        count = 0
+        for pk in pks:
+            await svc.delete(pk)
+            count += 1
+        return count

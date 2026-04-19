@@ -11,8 +11,10 @@ from starlette_admin import I18nConfig
 from starlette_admin.i18n import SUPPORTED_LOCALES
 
 from schemas.user import UserCreate, UserRead, UserUpdate
-from core.auth import auth_backend, fastapi_users
+from core.auth import auth_backend, bearer_auth_backend, fastapi_users
 from public.router import router
+from api.v1 import router as api_v1_router
+from api.v1.auth import router as jwt_auth_router
 from admin.admin import admin
 from seed import seed_database
 
@@ -45,12 +47,22 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 # Include public routes
 app.include_router(router)
-# Auth routers
+# Include API v1 routes
+app.include_router(api_v1_router)
+# Auth routers — cookie backend (web admin)
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth",
     tags=["auth"],
 )
+# Auth routers — bearer backend (mobile / API)
+app.include_router(
+    fastapi_users.get_auth_router(bearer_auth_backend),
+    prefix="/auth/jwt",
+    tags=["auth"],
+)
+# Custom JWT refresh/logout endpoints
+app.include_router(jwt_auth_router)
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",

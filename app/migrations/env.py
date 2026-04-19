@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Model's MetaData object for 'autogenerate' support
-from core.auth import Base, User, AccessToken
+from core.auth import Base, User, AccessToken, RefreshToken
 from models.property_type import PropertyType
 from models.property_rent_type import PropertyRentType
 from models.country import Country
@@ -20,6 +20,8 @@ from models.partner import Partner
 from models.property import Property
 from models.building import Building
 from models.property_image import PropertyImage
+from models.property_view import PropertyView
+from models.property_review import PropertyReview
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1,6 +1,7 @@
 import contextlib
 import uuid
-from fastapi import Depends, Request, Response
+
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin, models
 from fastapi_users.authentication import (
@@ -50,6 +51,15 @@ class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
     pass
 
 
+class RefreshToken(Base):
+    __tablename__ = "refresh_token"
+
+    id = Column(Text, primary_key=True)
+    user_id = Column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+
 async def get_user_db(session: AsyncSession = Depends(get_db)):
     yield SQLAlchemyUserDatabase(session, User)
 
@@ -81,7 +91,11 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
     yield UserManager(user_db)
 
 
-# bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+# ---------------------------------------------------------------------------
+# Authentication backends
+# ---------------------------------------------------------------------------
+
+# 1. Cookie-based JWT — used by the web admin panel
 cookie_transport = CookieTransport(cookie_max_age=3600, cookie_secure=True)
 
 
@@ -91,14 +105,53 @@ def get_jwt_strategy() -> JWTStrategy[models.UP, models.ID]:
 
 auth_backend = AuthenticationBackend(
     name="jwt-cookie",
-    # transport=bearer_transport,
     transport=cookie_transport,
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
+# 2. Bearer JWT — used by the mobile / REST API
+bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+
+JWT_ACCESS_LIFETIME = 60 * 15              # 15 minutes
+JWT_REFRESH_LIFETIME = 60 * 60 * 24 * 30   # 30 days
+
+
+def get_bearer_jwt_strategy() -> JWTStrategy[models.UP, models.ID]:
+    return JWTStrategy(secret=settings.secret, lifetime_seconds=JWT_ACCESS_LIFETIME)
+
+
+bearer_auth_backend = AuthenticationBackend(
+    name="jwt-bearer",
+    transport=bearer_transport,
+    get_strategy=get_bearer_jwt_strategy,
+)
+
+# Register FastAPIUsers with both backends
+fastapi_users = FastAPIUsers[User, uuid.UUID](
+    get_user_manager, [auth_backend, bearer_auth_backend],
+)
 
 current_active_user = fastapi_users.current_user(active=True)
+
+
+# ---------------------------------------------------------------------------
+# Role-based authorization dependency
+# ---------------------------------------------------------------------------
+
+def require_role(*allowed_roles: str):
+    """FastAPI dependency that checks the authenticated user has one of the allowed roles.
+
+    Usage:
+        @router.post("", dependencies=[Depends(require_role("admin", "superadmin"))])
+    """
+    async def _check_role(user: User = Depends(current_active_user)):
+        if user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+        return user
+    return _check_role
 
 get_async_session_context = contextlib.asynccontextmanager(get_db)
 get_user_db_context = contextlib.asynccontextmanager(get_user_db)

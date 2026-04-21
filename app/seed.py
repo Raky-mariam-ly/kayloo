@@ -121,3 +121,9 @@ async def seed_database() -> None:
     await polulate_property_types()
     await polulate_property_rent_types()
     await populate_countries()
+    # Agencies, agents, properties, images
+    from seed_properties import seed_properties_data
+    await seed_properties_data()
+    # CRM test data
+    from seed_crm import seed_crm_data
+    await seed_crm_data()

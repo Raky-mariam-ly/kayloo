@@ -22,6 +22,15 @@ from models.building import Building
 from models.property_image import PropertyImage
 from models.property_view import PropertyView
 from models.property_review import PropertyReview
+from models.contact import Contact
+from models.lead import Lead
+from models.activity import Activity
+from models.task import Task
+from models.notification import Notification
+from models.favorite import Favorite
+from models.saved_search import SavedSearch
+from models.conversation import Conversation, ConversationParticipant
+from models.message import Message
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

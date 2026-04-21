@@ -13,7 +13,7 @@ def load_country_choices(request: Request):
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT code, name FROM country WHERE is_active = true ORDER BY name"
+                "SELECT code, coalesce(name, code) FROM country WHERE is_active = true ORDER BY name"
             )
             rows = cur.fetchall()
         return [(r[0], f"{r[1]} ({r[0]})" if r[1] else r[0]) for r in rows]

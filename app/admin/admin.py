@@ -21,6 +21,14 @@ from models.property import Property
 from models.building import Building
 from models.property_image import PropertyImage  # noqa: F401 — requis pour les relations SQLAlchemy
 
+# CRM models
+from models.contact import Contact
+from models.lead import Lead
+from models.activity import Activity
+from models.task import Task
+from models.notification import Notification
+from models.conversation import Conversation
+
 from admin.country import CountryView
 from admin.property_rent_type import PropertyRentTypeView
 from admin.property_type import PropertyTypeView
@@ -33,6 +41,16 @@ from admin.partner import PartnerView
 from admin.property import PropertyView
 from admin.building import BuildingView
 # PropertyImageView retiré du sidebar mais le modèle doit être importé pour les relations SQLAlchemy
+
+# CRM admin views
+from admin.contact import ContactView
+from admin.lead import LeadView
+from admin.activity import ActivityView
+from admin.task import TaskView
+from admin.notification import NotificationView
+from admin.conversation import ConversationView
+from admin.crm_dashboard import CrmDashboardView
+from admin.lead_kanban import LeadKanbanView
 
 
 settings = get_settings()
@@ -84,9 +102,31 @@ admin.add_view(DropDown(
     label="Biens",
     icon="fa fa-home",
     views=[
-        PropertyTypeView(PropertyType, icon="fa fa-cogs", label="Types de bien"),
-        PropertyRentTypeView(PropertyRentType, icon="fa fa-cogs", label="Types de location"),
+        PropertyTypeView(PropertyType, icon="fa fa-cogs",
+                         label="Types de bien"),
+        PropertyRentTypeView(
+            PropertyRentType, icon="fa fa-cogs", label="Types de location"),
         BuildingView(Building, icon="fa fa-building-o", label="Immeubles"),
         PropertyView(Property, icon="fa fa-home", label="Biens"),
+    ]
+))
+
+# ── CRM ──
+# admin.add_view(CrmDashboardView())
+# admin.add_view(LeadKanbanView())
+admin.add_view(DropDown(
+    label="CRM",
+    icon="fa fa-handshake",
+    views=[
+        CrmDashboardView(),
+        LeadKanbanView(),
+        ContactView(Contact, icon="fa fa-address-book", label="Contacts"),
+        LeadView(Lead, icon="fa fa-funnel-dollar", label="Leads"),
+        ActivityView(Activity, icon="fa fa-history", label="Activités"),
+        TaskView(Task, icon="fa fa-tasks", label="Tâches"),
+        ConversationView(Conversation, icon="fa fa-comments",
+                         label="Conversations"),
+        NotificationView(Notification, icon="fa fa-bell",
+                         label="Notifications"),
     ]
 ))

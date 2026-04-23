@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+# --- Existing entity routers ---
 from api.v1.country import router as country_router
 from api.v1.city import router as city_router
 from api.v1.area import router as area_router
@@ -16,7 +17,21 @@ from api.v1.property_review import router as property_review_router
 from api.v1.property_review import admin_router as review_admin_router
 from api.v1.auth import router as auth_router
 
+# --- CRM routers ---
+from api.v1.contact import router as contact_router
+from api.v1.lead import router as lead_router
+from api.v1.lead import inquiry_router
+from api.v1.activity import router as activity_router
+from api.v1.task import router as task_router
+from api.v1.notification import router as notification_router
+from api.v1.favorite import router as favorite_router
+from api.v1.saved_search import router as saved_search_router
+from api.v1.conversation import router as conversation_router
+from api.v1.dashboard import router as dashboard_router
+
 router = APIRouter(prefix="/api/v1")
+
+# Existing entities
 router.include_router(country_router)
 router.include_router(city_router)
 router.include_router(area_router)
@@ -31,3 +46,15 @@ router.include_router(property_image_router)
 router.include_router(property_view_router)
 router.include_router(property_review_router)
 router.include_router(review_admin_router)
+
+# CRM
+router.include_router(contact_router)
+router.include_router(lead_router)
+router.include_router(inquiry_router)
+router.include_router(activity_router)
+router.include_router(task_router)
+router.include_router(notification_router)
+router.include_router(favorite_router)
+router.include_router(saved_search_router)
+router.include_router(conversation_router)
+router.include_router(dashboard_router)

@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, Text, func, UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy_file import FileField as FileStorageField
 
 from core.auth import Base
 
@@ -10,8 +11,8 @@ class Property(Base):
 
     id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, nullable=False)
     version = Column(Integer, nullable=False, default=1)
-    building_id = Column(UUID(as_uuid=True), nullable=True)
-    owner_id = Column(UUID(as_uuid=True), nullable=True)
+    building_id = Column(UUID(as_uuid=True), ForeignKey("building.id"), nullable=True)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=True)
     agency_id = Column(UUID(as_uuid=True), ForeignKey("agency.id"), nullable=True)
     label = Column(Text, nullable=True)
     code = Column(Text, nullable=True)
@@ -26,7 +27,7 @@ class Property(Base):
     rent_type = Column(Text, nullable=True)
     rental_period = Column(Text, nullable=True)
     tag = Column(Text, nullable=True)
-    image_url = Column(Text, nullable=True)
+    image_url = Column(FileStorageField(upload_storage="images"), nullable=True)
     level = Column(Text, nullable=True)
     position = Column(Text, nullable=True)
     apartment_number = Column(Text, nullable=True)
@@ -39,7 +40,7 @@ class Property(Base):
     bed_room_count = Column(Integer, nullable=True)
     kitchen_count = Column(Integer, nullable=True)
     living_room_count = Column(Integer, nullable=True)
-    build_year = Column(Text, nullable=True)
+    build_year = Column(Integer, nullable=True)
     lng = Column(Numeric(21, 6), nullable=True)
     lat = Column(Numeric(21, 6), nullable=True)
     acquisition_date = Column(Date, nullable=True)
@@ -71,9 +72,19 @@ class Property(Base):
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
 
+    agency = relationship("Agency", back_populates="properties",
+                          foreign_keys=[agency_id], lazy="selectin")
+
     images = relationship(
         "PropertyImage",
         back_populates="property",
         cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    gallery = relationship(
+        "PropertyGallery",
+        back_populates="property",
+        cascade="all, delete-orphan",
+        uselist=False,
         lazy="selectin",
     )

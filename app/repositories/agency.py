@@ -15,3 +15,11 @@ class AgencyRepository(BaseRepository[Agency]):
     async def get_by_country(self, country: str) -> List[Agency]:
         result = await self.db.execute(select(self.model).filter_by(country=country))
         return result.scalars().all()
+
+    async def get_active(self) -> List[Agency]:
+        result = await self.db.execute(
+            select(self.model)
+            .where(self.model.is_active == True)
+            .order_by(self.model.name)
+        )
+        return result.scalars().all()

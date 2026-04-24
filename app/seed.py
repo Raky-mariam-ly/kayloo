@@ -1,5 +1,8 @@
+import logging
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 from core.auth import create_user, get_async_session_context
 
@@ -57,7 +60,10 @@ async def populate_users() -> None:
         }
     ]
     for user in users:
-        await create_user(**user)
+        try:
+            await create_user(**user)
+        except Exception as e:
+            logger.warning("populate_users: skipped %s — %s", user["email"], e)
 
 
 async def polulate_property_types() -> None:

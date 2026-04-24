@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import Column, DateTime, ForeignKey, Text, func, UUID
+from sqlalchemy import Column, DateTime, ForeignKey, Text, UniqueConstraint, func, UUID
+from sqlalchemy.orm import relationship
 
 from core.auth import Base
 
@@ -16,3 +17,10 @@ class Agent(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "agency_id", name="ux_agent_user_agency"),
+    )
+
+    user = relationship("User", foreign_keys=[user_id], lazy="selectin")
+    agency = relationship("Agency", foreign_keys=[agency_id], back_populates="agents", lazy="selectin")

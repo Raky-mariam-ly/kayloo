@@ -2,14 +2,29 @@ from typing import Any, Dict
 
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin.fields import EnumField, BooleanField, StringField, URLField, DateTimeField
-from admin.base import AdminModelView
+from starlette_admin.fields import BooleanField, StringField, URLField, DateTimeField
+from admin.base import AdminModelView, SafeEnumField, _is_full_admin, _is_agent
 from admin.choices import load_country_choices
 
 
 class AgencyView(AdminModelView):
+    list_template = "agency_list.html"
+    detail_template = "agency_detail.html"
+
+    def is_accessible(self, request) -> bool:
+        return _is_full_admin(request) or _is_agent(request)
+
+    def can_create(self, request) -> bool:
+        return _is_full_admin(request)
+
+    def can_edit(self, request) -> bool:
+        return _is_full_admin(request)
+
+    def can_delete(self, request) -> bool:
+        return _is_full_admin(request)
+
     fields = [
-        EnumField("country", choices_loader=load_country_choices, required=True, label="Country"),
+        SafeEnumField("country", choices_loader=load_country_choices, required=True, label="Country"),
         StringField("name"),
         StringField("email"),
         StringField("phone_number", label="Phone Number"),
@@ -28,8 +43,21 @@ class AgencyView(AdminModelView):
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
+    def get_list_query(self, request):
+        query = super().get_list_query(request)
+        agency_id = getattr(request.state, "agent_agency_id", None)
+        if agency_id:
+            from models.agency import Agency
+            query = query.where(Agency.id == agency_id)
+        return query
+
+    def get_count_query(self, request):
+        query = super().get_count_query(request)
+        agency_id = getattr(request.state, "agent_agency_id", None)
+        if agency_id:
+            from models.agency import Agency
+            query = query.where(Agency.id == agency_id)
+        return query
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = dict()

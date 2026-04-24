@@ -20,6 +20,17 @@ class PropertyRepository(BaseRepository[Property]):
         result = await self.db.execute(select(self.model).filter_by(agency_id=agency_id))
         return result.scalars().all()
 
+    async def get_by_agency(self, agency_id: UUID, exclude_hidden: bool = True) -> List[Property]:
+        query = select(self.model).where(self.model.agency_id == agency_id)
+        if exclude_hidden:
+            query = query.where(
+                self.model.is_hidden == False,
+                self.model.archived == False,
+            )
+        query = query.order_by(self.model.created_at.desc())
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
     async def get_by_status(self, status: str) -> List[Property]:
         result = await self.db.execute(select(self.model).filter_by(status=status))
         return result.scalars().all()

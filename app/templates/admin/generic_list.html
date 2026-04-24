@@ -1,0 +1,174 @@
+{% extends "list.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+@import url("https://cdn.jsdelivr.net/npm/flag-icons@7.3.2/css/flag-icons.min.css");
+
+@media (max-width: 767.98px) {
+  table#dt tbody tr td.g-td-avatar {
+    display: flex !important;
+    flex: 0 0 auto;
+  }
+  table#dt tbody tr td.g-td-body {
+    display: flex !important;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    gap: .12rem;
+  }
+  table#dt tbody tr td.g-td-actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .22rem;
+    margin-left: auto;
+  }
+  table#dt tbody tr td.g-td-actions .row-actions-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: .22rem !important;
+  }
+  table#dt tbody tr td.g-td-actions .btn {
+    padding: .28rem .55rem !important;
+    font-size: .77rem !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .3rem;
+    width: 100% !important;
+    white-space: nowrap;
+  }
+  table#dt tbody tr td.g-td-actions .btn span { display: inline !important; }
+  .g-avatar {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    border: 1px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .82rem;
+    flex-shrink: 0;
+  }
+  .g-avatar .fi {
+    width: 1.25rem;
+    line-height: 1;
+    border-radius: 2px;
+  }
+  .g-card-title { font-weight: 600; font-size: .86rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-card-sub   { font-size: .74rem; color: #868e96; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .g-card-bottom { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; margin-top: .08rem; }
+  .g-card-badge {
+    display: inline-block; padding: .08rem .3rem;
+    border-radius: 4px; font-size: .66rem; font-weight: 600;
+  }
+  .g-badge-active   { background: #d4edda; color: #155724; }
+  .g-badge-inactive { background: #f8d7da; color: #721c24; }
+  .g-badge-code     { background: #f1f3f5; color: #495057; font-family: monospace; }
+}
+</style>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+(function () {
+  var SKIP = { created_at:1, updated_at:1, created_by:1, updated_by:1, id:1 };
+  var TITLE_FIELDS  = ['label', 'name', 'code'];
+  var SUB_FIELDS    = ['country', 'city', 'code', 'email', 'phone_number', 'slug'];
+
+  function buildCards() {
+    if (window.innerWidth >= 768) return;
+    var dt = $('#dt').DataTable();
+
+    $('#dt tbody tr').each(function () {
+      var $tr = $(this);
+      $tr.find('.g-td-avatar, .g-td-body, .g-td-actions').remove();
+
+      var data = dt.row(this).data();
+      if (!data) return;
+
+      var title = '';
+      for (var i = 0; i < TITLE_FIELDS.length; i++) {
+        if (data[TITLE_FIELDS[i]]) { title = data[TITLE_FIELDS[i]]; break; }
+      }
+      if (!title) {
+        for (var k in data) {
+          if (SKIP[k] || typeof data[k] === 'boolean' || data[k] == null) continue;
+          title = String(data[k]); break;
+        }
+      }
+
+      var subParts = [];
+      for (var j = 0; j < SUB_FIELDS.length; j++) {
+        var f = SUB_FIELDS[j];
+        if (data[f] && String(data[f]) !== title) {
+          subParts.push(esc(data[f]));
+          if (subParts.length >= 2) break;
+        }
+      }
+
+      var codeHtml = '';
+      if (data.code && data.code !== title) {
+        codeHtml = '<span class="g-card-badge g-badge-code">' + esc(data.code) + '</span>';
+      }
+
+      var activeHtml = '';
+      if (data.is_active !== undefined) {
+        activeHtml = data.is_active
+          ? '<span class="g-card-badge g-badge-active">Actif</span>'
+          : '<span class="g-card-badge g-badge-inactive">Inactif</span>';
+      }
+
+      var countryCode = (data.code || "").toLowerCase();
+      var avatarContent = '';
+      if (countryCode && countryCode.length === 2) {
+        avatarContent = '<span class="fi fi-' + countryCode + '"></span>';
+      } else {
+        avatarContent = (title || '?').charAt(0).toUpperCase();
+      }
+
+      var $avatar = $('<td class="g-td-avatar"></td>').append(
+        $('<div class="g-avatar"></div>').html(avatarContent)
+      );
+
+      var bottomHtml = (codeHtml || activeHtml)
+        ? '<div class="g-card-bottom">' + codeHtml + activeHtml + '</div>'
+        : '';
+
+      var $body = $('<td class="g-td-body"></td>').html(
+        '<div class="g-card-title">' + esc(title) + '</div>' +
+        (subParts.length ? '<div class="g-card-sub">' + subParts.join(' · ') + '</div>' : '') +
+        bottomHtml
+      );
+
+      var $actions = buildVerticalActions($tr, 'g-td-actions');
+
+      var $chk = $tr.find('td:nth-child(1)');
+      $chk.after($actions);
+      $chk.after($body);
+      $chk.after($avatar);
+    });
+  }
+
+  function destroyCards() {
+    $('#dt tbody tr').find('.g-td-avatar, .g-td-body, .g-td-actions').remove();
+  }
+
+  $(document).on('draw.dt', '#dt', buildCards);
+  $(window).on('load', function () { setTimeout(buildCards, 300); });
+
+  var _rt;
+  $(window).on('resize', function () {
+    clearTimeout(_rt);
+    _rt = setTimeout(function () {
+      if (window.innerWidth >= 768) destroyCards();
+      else buildCards();
+    }, 120);
+  });
+})();
+</script>
+{% endblock %}

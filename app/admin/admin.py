@@ -1,4 +1,3 @@
-from sqlalchemy import engine
 from starlette_admin import I18nConfig, DropDown
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -20,6 +19,7 @@ from models.partner import Partner
 from models.property import Property
 from models.building import Building
 from models.property_image import PropertyImage  # noqa: F401 — requis pour les relations SQLAlchemy
+from models.property_gallery import PropertyGallery  # noqa: F401 — requis pour les relations SQLAlchemy
 
 from admin.country import CountryView
 from admin.property_rent_type import PropertyRentTypeView
@@ -32,7 +32,12 @@ from admin.agent import AgentView
 from admin.partner import PartnerView
 from admin.property import PropertyView
 from admin.building import BuildingView
-# PropertyImageView retiré du sidebar mais le modèle doit être importé pour les relations SQLAlchemy
+from admin.profile import ProfileView, ProfileUploadView, ProfileChangePasswordView, ProfileDeleteView, ProfileAgencyView
+from admin.viewer import ViewerFavorisView, ViewerMessagesView
+from admin.manager_views import (
+    ManagerDashboardView, ManagerActivitesView, ManagerStatistiquesView,
+    ManagerOffresView, ManagerProspectsView, ManagerDemandesView,
+)
 
 
 settings = get_settings()
@@ -74,7 +79,7 @@ admin.add_view(DropDown(
     icon="fa fa-briefcase",
     views=[
         AgencyView(Agency, icon="fa fa-building", label="Agences"),
-        AgentView(Agent, icon="fa fa-user-tie", label="Agents"),
+        AgentView(Agent, icon="fa fa-id-badge", label="Agents"),
         PartnerView(Partner, icon="fa fa-handshake", label="Partenaires"),
     ]
 ))
@@ -90,3 +95,21 @@ admin.add_view(DropDown(
         PropertyView(Property, icon="fa fa-home", label="Biens"),
     ]
 ))
+
+# ── Compte (profil — add_to_menu=False : rendu manuellement dans le sidebar) ──
+admin.add_view(ProfileView())
+admin.add_view(ProfileUploadView())
+admin.add_view(ProfileChangePasswordView())
+admin.add_view(ProfileDeleteView())
+admin.add_view(ProfileAgencyView())
+admin.add_view(ViewerFavorisView())
+admin.add_view(ViewerMessagesView())
+
+# ── Manager (agent) views ──
+admin.add_view(ManagerDashboardView())
+admin.add_view(ManagerActivitesView())
+admin.add_view(ManagerStatistiquesView())
+admin.add_view(ManagerOffresView())
+admin.add_view(ManagerProspectsView())
+admin.add_view(ManagerDemandesView())
+

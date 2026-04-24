@@ -20,74 +20,32 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-                    <!-- SABLUX Construction -->
-                    <article
-                        class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                        <a href="https://test.kayloo.immo/agent/sablux/" class="block p-6 pb-0 no-underline">
-                            <img loading="lazy" decoding="async" width="320" height="320"
-                                src="https://test.kayloo.immo/wp-content/uploads/2025/02/308061163_454622853359522_609906544370464672_n.png"
-                                alt="SABLUX Construction" class="w-full aspect-square object-cover rounded-lg">
-                            <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Dakar Propriétés</h3>
+                    {% for agency in agencies %}
+                    <article class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
+                        <a href="{{ url_for('get_agency_profile', agency_id=agency.id) }}" class="block p-6 pb-0 no-underline">
+                            {% if agency.logo_url %}
+                            <img loading="lazy" decoding="async"
+                                src="{{ agency.logo_url }}"
+                                alt="{{ agency.name }}"
+                                class="w-full aspect-square object-cover rounded-lg">
+                            {% else %}
+                            <div class="w-full aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
+                                <i class="fa-solid fa-building text-gray-300 text-5xl"></i>
+                            </div>
+                            {% endif %}
+                            <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">{{ agency.name or '—' }}</h3>
+                            <p class="text-sm text-gray-400 mb-2">{{ agency.country }}</p>
                         </a>
                         <div class="px-6 pb-6 pt-3">
-                            <a href="https://test.kayloo.immo/agent/sablux/"
+                            <a href="{{ url_for('get_agency_profile', agency_id=agency.id) }}"
                                 class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
                                 Voir le profil
                             </a>
                         </div>
                     </article>
-
-                    <!-- Pierre & Projet -->
-                    <article
-                        class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                        <a href="https://test.kayloo.immo/agent/pierre-projet/" class="block p-6 pb-0 no-underline">
-                            <img loading="lazy" decoding="async" width="600" height="600"
-                                src="https://test.kayloo.immo/wp-content/uploads/2025/07/REAL-ESTATE-professional-logo-design-template-Made-with-PosterMyWall.jpg"
-                                alt="Pierre &amp; Projet" class="w-full aspect-square object-cover rounded-lg">
-                            <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Teranga Immobilier</h3>
-                        </a>
-                        <div class="px-6 pb-6 pt-3">
-                            <a href="https://test.kayloo.immo/agent/pierre-projet/"
-                                class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                                Voir le profil
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- SPACE CO -->
-                    <article
-                        class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                        <a href="https://test.kayloo.immo/agent/space-co/" class="block p-6 pb-0 no-underline">
-                            <img loading="lazy" decoding="async" width="600" height="600"
-                                src="https://test.kayloo.immo/wp-content/uploads/2025/07/Professional-Real-Estate-realtor-logo-design-template-Made-with-PosterMyWall.jpg"
-                                alt="SPACE CO" class="w-full aspect-square object-cover rounded-lg">
-                            <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Sénégal Habitat Plus
-                            </h3>
-                        </a>
-                        <div class="px-6 pb-6 pt-3">
-                            <a href="https://test.kayloo.immo/agent/space-co/"
-                                class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                                Voir le profil
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- GALLE IMMO -->
-                    <article
-                        class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                        <a href="https://test.kayloo.immo/agent/galle-immo/" class="block p-6 pb-0 no-underline">
-                            <img loading="lazy" decoding="async" width="600" height="600"
-                                src="https://test.kayloo.immo/wp-content/uploads/2025/07/Real-estate-logo-Made-with-PosterMyWall.jpg"
-                                alt="GALLE IMMO" class="w-full aspect-square object-cover rounded-lg">
-                            <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Kolda Properties</h3>
-                        </a>
-                        <div class="px-6 pb-6 pt-3">
-                            <a href="https://test.kayloo.immo/agent/galle-immo/"
-                                class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                                Voir le profil
-                            </a>
-                        </div>
-                    </article>
+                    {% else %}
+                    <p class="col-span-4 text-center text-gray-400 py-12">Aucune agence disponible pour le moment.</p>
+                    {% endfor %}
 
                 </div>
             </div>

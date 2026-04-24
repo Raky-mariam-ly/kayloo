@@ -1,17 +1,16 @@
-import os
 from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware import Middleware
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-from starlette_admin.contrib.sqlmodel import Admin
-from starlette_admin import I18nConfig
-from starlette_admin.i18n import SUPPORTED_LOCALES
+from starlette.requests import ClientDisconnect
 
 from schemas.user import UserCreate, UserRead, UserUpdate
 from core.auth import auth_backend, bearer_auth_backend, fastapi_users
+from core.config import get_settings
+from admin.choices import warm_choices_cache
+from core.db import async_session_maker
+from core.storage import UPLOAD_DIR, configure_storage
 from public.router import router
 from api.v1 import router as api_v1_router
 from api.v1.auth import router as jwt_auth_router
@@ -22,10 +21,11 @@ from seed import seed_database
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- Startup Logic ---
-    # Initialize DB pools, load ML models, or warm up caches
+    configure_storage()
     print("Application is starting up")
-    # Seed the database with initial data if needed
     await seed_database()
+    async with async_session_maker() as session:
+        await warm_choices_cache(session)
 
     yield
     # --- Shutdown Logic ---
@@ -35,10 +35,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# CORS configuration
+
+@app.exception_handler(ClientDisconnect)
+async def client_disconnect_handler(request, exc: ClientDisconnect):
+    # Client closed connection while request body was being read.
+    # Return a quiet response instead of noisy traceback logs.
+    return Response(status_code=499)
+
+# CORS configuration — set CORS_ORIGINS in .env for production
+_cors_raw = get_settings().cors_origins
+_cors_origins = [o.strip() for o in _cors_raw.split(",")] if _cors_raw != "*" else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict in production
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -75,3 +84,19 @@ app.include_router(
 )
 # Mount to admin to app
 admin.mount_to(app)
+
+
+if get_settings().environment != "prod":
+    @app.get("/debug/storage", tags=["debug"])
+    async def debug_storage():
+        s = get_settings()
+        s3_configured = bool(s.s3_access_key and s.s3_secret_key and s.s3_endpoint and s.s3_bucket)
+        return JSONResponse({
+            "backend": "s3" if s3_configured else "local",
+            "s3_endpoint": s.s3_endpoint or None,
+            "s3_bucket": s.s3_bucket or None,
+            "s3_region": s.s3_region,
+            "local_fallback_dir": None if s3_configured else UPLOAD_DIR,
+            "s3_access_key_set": bool(s.s3_access_key),
+            "s3_secret_key_set": bool(s.s3_secret_key),
+        })

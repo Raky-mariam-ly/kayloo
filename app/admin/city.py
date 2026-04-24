@@ -2,14 +2,16 @@ from typing import Any, Dict
 
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin.fields import EnumField, BooleanField, StringField, DateTimeField
-from admin.base import AdminModelView
+from starlette_admin.fields import BooleanField, StringField, DateTimeField
+from admin.base import AdminModelView, SafeEnumField
 from admin.choices import load_country_choices
 
 
 class CityView(AdminModelView):
+    list_template = "generic_list.html"
+
     fields = [
-        EnumField("country", choices_loader=load_country_choices, required=True, label="Country"),
+        SafeEnumField("country", choices_loader=load_country_choices, required=True, label="Country"),
         StringField("code", required=True),
         StringField("name"),
         BooleanField("is_active"),
@@ -18,9 +20,6 @@ class CityView(AdminModelView):
         StringField("updated_by", read_only=True),
         DateTimeField("updated_at", read_only=True),
     ]
-
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = dict()

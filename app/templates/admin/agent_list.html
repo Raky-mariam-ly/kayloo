@@ -1,0 +1,126 @@
+{% extends "list.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+@media (max-width: 767.98px) {
+
+  /* Avatar */
+  table#dt tbody tr td.ag-td-avatar {
+    display: flex !important;
+    flex: 0 0 auto;
+  }
+
+  /* Info */
+  table#dt tbody tr td.ag-td-info {
+    display: flex !important;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    gap: .1rem;
+  }
+
+  /* Actions */
+  table#dt tbody tr td.ag-td-actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    margin-left: auto;
+    align-items: center;
+    gap: .15rem;
+  }
+  table#dt tbody tr td.ag-td-actions .btn {
+    padding: .28rem .38rem !important;
+    font-size: .78rem !important;
+  }
+  table#dt tbody tr td.ag-td-actions .btn span { display: none !important; }
+
+  /* ── Avatar ── */
+  .ag-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    border: 1px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .82rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Card text ── */
+  .ag-card-name    { font-weight: 600; font-size: .86rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag-card-agency  { font-size: .75rem; color: #495057; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag-card-slug    { font-size: .69rem; color: #868e96; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag-card-agency i { color: #a80000; margin-right: .25rem; }
+}
+</style>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+(function () {
+  /* user_id label format: "Prénom Nom (email)" — extract name before " (" */
+  function parseUserLabel(label) {
+    if (!label) return { name: '—', email: '' };
+    var idx = label.lastIndexOf(' (');
+    return idx > 0
+      ? { name: label.slice(0, idx), email: label.slice(idx + 2, -1) }
+      : { name: label, email: '' };
+  }
+
+  function buildCards() {
+    if (window.innerWidth >= 768) return;
+    var dt = $('#dt').DataTable();
+
+    $('#dt tbody tr').each(function () {
+      var $tr = $(this);
+      $tr.find('.ag-td-avatar, .ag-td-info, .ag-td-actions').remove();
+
+      var data = dt.row(this).data();
+      if (!data) return;
+
+      var user    = parseUserLabel(data.user_id);
+      var agency  = data.agency_id || '';
+      var slug    = data.slug      || '';
+      var initial = user.name.charAt(0).toUpperCase();
+
+      /* Avatar */
+      var $avatar = $('<td class="ag-td-avatar"></td>').append(
+        $('<div class="ag-avatar"></div>').text(initial)
+      );
+
+      /* Info */
+      var $info = $('<td class="ag-td-info"></td>').html(
+        '<div class="ag-card-name">' + esc(user.name) + '</div>' +
+        (agency ? '<div class="ag-card-agency"><i class="fa-solid fa-building"></i>' + esc(agency) + '</div>' : '') +
+        (slug   ? '<div class="ag-card-slug">' + esc(slug) + '</div>' : '')
+      );
+
+      var $actions = buildVerticalActions($tr, 'ag-td-actions');
+
+      var $chk = $tr.find('td:nth-child(1)');
+      $chk.after($actions);
+      $chk.after($info);
+      $chk.after($avatar);
+    });
+  }
+
+  function destroyCards() {
+    $('#dt tbody tr').find('.ag-td-avatar, .ag-td-info, .ag-td-actions').remove();
+  }
+
+  $(document).on('draw.dt', '#dt', buildCards);
+  $(window).on('load', function () { setTimeout(buildCards, 300); });
+
+  var _rt;
+  $(window).on('resize', function () {
+    clearTimeout(_rt);
+    _rt = setTimeout(function () {
+      if (window.innerWidth >= 768) destroyCards();
+      else buildCards();
+    }, 120);
+  });
+})();
+</script>
+{% endblock %}

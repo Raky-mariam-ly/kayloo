@@ -4,17 +4,19 @@ from typing import Any, Dict
 from fastapi import Request
 from starlette_admin.fields import (
     BooleanField, DateField, DateTimeField, DecimalField, EnumField,
-    FloatField, IntegerField, StringField, TextAreaField,
+    FloatField, ImageField, IntegerField, StringField, TextAreaField,
 )
-from admin.base import AdminModelView, ImageUploadField, PropertyImagesField, SectionField, UUIDEnumField
+from admin.base import AdminModelView, SafeEnumField, SectionField, UUIDEnumField, _is_full_admin, _is_agent
 from admin.choices import (
     load_agency_choices,
     load_building_choices,
     load_country_choices,
     load_city_choices,
+    load_zone_choices,
     load_property_type_choices,
     load_property_rent_type_choices,
 )
+from models.property_gallery import PropertyGallery
 
 STATUS_CHOICES = [
     ("free", "Libre"),
@@ -67,6 +69,7 @@ CURRENCY_CHOICES = [
 
 
 class PropertyView(AdminModelView):
+    list_template = "property_list.html"
     create_template = "property_create.html"
     edit_template = "property_edit.html"
     detail_template = "property_detail.html"
@@ -77,7 +80,7 @@ class PropertyView(AdminModelView):
         StringField("code", label="Code"),
         StringField("label", label="Label"),
         EnumField("status", choices=STATUS_CHOICES, label="Statut"),
-        EnumField("type", choices_loader=load_property_type_choices, label="Type"),
+        SafeEnumField("type", choices_loader=load_property_type_choices, label="Type"),
         EnumField("usage", choices=USAGE_CHOICES, label="Usage", exclude_from_list=True),
 
         # ── Relations ──
@@ -91,8 +94,8 @@ class PropertyView(AdminModelView):
         SectionField("_sec_classification", label="Classification", exclude_from_list=True),
         EnumField("status_before_reserved", choices=STATUS_CHOICES,
                   label="Statut avant réservation", exclude_from_list=True),
-        EnumField("rent_type", choices_loader=load_property_rent_type_choices,
-                  label="Type de location", exclude_from_list=True),
+        SafeEnumField("rent_type", choices_loader=load_property_rent_type_choices,
+                      label="Type de location", exclude_from_list=True),
         EnumField("rental_period", choices=RENTAL_PERIOD_CHOICES,
                   label="Période de location", exclude_from_list=True),
         EnumField("managed_by", choices=MANAGED_BY_CHOICES,
@@ -100,11 +103,12 @@ class PropertyView(AdminModelView):
 
         # ── Localisation ──
         SectionField("_sec_localisation", label="Localisation", exclude_from_list=True),
-        EnumField("country", choices_loader=load_country_choices,
-                  label="Pays", exclude_from_list=True),
-        EnumField("city", choices_loader=load_city_choices,
-                  label="Ville", exclude_from_list=True),
-        StringField("zone", label="Zone", exclude_from_list=True),
+        SafeEnumField("country", choices_loader=load_country_choices,
+                      label="Pays", exclude_from_list=True),
+        SafeEnumField("city", choices_loader=load_city_choices,
+                      label="Ville", exclude_from_list=True),
+        SafeEnumField("zone", choices_loader=load_zone_choices,
+                      label="Zone", exclude_from_list=True),
         StringField("street", label="Rue", exclude_from_list=True),
         StringField("address", label="Adresse", exclude_from_list=True),
         StringField("level", label="Niveau", exclude_from_list=True),
@@ -114,16 +118,16 @@ class PropertyView(AdminModelView):
         # ── Description ──
         SectionField("_sec_description", label="Description", exclude_from_list=True),
         TextAreaField("description", label="Description", exclude_from_list=True),
-        ImageUploadField("image_url", label="Image de couverture", exclude_from_list=True),
-        PropertyImagesField("images", label="Photos du bien", exclude_from_list=True),
+        ImageField("image_url", label="Image de couverture", exclude_from_list=True),
+        ImageField("gallery_images", label="Galerie de photos", multiple=True, exclude_from_list=True),
 
         # ── Caractéristiques physiques ──
         SectionField("_sec_physique", label="Caractéristiques", exclude_from_list=True),
         DecimalField("surface", label="Surface (m²)", min=0, step="0.01"),
         IntegerField("bed_room_count", label="Chambres", min=0),
-        IntegerField("bath_room_count", label="Salles de bain", min=0, exclude_from_list=True),
-        IntegerField("kitchen_count", label="Cuisines", min=0, exclude_from_list=True),
-        IntegerField("living_room_count", label="Salons", min=0, exclude_from_list=True),
+        IntegerField("bath_room_count", label="Salles de bain", min=0),
+        IntegerField("kitchen_count", label="Cuisines", min=0),
+        IntegerField("living_room_count", label="Salons", min=0),
         IntegerField("build_year", label="Année", min=1800, max=2100, exclude_from_list=True),
         DecimalField("lng", label="Longitude", min=-180, max=180, step="0.000001", exclude_from_list=True),
         DecimalField("lat", label="Latitude", min=-90, max=90, step="0.000001", exclude_from_list=True),
@@ -172,28 +176,33 @@ class PropertyView(AdminModelView):
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
+    def is_accessible(self, request) -> bool:
+        return _is_full_admin(request) or _is_agent(request)
 
-    async def _populate_obj(self, request: Request, obj: Any, data: Dict[str, Any], is_edit: bool = False) -> Any:
-        from models.property_image import PropertyImage
-        # Extraire les images et mettre un tuple neutre (None, False) pour que
-        # le parent ne lève pas ValueError via not_none() et ne touche pas la relation
-        images_raw = data.get("images")
-        data["images"] = (None, False)
+    def can_create(self, request) -> bool:
+        return _is_full_admin(request)
 
-        await super()._populate_obj(request, obj, data, is_edit)
+    def can_edit(self, request) -> bool:
+        return _is_full_admin(request)
 
-        # Traitement des images uploadées
-        if images_raw is not None:
-            val, should_delete = images_raw if isinstance(images_raw, tuple) else (images_raw, False)
-            if should_delete:
-                obj.images.clear()
-            elif val:
-                urls = val if isinstance(val, list) else [val]
-                for url in urls:
-                    obj.images.append(PropertyImage(url=url))
-        return obj
+    def can_delete(self, request) -> bool:
+        return _is_full_admin(request)
+
+    def get_list_query(self, request):
+        query = super().get_list_query(request)
+        agency_id = getattr(request.state, "agent_agency_id", None)
+        if agency_id:
+            from models.property import Property
+            query = query.where(Property.agency_id == agency_id)
+        return query
+
+    def get_count_query(self, request):
+        query = super().get_count_query(request)
+        agency_id = getattr(request.state, "agent_agency_id", None)
+        if agency_id:
+            from models.property import Property
+            query = query.where(Property.agency_id == agency_id)
+        return query
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = {}
@@ -211,3 +220,90 @@ class PropertyView(AdminModelView):
             from starlette_admin.exceptions import FormValidationError
             raise FormValidationError(errors)
         return await super().validate(request, data)
+
+    # ── Gallery — create / edit en une seule transaction ────────────────────
+
+    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data)
+            gallery_files = self._unpack_gallery(data.get("gallery_images"))
+            self._prepare_file_fields_for_populate(data)
+            await self.validate(request, data)
+
+            session = request.state.session
+            obj = await self._populate_obj(request, self.model(), data)
+            session.add(obj)
+            await self.before_create(request, data, obj)
+            await session.flush()  # obtenir obj.id sans commit
+
+            if gallery_files:
+                session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
+
+            await session.commit()
+            await session.refresh(obj)
+            await self.after_create(request, obj)
+            return obj
+        except Exception as e:
+            return self.handle_exception(e)
+
+    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data, True)
+            gallery_files = self._unpack_gallery(data.get("gallery_images"))
+            self._prepare_file_fields_for_populate(data)
+            await self.validate(request, data)
+
+            session = request.state.session
+            obj = await self.find_by_pk(request, pk)
+            await self._populate_obj(request, obj, data, True)
+            session.add(obj)
+            await self.before_edit(request, data, obj)
+
+            if gallery_files:
+                from sqlalchemy import select
+                result = await session.execute(
+                    select(PropertyGallery).where(PropertyGallery.property_id == obj.id)
+                )
+                gallery = result.scalar_one_or_none()
+                if gallery:
+                    gallery.images = gallery_files
+                else:
+                    session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
+
+            await session.commit()
+            await session.refresh(obj)
+            await self.after_edit(request, obj)
+            return obj
+        except Exception as e:
+            return self.handle_exception(e)
+
+    async def after_create(self, request: Request, obj: Any) -> None:
+        from admin.choices import warm_choices_cache
+        await warm_choices_cache(request.state.session)
+
+    async def after_edit(self, request: Request, obj: Any) -> None:
+        from admin.choices import warm_choices_cache
+        await warm_choices_cache(request.state.session)
+
+    @staticmethod
+    def _unpack_gallery(raw: Any) -> list:
+        """Dépaquette le (files, should_delete) produit par ImageField.parse_form_data."""
+        if raw is None:
+            return []
+        if isinstance(raw, tuple) and len(raw) == 2:
+            files, should_delete = raw
+            if should_delete or not files:
+                return []
+            return files if isinstance(files, list) else [files]
+        return []
+
+    @staticmethod
+    def _prepare_file_fields_for_populate(data: Dict[str, Any]) -> None:
+        """
+        Ensure all FileField values are non-None for Starlette-Admin _populate_obj.
+        Also neutralize gallery_images because it's not a Property model attribute.
+        """
+        if data.get("image_url") is None:
+            data["image_url"] = (None, False)
+        # Keep FileField non-None while preventing setattr on unknown attribute.
+        data["gallery_images"] = ([], False)

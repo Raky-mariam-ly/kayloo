@@ -4,8 +4,8 @@ from typing import Any, Dict
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin.fields import DateTimeField, StringField
-from admin.base import AdminModelView, ImageUploadField, SectionField, UUIDEnumField
+from starlette_admin.fields import DateTimeField, ImageField, StringField
+from admin.base import AdminModelView, SectionField, UUIDEnumField
 from admin.choices import load_property_choices
 
 
@@ -18,7 +18,7 @@ class PropertyImageView(AdminModelView):
 
         # ── Images ──
         SectionField("_sec_images", label="Images (sélectionnez une ou plusieurs)"),
-        ImageUploadField("url", label="Photos", required=True, multiple=True),
+        ImageField("url", label="Photos", required=True, multiple=True),
 
         # ── Audit ──
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
@@ -35,15 +35,18 @@ class PropertyImageView(AdminModelView):
         try:
             data = await self._arrange_data(request, data)
             await self.validate(request, data)
-            session = request.state.session
+            session: AsyncSession = request.state.session
 
-            # Extraire les URLs du champ multiple
+            # Récupérer les fichiers uploadés depuis ImageField(multiple=True)
             url_raw = data.get("url")
-            urls = []
+            files = []
             if isinstance(url_raw, tuple) and len(url_raw) == 2:
                 val, should_delete = url_raw
                 if not should_delete and val is not None:
-                    urls = val if isinstance(val, list) else [val]
+                    files = val if isinstance(val, list) else [val]
+
+            if not files:
+                raise FormValidationError({"url": "Au moins une image est requise"})
 
             # Récupérer le property_id
             pid_raw = data.get("property_id")
@@ -54,36 +57,19 @@ class PropertyImageView(AdminModelView):
                 except (ValueError, AttributeError):
                     property_id = pid_raw
 
-            if not urls:
-                # Aucune image : création vide (laisse la validation gérer)
-                obj = self.model()
-                obj.property_id = property_id
-                session.add(obj)
-                await self.before_create(request, data, obj)
-                if isinstance(session, AsyncSession):
-                    await session.commit()
-                    await session.refresh(obj)
-                await self.after_create(request, obj)
-                return obj
-
-            # Créer un enregistrement par URL
+            # Créer un enregistrement par fichier — sqlalchemy-file gère le stockage
             first_obj = None
-            for url in urls:
+            for file in files:
                 obj = self.model()
                 obj.property_id = property_id
-                obj.url = url
+                obj.url = file  # assignation : sqlalchemy-file sauvegarde dans StorageManager
                 session.add(obj)
                 if first_obj is None:
                     first_obj = obj
 
             await self.before_create(request, data, first_obj)
-            if isinstance(session, AsyncSession):
-                await session.commit()
-                await session.refresh(first_obj)
-            else:
-                import anyio
-                await anyio.to_thread.run_sync(session.commit)
-
+            await session.commit()
+            await session.refresh(first_obj)
             await self.after_create(request, first_obj)
             return first_obj
 

@@ -1,6 +1,6 @@
 import logging
 from typing import Any, Dict, Generic, TypeVar, Type, List, Optional, Union
-from sqlalchemy import func, func, or_, select, Text, String
+from sqlalchemy import func, or_, select, Text, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette_admin.contrib.sqla.helpers import build_query
 from abc import ABC, abstractmethod

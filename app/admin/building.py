@@ -9,6 +9,8 @@ from admin.choices import load_agency_choices, load_city_id_choices
 
 
 class BuildingView(AdminModelView):
+    list_template = "generic_list.html"
+
     fields = [
         StringField("name", label="Nom", required=True),
         UUIDEnumField("agency_id", choices_loader=load_agency_choices,
@@ -25,9 +27,6 @@ class BuildingView(AdminModelView):
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
-
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = {}

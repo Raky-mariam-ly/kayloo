@@ -94,7 +94,6 @@ async def get_locataire(request: Request, session=Depends(get_db)):
 @router.get("/vente-acheteur", response_class=HTMLResponse)
 async def get_acheteur(request: Request, session=Depends(get_db)):
     logging.info(f"Home page accessed from {request.client.host}")
-    home
     return templates.TemplateResponse(request, "public/pages/vente-acheteur.html", context={
         "carousel_section_data": carousel_vente_acheteur_text,
         "listings": homepage_listings

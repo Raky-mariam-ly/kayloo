@@ -180,9 +180,6 @@ class AdminModelView(ModelView):
     exclude_fields_from_create = AUDIT_FIELDS_EXCLUDE
     exclude_fields_from_edit = AUDIT_FIELDS_EXCLUDE
 
-    def is_accessible(self, request) -> bool:
-        return _is_full_admin(request)
-
     service_class: Optional[Type] = None
     repository_class: Optional[Type] = None
 
@@ -216,10 +213,10 @@ class AdminModelView(ModelView):
         return query
 
     async def is_accessible(self, request: Request) -> bool:
-        if not self.agency_scoped:
-            return await super().is_accessible(request)
-        agency_id = await self._get_agency_id(request)
-        return agency_id is not None
+        if self.agency_scoped:
+            agency_id = await self._get_agency_id(request)
+            return agency_id is not None
+        return _is_full_admin(request)
 
     async def count(
         self,

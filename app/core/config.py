@@ -1,7 +1,7 @@
 import logging
 from functools import lru_cache
 
-from pydantic import AnyUrl
+from pydantic import AnyUrl, Field
 from pydantic_settings import BaseSettings
 
 
@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     environment: str = "dev"
     testing: bool = 0
     database_url: str = "postgresql+asyncpg://postgres:postgres@db:5432/db"
-    secret: str = "ff9e2b240fb9be53ac77358a4b667d68b1c8e9a0c9f2e5b4c8e7a1d2f3"
+    secret: str = Field(
+        default="ff9e2b240fb9be53ac77358a4b667d68b1c8e9a0c9f2e5b4c8e7a1d2f3",
+        validation_alias="SECRET_KEY",
+    )
 
     # ── URL publique de l'app (utilisée dans les emails) ──
     app_url: str = "http://localhost:8000"

@@ -1,0 +1,448 @@
+{% extends "layout.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+    .stat-card {
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    .pipeline-stage {
+        text-align: center;
+        padding: 1rem .5rem;
+        border-radius: 8px;
+        transition: transform .15s ease;
+    }
+    .pipeline-stage:hover {
+        transform: scale(1.03);
+    }
+    .pipeline-stage .count {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .pipeline-stage .label {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-top: .25rem;
+        opacity: .85;
+    }
+    .timeline-item {
+        border-left: 2px solid #e6edf5;
+        padding-left: 1.25rem;
+        padding-bottom: 1.25rem;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--tblr-primary);
+    }
+    .timeline-item:last-child {
+        border-left-color: transparent;
+        padding-bottom: 0;
+    }
+    .source-bar {
+        height: 8px;
+        border-radius: 4px;
+        transition: width .6s ease;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="page-title">
+            <i class="fa fa-chart-bar me-2" style="color: var(--tblr-primary)"></i>
+            CRM — Tableau de bord
+        </h2>
+        <div class="text-muted mt-1">Vue d'ensemble de l'activité commerciale</div>
+    </div>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for(__name__ ~ ':index') }}">Admin</a></li>
+        <li class="breadcrumb-item active">CRM Dashboard</li>
+    </ol>
+</div>
+{% endblock %}
+
+{% block content %}
+
+{# ── KPI Cards Row ── #}
+<div class="col-sm-6 col-lg-3">
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader text-muted">Total Leads</div>
+            </div>
+            <div class="d-flex align-items-baseline mt-1">
+                <div class="h1 mb-0 me-2">{{ total_leads }}</div>
+                <div class="me-auto">
+                    <span class="badge bg-green-lt">{{ won_leads }} gagnés</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-6 col-lg-3">
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader text-muted">Taux de conversion</div>
+            </div>
+            <div class="d-flex align-items-baseline mt-1">
+                <div class="h1 mb-0 me-2">{{ conversion_rate }}%</div>
+                <div class="me-auto">
+                    <span class="badge bg-red-lt">{{ lost_leads }} perdus</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-6 col-lg-3">
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader text-muted">Contacts</div>
+            </div>
+            <div class="d-flex align-items-baseline mt-1">
+                <div class="h1 mb-0 me-2">{{ total_contacts }}</div>
+                <div class="me-auto">
+                    <span class="badge bg-azure-lt">
+                        <i class="fa fa-users me-1"></i> base
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-6 col-lg-3">
+    <div class="card stat-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="subheader text-muted">Tâches en retard</div>
+            </div>
+            <div class="d-flex align-items-baseline mt-1">
+                <div class="h1 mb-0 me-2 {% if overdue_tasks > 0 %}text-danger{% endif %}">{{ overdue_tasks }}</div>
+                <div class="me-auto">
+                    <span class="badge bg-yellow-lt">
+                        <i class="fa fa-comment me-1"></i> {{ active_conversations }} conv.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Pipeline Funnel ── #}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fa fa-filter me-2"></i> Pipeline commercial
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% set stage_colors = {
+                    'new': 'bg-azure',
+                    'contacted': 'bg-blue',
+                    'qualified': 'bg-indigo',
+                    'negotiation': 'bg-purple',
+                    'won': 'bg-green',
+                    'lost': 'bg-red'
+                } %}
+                {% set stage_labels = {
+                    'new': 'Nouveau',
+                    'contacted': 'Contacté',
+                    'qualified': 'Qualifié',
+                    'negotiation': 'Négociation',
+                    'won': 'Gagné',
+                    'lost': 'Perdu'
+                } %}
+                {% set stage_icons = {
+                    'new': 'fa-star',
+                    'contacted': 'fa-phone',
+                    'qualified': 'fa-check-circle',
+                    'negotiation': 'fa-handshake',
+                    'won': 'fa-trophy',
+                    'lost': 'fa-times-circle'
+                } %}
+                {% for stage in pipeline_order %}
+                <div class="col-6 col-md-2">
+                    <div class="pipeline-stage {{ stage_colors[stage] }} bg-opacity-10">
+                        <div class="mb-1">
+                            <i class="fa {{ stage_icons[stage] }} {{ stage_colors[stage].replace('bg-', 'text-') }}"></i>
+                        </div>
+                        <div class="count">{{ lead_stats.get(stage, 0) }}</div>
+                        <div class="label text-muted">{{ stage_labels[stage] }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {# Visual funnel bar #}
+            {% if total_leads > 0 %}
+            <div class="mt-4">
+                <div class="d-flex" style="height: 12px; border-radius: 6px; overflow: hidden;">
+                    {% for stage in pipeline_order %}
+                        {% set count = lead_stats.get(stage, 0) %}
+                        {% if count > 0 %}
+                        <div class="{{ stage_colors[stage] }}"
+                             style="width: {{ (count / total_leads * 100) | round(1) }}%"
+                             data-bs-toggle="tooltip"
+                             title="{{ stage_labels[stage] }}: {{ count }}">
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# ── Sources + Tasks Row ── #}
+<div class="col-lg-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fa fa-bullseye me-2"></i> Sources des leads
+            </h3>
+        </div>
+        <div class="card-body">
+            {% set source_icons = {
+                'website': 'fa-globe',
+                'mobile_app': 'fa-mobile-alt',
+                'phone': 'fa-phone',
+                'walk_in': 'fa-walking',
+                'referral': 'fa-user-friends',
+                'social_media': 'fa-share-alt'
+            } %}
+            {% set source_colors = ['bg-blue', 'bg-azure', 'bg-indigo', 'bg-purple', 'bg-pink', 'bg-orange'] %}
+            {% set max_source = lead_sources | map(attribute='count') | max if lead_sources else 1 %}
+            {% if lead_sources %}
+                {% for src in lead_sources | sort(attribute='count', reverse=True) %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>
+                            <i class="fa {{ source_icons.get(src.source, 'fa-circle') }} me-1 text-muted"></i>
+                            {{ src.source | capitalize }}
+                        </span>
+                        <span class="fw-bold">{{ src.count }}</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar {{ source_colors[loop.index0 % 6] }}"
+                             style="width: {{ (src.count / max_source * 100) | round }}%"
+                             role="progressbar">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">
+                    <p class="empty-title">Aucune donnée</p>
+                    <p class="empty-subtitle text-muted">Les sources apparaîtront ici quand des leads seront créés.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fa fa-tasks me-2"></i> Tâches
+            </h3>
+        </div>
+        <div class="card-body">
+            {% set task_labels = {
+                'pending': 'En attente',
+                'in_progress': 'En cours',
+                'completed': 'Terminé',
+                'cancelled': 'Annulé'
+            } %}
+            {% set task_colors = {
+                'pending': 'bg-yellow',
+                'in_progress': 'bg-azure',
+                'completed': 'bg-green',
+                'cancelled': 'bg-secondary'
+            } %}
+            {% set total_tasks = task_stats.values() | sum %}
+            <div class="row g-3 mb-3">
+                {% for status, label in task_labels.items() %}
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <span class="avatar avatar-sm {{ task_colors[status] }} me-2">
+                            {{ task_stats.get(status, 0) }}
+                        </span>
+                        <div>
+                            <div class="fw-bold">{{ label }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if overdue_tasks > 0 %}
+            <div class="alert alert-danger mb-0">
+                <div class="d-flex">
+                    <div><i class="fa fa-exclamation-triangle me-2"></i></div>
+                    <div>
+                        <strong>{{ overdue_tasks }}</strong> tâche(s) en retard nécessitent votre attention.
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-success mb-0">
+                <i class="fa fa-check-circle me-2"></i>
+                Toutes les tâches sont à jour.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# ── Recent Leads + Activity Timeline ── #}
+<div class="col-lg-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fa fa-bolt me-2"></i> Leads récents
+            </h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Statut</th>
+                        <th>Priorité</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set status_badges = {
+                        'new': 'bg-azure-lt',
+                        'contacted': 'bg-blue-lt',
+                        'qualified': 'bg-indigo-lt',
+                        'negotiation': 'bg-purple-lt',
+                        'won': 'bg-green-lt',
+                        'lost': 'bg-red-lt'
+                    } %}
+                    {% set priority_badges = {
+                        'low': 'bg-secondary-lt',
+                        'medium': 'bg-yellow-lt',
+                        'high': 'bg-orange-lt',
+                        'urgent': 'bg-red-lt'
+                    } %}
+                    {% for lead in recent_leads %}
+                    <tr>
+                        <td>
+                            <i class="fa {{ source_icons.get(lead.source, 'fa-circle') }} me-1 text-muted"></i>
+                            {{ lead.source | capitalize }}
+                        </td>
+                        <td><span class="badge {{ status_badges.get(lead.status, 'bg-secondary-lt') }}">{{ stage_labels.get(lead.status, lead.status) }}</span></td>
+                        <td><span class="badge {{ priority_badges.get(lead.priority, 'bg-secondary-lt') }}">{{ lead.priority | capitalize }}</span></td>
+                        <td class="text-muted">{{ lead.created_at.strftime('%d/%m %H:%M') if lead.created_at else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not recent_leads %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">Aucun lead</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fa fa-history me-2"></i> Activité récente
+            </h3>
+        </div>
+        <div class="card-body">
+            {% set activity_icons = {
+                'call': 'fa-phone',
+                'email': 'fa-envelope',
+                'sms': 'fa-comment-dots',
+                'whatsapp': 'fa-whatsapp',
+                'visit': 'fa-map-marker-alt',
+                'meeting': 'fa-calendar-check',
+                'note': 'fa-sticky-note',
+                'status_change': 'fa-exchange-alt',
+                'document_sent': 'fa-file-alt',
+                'offer_made': 'fa-hand-holding-usd',
+                'offer_accepted': 'fa-check',
+                'offer_rejected': 'fa-times'
+            } %}
+            {% if recent_activities %}
+                {% for act in recent_activities %}
+                <div class="timeline-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <i class="fa {{ activity_icons.get(act.activity_type, 'fa-circle') }} me-1 text-muted"></i>
+                            <strong>{{ act.title }}</strong>
+                        </div>
+                        <small class="text-muted">{{ act.created_at.strftime('%d/%m %H:%M') if act.created_at else '' }}</small>
+                    </div>
+                    {% if act.description %}
+                    <div class="text-muted small mt-1">{{ act.description[:120] }}{% if act.description|length > 120 %}…{% endif %}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">
+                    <p class="empty-title">Aucune activité</p>
+                    <p class="empty-subtitle text-muted">Les activités apparaîtront ici au fil des interactions.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# ── Quick Stats Footer ── #}
+<div class="col-12">
+    <div class="card">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <span class="badge bg-blue-lt me-1">
+                        <i class="fa fa-bell me-1"></i> {{ unread_notifications }} notification(s) non lue(s)
+                    </span>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-green-lt me-1">
+                        <i class="fa fa-comment me-1"></i> {{ active_conversations }} conversation(s) active(s)
+                    </span>
+                </div>
+                <div class="col-auto ms-auto text-muted small">
+                    <i class="fa fa-clock me-1"></i> Mis à jour en temps réel
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+    // Init Bootstrap tooltips for the pipeline bar
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
+</script>
+{% endblock %}

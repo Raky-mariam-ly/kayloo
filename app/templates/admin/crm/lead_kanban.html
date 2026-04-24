@@ -1,0 +1,440 @@
+{% extends "layout.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+    /* ── Kanban layout ── */
+    .kanban-board {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        height: calc(100vh - 165px);
+    }
+    .kanban-column {
+        min-width: 260px;
+        max-width: 280px;
+        flex: 1 0 260px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #e6e8eb;
+        height: 100%;
+        overflow: hidden;
+    }
+    .kanban-column-header {
+        padding: 12px 14px;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        font-size: .875rem;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .kanban-column-header .badge {
+        font-size: .75rem;
+        min-width: 24px;
+    }
+    .kanban-column-body {
+        flex: 1;
+        padding: 8px;
+        overflow-y: auto;
+        min-height: 0;
+        transition: background .15s ease;
+    }
+    .kanban-column-body.drag-over {
+        background: rgba(0,0,0,.04);
+        border: 2px dashed rgba(0,0,0,.15);
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* ── Cards ── */
+    .kanban-card {
+        background: #fff;
+        border: 1px solid #e6e8eb;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 8px;
+        cursor: grab;
+        transition: transform .12s ease, box-shadow .12s ease;
+        position: relative;
+    }
+    .kanban-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        transform: translateY(-1px);
+    }
+    .kanban-card.dragging {
+        opacity: .5;
+        transform: rotate(2deg);
+    }
+    .kanban-card .card-contact {
+        font-weight: 600;
+        font-size: .875rem;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .kanban-card .card-property {
+        font-size: .8rem;
+        color: #667;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .kanban-card .card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: .75rem;
+        color: #999;
+    }
+    .kanban-card .priority-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .kanban-card .source-badge {
+        font-size: .7rem;
+        padding: 1px 6px;
+        border-radius: 100px;
+        background: #f0f0f0;
+        color: #555;
+    }
+    .kanban-card .card-notes {
+        font-size: .75rem;
+        color: #888;
+        margin-top: 6px;
+        font-style: italic;
+        line-height: 1.3;
+    }
+    .kanban-card .probability-badge {
+        font-size: .7rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: #f0f0f0;
+        color: #555;
+    }
+    .kanban-card .card-deal {
+        display: flex;
+        gap: 10px;
+        font-size: .75rem;
+        color: #556;
+        margin-bottom: 6px;
+    }
+    .kanban-card .card-link {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px dashed transparent;
+        transition: border-color .15s;
+    }
+    .kanban-card .card-link:hover {
+        color: var(--tblr-primary);
+        border-bottom-color: var(--tblr-primary);
+    }
+    .kanban-card .card-agent {
+        font-size: .8rem;
+        color: #667;
+        margin-bottom: 6px;
+    }
+
+    /* ── Stats bar ── */
+    .kanban-stats {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .kanban-stats .stat {
+        font-size: .875rem;
+    }
+    .kanban-stats .stat strong {
+        font-size: 1.1rem;
+    }
+
+    /* ── Toast notification ── */
+    .kanban-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        min-width: 280px;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="page-title">
+            <i class="fa fa-columns me-2" style="color: var(--tblr-primary)"></i>
+            Kanban — Pipeline Leads
+        </h2>
+        <div class="text-muted mt-1">Glissez-déposez les cartes pour changer le statut</div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <span class="text-muted"><strong>{{ total_leads }}</strong> leads</span>
+        <span class="text-muted">Conversion : <strong>{{ conversion_rate }}%</strong></span>
+        <a href="/admin/lead/list" class="btn btn-sm btn-outline-primary">
+            <i class="fa fa-list me-1"></i>Vue liste
+        </a>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+            <li class="breadcrumb-item">CRM</li>
+            <li class="breadcrumb-item active">Kanban Leads</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-xl">
+
+    {# ── Kanban Board ── #}
+    <div class="kanban-board" id="kanbanBoard">
+        {% for col in columns %}
+        <div class="kanban-column" data-status="{{ col.key }}">
+            <div class="kanban-column-header"
+                 style="background: {{ col.bg }}; color: {{ col.color }}; border-bottom: 2px solid {{ col.color }};">
+                <span>{{ col.label }}</span>
+                <span class="badge" style="background: {{ col.color }}; color: #fff;">
+                    {{ columns_data[col.key] | length }}
+                </span>
+            </div>
+            <div class="kanban-column-body"
+                 data-status="{{ col.key }}">
+                {% for card in columns_data[col.key] %}
+                <div class="kanban-card"
+                     draggable="true"
+                     data-lead-id="{{ card.id }}">
+                    <div class="card-contact">
+                        <span class="priority-dot" style="background: {{ card.priority_color }}"
+                              title="{{ card.priority_label }}"></span>
+                        <a href="{{ card.lead_url }}" class="card-link" title="Voir le lead">{{ card.contact_name }}</a>
+                        <span class="probability-badge ms-auto" title="Probabilité">{{ card.probability }}%</span>
+                    </div>
+                    <div class="card-property">
+                        {% if card.property_url %}
+                        <a href="{{ card.property_url }}" class="card-link" title="Voir le bien"><i class="fa fa-home me-1"></i>{{ card.property_label }}</a>
+                        {% elif card.property_label %}
+                        <i class="fa fa-home me-1"></i>{{ card.property_label }}
+                        {% else %}
+                        <span class="text-muted"><i class="fa fa-home me-1"></i>—</span>
+                        {% endif %}
+                    </div>
+                    {% if card.agent_name %}
+                    <div class="card-agent">
+                        <i class="fa fa-user-tie me-1"></i>
+                        <a href="{{ card.agent_url }}" class="card-link" title="Voir l'agent">{{ card.agent_name }}</a>
+                    </div>
+                    {% endif %}
+                    {% if card.deal_value or card.expected_close %}
+                    <div class="card-deal">
+                        {% if card.deal_value %}<span><i class="fa fa-coins me-1"></i>{{ card.deal_value }}</span>{% endif %}
+                        {% if card.expected_close %}<span><i class="fa fa-calendar me-1"></i>{{ card.expected_close }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="card-meta">
+                        <span class="source-badge">{{ card.source }}</span>
+                        <span>{{ card.created_at }}</span>
+                    </div>
+                    {% if card.notes %}
+                    <div class="card-notes">{{ card.notes }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{# ── Toast container ── #}
+<div id="kanbanToast" class="kanban-toast" style="display:none;">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        <div class="d-flex">
+            <div><i class="fa fa-check-circle me-2"></i></div>
+            <div id="toastMessage">Statut mis à jour</div>
+        </div>
+        <a class="btn-close" id="toastClose"></a>
+    </div>
+</div>
+
+<script>
+(function() {
+    "use strict";
+
+    // Valid pipeline transitions (mirrors services/lead.py)
+    const VALID_TRANSITIONS = {
+        "new":         ["contacted"],
+        "contacted":   ["qualified", "lost"],
+        "qualified":   ["negotiation", "lost"],
+        "negotiation": ["won", "lost"],
+        "won":         [],
+        "lost":        ["new"],
+    };
+
+    const STATUS_LABELS = {
+        "new": "Nouveau",
+        "contacted": "Contacté",
+        "qualified": "Qualifié",
+        "negotiation": "Négociation",
+        "won": "Gagné",
+        "lost": "Perdu",
+    };
+
+    let draggedCard = null;
+    let sourceStatus = null;
+
+    // ── Bind drag events on cards ──
+    document.querySelectorAll(".kanban-card").forEach(function(card) {
+        card.addEventListener("dragstart", function(e) {
+            draggedCard = card;
+            sourceStatus = card.closest(".kanban-column").dataset.status;
+            card.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/plain", card.dataset.leadId);
+            highlightValidColumns(sourceStatus);
+        });
+        card.addEventListener("dragend", function() {
+            card.classList.remove("dragging");
+            clearHighlights();
+            draggedCard = null;
+            sourceStatus = null;
+        });
+    });
+
+    // ── Bind drop-zone events on column bodies ──
+    document.querySelectorAll(".kanban-column-body").forEach(function(body) {
+        body.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+        });
+        body.addEventListener("dragenter", function(e) {
+            e.preventDefault();
+            body.classList.add("drag-over");
+        });
+        body.addEventListener("dragleave", function(e) {
+            if (!body.contains(e.relatedTarget)) {
+                body.classList.remove("drag-over");
+            }
+        });
+        body.addEventListener("drop", function(e) {
+            e.preventDefault();
+            body.classList.remove("drag-over");
+            if (!draggedCard) return;
+
+            var targetStatus = body.dataset.status;
+            var leadId = draggedCard.dataset.leadId;
+            if (targetStatus === sourceStatus) return;
+
+            var allowed = VALID_TRANSITIONS[sourceStatus] || [];
+            if (!allowed.includes(targetStatus)) {
+                showToast(
+                    "Transition non autorisée : " + STATUS_LABELS[sourceStatus] + " → " + STATUS_LABELS[targetStatus],
+                    "danger"
+                );
+                return;
+            }
+
+            // Optimistic UI: move card immediately
+            body.appendChild(draggedCard);
+            updateColumnCounts();
+
+            // API call
+            updateLeadStatus(leadId, targetStatus, sourceStatus, draggedCard);
+        });
+    });
+
+    // ── API ──
+
+    async function updateLeadStatus(leadId, newStatus, oldStatus, cardEl) {
+        try {
+            var resp = await fetch("/admin/crm-kanban", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
+                body: JSON.stringify({ lead_id: leadId, status: newStatus }),
+            });
+
+            if (!resp.ok) {
+                var data = await resp.json().catch(function() { return {}; });
+                throw new Error(data.detail || ("HTTP " + resp.status));
+            }
+
+            showToast("Lead déplacé vers « " + STATUS_LABELS[newStatus] + " »", "success");
+
+        } catch (err) {
+            console.error("Kanban status update failed:", err);
+            showToast(err.message || "Erreur lors de la mise à jour.", "danger");
+            var sourceBody = document.querySelector(
+                '.kanban-column[data-status="' + oldStatus + '"] .kanban-column-body'
+            );
+            if (sourceBody) sourceBody.appendChild(cardEl);
+            updateColumnCounts();
+        }
+    }
+
+    // ── Visual helpers ──
+
+    function highlightValidColumns(fromStatus) {
+        var allowed = VALID_TRANSITIONS[fromStatus] || [];
+        document.querySelectorAll(".kanban-column").forEach(function(col) {
+            if (!allowed.includes(col.dataset.status) && col.dataset.status !== fromStatus) {
+                col.style.opacity = "0.4";
+            }
+        });
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll(".kanban-column").forEach(function(col) {
+            col.style.opacity = "";
+        });
+        document.querySelectorAll(".kanban-column-body").forEach(function(b) {
+            b.classList.remove("drag-over");
+        });
+    }
+
+    function updateColumnCounts() {
+        document.querySelectorAll(".kanban-column").forEach(function(col) {
+            var count = col.querySelectorAll(".kanban-card").length;
+            var badge = col.querySelector(".kanban-column-header .badge");
+            if (badge) badge.textContent = count;
+        });
+    }
+
+    // ── Toast ──
+
+    var toastTimeout = null;
+
+    function showToast(message, type) {
+        var container = document.getElementById("kanbanToast");
+        var msgEl = document.getElementById("toastMessage");
+        var alertEl = container.querySelector(".alert");
+
+        alertEl.className = "alert alert-" + type + " alert-dismissible";
+        msgEl.textContent = message;
+        container.style.display = "block";
+
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(hideToast, 3000);
+    }
+
+    function hideToast() {
+        document.getElementById("kanbanToast").style.display = "none";
+    }
+
+    document.getElementById("toastClose").addEventListener("click", hideToast);
+
+})();
+</script>
+{% endblock %}

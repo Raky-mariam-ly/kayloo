@@ -139,6 +139,7 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
 # 1. Cookie-based JWT — used by the web admin panel
 cookie_transport = CookieTransport(
     cookie_max_age=3600,
+
     cookie_secure=settings.environment == "prod",
 )
 

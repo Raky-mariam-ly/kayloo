@@ -12,8 +12,6 @@ from models.property_view import PropertyView
 from repositories.agency import AgencyRepository
 from repositories.property import PropertyRepository
 from repositories.property_view import PropertyViewRepository
-from services.agency import AgencyService
-from services.property import PropertyService
 from services.property_view import PropertyViewService
 
 from public.listing_data import homepage_listings

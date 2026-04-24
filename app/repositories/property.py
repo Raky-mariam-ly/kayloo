@@ -24,8 +24,8 @@ class PropertyRepository(BaseRepository[Property]):
         query = select(self.model).where(self.model.agency_id == agency_id)
         if exclude_hidden:
             query = query.where(
-                self.model.is_hidden == False,
-                self.model.archived == False,
+                self.model.is_hidden.is_(False),
+                self.model.archived.is_(False),
             )
         query = query.order_by(self.model.created_at.desc())
         result = await self.db.execute(query)

@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type, Union
 from uuid import UUID
 
-from starlette.datastructures import FormData
+from starlette.datastructures import FormData, UploadFile
 from starlette.requests import Request
 from starlette_admin import BaseField, ExportType
 from starlette_admin.contrib.sqla import ModelView
-from starlette_admin.fields import EnumField
+from starlette_admin.fields import EnumField, ImageField
 from starlette_admin.helpers import RequestAction
 
 

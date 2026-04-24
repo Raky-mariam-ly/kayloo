@@ -1,10 +1,7 @@
-import json
 from typing import Any, Dict
 
 from starlette.requests import Request
-from starlette.responses import Response
-from starlette.templating import Jinja2Templates
-from starlette_admin import CustomView
+from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import EnumField, StringField, PasswordField, DateTimeField, BooleanField, TextAreaField
 
 from core.auth import User, create_user
@@ -64,18 +61,17 @@ class UserView(AdminModelView):
         return await super().edit(request, pk, data)
 
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        # Validation logic before creation (e.g., check if email already exists)
-        # await ModelView.validate(self, request, data)
-
-        # Custom logic before creation (e.g., hash a password)
-        user = await create_user(
-            email=data["email"],
-            password=data["hashed_password"],
-            first_name=data["first_name"],
-            last_name=data["last_name"],
-            phone_number=data["phone_number"],
-            gender=data["gender"],
-        )
-        # Call the parent create method to save to the database
-        # return await super().create(request, data)
+        try:
+            user = await create_user(
+                email=data["email"],
+                password=data["hashed_password"],
+                first_name=data["first_name"],
+                last_name=data["last_name"],
+                phone_number=data["phone_number"],
+                gender=data["gender"],
+            )
+        except Exception:
+            raise FormValidationError({"email": "Cet email est déjà utilisé ou invalide."})
+        if user is None:
+            raise FormValidationError({"email": "Cet email est déjà utilisé."})
         return user

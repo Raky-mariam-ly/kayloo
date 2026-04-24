@@ -39,7 +39,8 @@ async def _get_dashboard_stats(email: str) -> dict:
                 await session.execute(base.where(Property.status == "sold"))
             ).scalar() or 0
     except Exception:
-        pass
+        import logging
+        logging.getLogger(__name__).exception("Failed to load dashboard stats for %s", email)
     return stats
 
 

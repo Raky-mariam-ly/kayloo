@@ -19,7 +19,7 @@ class AgencyRepository(BaseRepository[Agency]):
     async def get_active(self) -> List[Agency]:
         result = await self.db.execute(
             select(self.model)
-            .where(self.model.is_active == True)
+            .where(self.model.is_active.is_(True))
             .order_by(self.model.name)
         )
         return result.scalars().all()

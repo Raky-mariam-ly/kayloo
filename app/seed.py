@@ -130,6 +130,10 @@ async def seed_database() -> None:
     # Agencies, agents, properties, images
     from seed_properties import seed_properties_data
     await seed_properties_data()
-    # CRM test data
-    from seed_crm import seed_crm_data
-    await seed_crm_data()
+    # CRM test data — ignoré si la migration n'a pas encore créé les tables CRM
+    try:
+        from seed_crm import seed_crm_data
+        await seed_crm_data()
+    except Exception:
+        import logging
+        logging.getLogger(__name__).warning("seed_crm ignoré : tables CRM absentes ou erreur", exc_info=True)

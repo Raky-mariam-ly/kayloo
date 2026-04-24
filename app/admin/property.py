@@ -181,10 +181,10 @@ class PropertyView(AdminModelView):
         return _is_full_admin(request) or _is_agent(request)
 
     def can_create(self, request) -> bool:
-        return _is_full_admin(request)
+        return _is_full_admin(request) or _is_agent(request)
 
     def can_edit(self, request) -> bool:
-        return _is_full_admin(request)
+        return _is_full_admin(request) or _is_agent(request)
 
     def can_delete(self, request) -> bool:
         return _is_full_admin(request)
@@ -238,7 +238,7 @@ class PropertyView(AdminModelView):
             await session.flush()  # obtenir obj.id sans commit
 
             agency_name = obj.agency.name if obj.agency else None
-            gallery_files = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+            gallery_files, _ = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
             if gallery_files:
                 session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
 
@@ -263,14 +263,17 @@ class PropertyView(AdminModelView):
             await self.before_edit(request, data, obj)
 
             agency_name = obj.agency.name if obj.agency else None
-            gallery_files = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
-            if gallery_files:
+            gallery_files, delete_gallery = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+            if gallery_files or delete_gallery:
                 from sqlalchemy import select
                 result = await session.execute(
                     select(PropertyGallery).where(PropertyGallery.property_id == obj.id)
                 )
                 gallery = result.scalar_one_or_none()
-                if gallery:
+                if delete_gallery:
+                    if gallery:
+                        gallery.images = None
+                elif gallery:
                     gallery.images = gallery_files
                 else:
                     session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
@@ -291,14 +294,19 @@ class PropertyView(AdminModelView):
         await warm_choices_cache(request.state.session)
 
     @staticmethod
-    def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None) -> list:
-        """Dépaquette le (files, should_delete) produit par ImageField.parse_form_data."""
+    def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None):
+        """Dépaquette le (files, should_delete) produit par ImageField.parse_form_data.
+
+        Returns (files, should_delete) où should_delete=True signale une suppression.
+        """
         if raw is None:
-            return []
+            return [], False
         if isinstance(raw, tuple) and len(raw) == 2:
             files, should_delete = raw
-            if should_delete or not files:
-                return []
+            if should_delete:
+                return [], True
+            if not files:
+                return [], False
             files = files if isinstance(files, list) else [files]
             return [
                 PropertyImageFile(
@@ -309,8 +317,8 @@ class PropertyView(AdminModelView):
                     property_id=property_id,
                 )
                 for f in files
-            ]
-        return []
+            ], False
+        return [], False
 
     @staticmethod
     def _prepare_file_fields_for_populate(data: Dict[str, Any]) -> None:

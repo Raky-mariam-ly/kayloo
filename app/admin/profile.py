@@ -131,8 +131,7 @@ class ProfileChangePasswordView(CustomView):
         return getattr(request.state, "user", None) is not None
 
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
-        from fastapi_users.db import SQLAlchemyUserDatabase
-        from core.auth import User, UserManager
+        from core.auth import User
 
         profile_url = request.url.path.rsplit("/", 1)[0]
         session = request.state.session

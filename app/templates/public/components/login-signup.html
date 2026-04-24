@@ -1,0 +1,275 @@
+{#
+  Usage:
+    {% import "public/components/login-signup.html" as auth %}
+    {{ auth.modal() }}          — renders the modal overlay
+    {{ auth.trigger_btn() }}    — optional pre-built trigger button (or wire your own)
+
+  Open  : document.getElementById('auth-modal').classList.remove('hidden')
+  Close : document.getElementById('auth-modal').classList.add('hidden')
+#}
+
+{# ── Optional trigger button ─────────────────────────────────────────────── #}
+{% macro trigger_btn() %}
+<button onclick="document.getElementById('auth-modal').classList.remove('hidden')"
+    class="bg-primary text-white font-jakarta text-sm font-medium px-[15px] py-2 rounded-[5px] hover:bg-primary-hover transition">
+    Connexion / Inscription
+</button>
+{% endmacro %}
+
+{# ── Modal ────────────────────────────────────────────────────────────────── #}
+{% macro modal() %}
+<!-- AUTH MODAL OVERLAY -->
+<div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 py-8" role="dialog"
+    aria-modal="true" aria-labelledby="auth-modal-title">
+
+    <!-- Backdrop -->
+    <div id="auth-modal-backdrop" class="absolute inset-0 bg-black/60"
+        onclick="document.getElementById('auth-modal').classList.add('hidden')">
+    </div>
+
+    <!-- Panel -->
+    <div
+        class="relative z-10 w-full max-w-[520px] bg-white rounded-[11px] shadow-[0_20px_60px_rgba(0,0,0,0.25)] overflow-hidden">
+
+        <!-- Top color bar -->
+        <div class="h-1.5 bg-primary w-full"></div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-8 pt-6 pb-0">
+            <a href="/">
+                <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
+                    class="h-8 w-auto" />
+            </a>
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')"
+                class="text-muted hover:text-dark transition text-xl leading-none" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="flex mt-6 border-b border-border-input mx-8 text-sm">
+            <button id="tab-login" onclick="authSwitchTab('login')"
+                class="search-tab search-tab-active rounded-t-[5px] mr-1 border border-b-0 border-border-input flex-1">
+                Se connecter
+            </button>
+            <button id="tab-signup" onclick="authSwitchTab('signup')"
+                class="search-tab rounded-t-[5px] text-muted bg-transparent border border-b-0 border-transparent hover:text-dark transition flex-1">
+                Créer un compte
+            </button>
+        </div>
+
+        <!-- ── LOGIN FORM ─────────────────────────────────────────────── -->
+        <div id="panel-login" class="px-8 pt-3 pb-8">
+            <p id="auth-modal-title" class="font-poppins text-[22px] font-bold text-dark mb-1">Bon retour !</p>
+            <p class="text-sm text-muted mb-6">Connectez-vous à votre espace Kayloo.</p>
+
+            <form method="post" action="#" class="space-y-3">
+
+                <div>
+                    <label for="login-email" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                        Adresse e-mail
+                    </label>
+                    <input id="login-email" type="email" name="email" placeholder="exemple@email.com" required
+                        autocomplete="email" class="search-select" />
+                </div>
+
+                <div>
+                    <label for="login-password" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                        Mot de passe
+                    </label>
+                    <div class="relative">
+                        <input id="login-password" type="password" name="password" placeholder="••••••••" required
+                            autocomplete="current-password" class="search-select pr-10" />
+                        <button type="button" onclick="authTogglePwd('login-password', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-input-muted hover:text-dark transition text-sm"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" name="remember" class="w-4 h-4 accent-primary rounded" />
+                        <span class="text-sm text-text-body">Se souvenir de moi</span>
+                    </label>
+                    <a href="#"
+                        class="text-sm text-primary hover:text-primary-hover no-underline transition font-medium">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-primary text-white font-poppins text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">
+                    Se connecter
+                </button>
+
+            </form>
+        </div>
+
+        <!-- ── SIGN-UP FORM ────────────────────────────────────────────── -->
+        <div id="panel-signup" class="hidden px-8 pt-3 pb-8">
+            <p class="font-poppins text-[22px] font-bold text-dark mb-1">Créez votre compte</p>
+            <p class="text-sm text-muted mb-6">Rejoignez Kayloo et accédez à toutes nos offres.</p>
+
+            <form method="post" action="#" class="space-y-3">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="signup-firstname" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Prénom
+                        </label>
+                        <input id="signup-firstname" type="text" name="firstname" placeholder="Jean" required
+                            autocomplete="given-name" class="search-select" />
+                    </div>
+                    <div>
+                        <label for="signup-lastname" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Nom
+                        </label>
+                        <input id="signup-lastname" type="text" name="lastname" placeholder="Dupont" required
+                            autocomplete="family-name" class="search-select" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="signup-email" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Adresse e-mail
+                        </label>
+                        <input id="signup-email" type="email" name="email" placeholder="exemple@email.com" required
+                            autocomplete="email" class="search-select" />
+                    </div>
+                    <div>
+                        <label for="signup-phone" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Téléphone <span class="text-xs font-normal text-gray-600">(facultatif)</span>
+                        </label>
+                        <input id="signup-phone" type="tel" name="phone" placeholder="+221 77 000 00 00"
+                            autocomplete="tel" class="search-select" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="signup-role" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Je suis…
+                        </label>
+                        <select id="signup-role" name="role" class="search-select">
+                            <option value="" disabled selected>Choisissez un profil</option>
+                            <option value="acheteur">Acheteur</option>
+                            <option value="vendeur">Vendeur</option>
+                            <option value="locataire">Locataire</option>
+                            <option value="bailleur">Bailleur</option>
+                            <option value="investisseur">Investisseur / Diaspora</option>
+                            <option value="professionnel">Professionnel de l'immobilier</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="signup-country" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                            Pays de résidence
+                        </label>
+                        <input id="signup-country" type="text" name="country" placeholder="Sénégal"
+                            autocomplete="country-name" class="search-select" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="signup-password" class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                        Mot de passe
+                    </label>
+                    <div class="relative">
+                        <input id="signup-password" type="password" name="password" placeholder="8 caractères minimum"
+                            required autocomplete="new-password" class="search-select pr-10" />
+                        <button type="button" onclick="authTogglePwd('signup-password', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-input-muted hover:text-dark transition text-sm"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="signup-password-confirm"
+                        class="block font-poppins text-sm font-medium text-dark mb-0.5">
+                        Confirmer le mot de passe
+                    </label>
+                    <div class="relative">
+                        <input id="signup-password-confirm" type="password" name="password_confirm"
+                            placeholder="••••••••" required autocomplete="new-password" class="search-select pr-10" />
+                        <button type="button" onclick="authTogglePwd('signup-password-confirm', this)"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-input-muted hover:text-dark transition text-sm"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="flex items-start gap-2 cursor-pointer select-none">
+                    <input type="checkbox" name="terms" required
+                        class="w-4 h-4 mt-0.5 accent-primary rounded flex-shrink-0" />
+                    <span class="text-sm text-text-body">
+                        J'accepte les
+                        <a href="#" class="text-primary hover:text-primary-hover no-underline transition">Conditions
+                            d'utilisation</a>
+                        et la
+                        <a href="#" class="text-primary hover:text-primary-hover no-underline transition">Politique de
+                            confidentialité</a>.
+                    </span>
+                </label>
+
+                <button type="submit"
+                    class="w-full bg-primary text-white font-poppins text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">
+                    Créer mon compte
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- AUTH MODAL SCRIPT -->
+<script>
+    function authSwitchTab(tab) {
+        var isLogin = tab === 'login';
+
+        document.getElementById('panel-login').classList.toggle('hidden', !isLogin);
+        document.getElementById('panel-signup').classList.toggle('hidden', isLogin);
+
+        var tabLogin = document.getElementById('tab-login');
+        var tabSignup = document.getElementById('tab-signup');
+
+        if (isLogin) {
+            tabLogin.classList.add('search-tab-active');
+            tabLogin.classList.remove('text-muted', 'bg-transparent', 'border-transparent');
+            tabLogin.classList.add('border-border-input');
+            tabSignup.classList.remove('search-tab-active', 'border-border-input');
+            tabSignup.classList.add('text-muted', 'bg-transparent', 'border-transparent');
+        } else {
+            tabSignup.classList.add('search-tab-active');
+            tabSignup.classList.remove('text-muted', 'bg-transparent', 'border-transparent');
+            tabSignup.classList.add('border-border-input');
+            tabLogin.classList.remove('search-tab-active', 'border-border-input');
+            tabLogin.classList.add('text-muted', 'bg-transparent', 'border-transparent');
+        }
+    }
+
+    function authTogglePwd(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    /* Close on Escape */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+    });
+</script>
+{% endmacro %}

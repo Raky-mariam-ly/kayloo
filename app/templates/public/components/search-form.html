@@ -1,298 +1,213 @@
-{% macro search(config) %}
-    {% if config.tabs|length > 1 %}
-        {% for tab in config.tabs %}
-            <button
-            type="button"
-            class="search-tab active font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
-            data-val="a-vendre"
-            >
-            {{ tab.label }}
-            </button>
-        {% endfor %}
-    {% endif %}
-        <button
-          type="button"
-          class="search-tab active font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
-          data-val="a-vendre"
-        >
-          À Vendre
-        </button>
-<div class="max-w-full lg:max-w-[90%] mx-auto mt-10">
-  <form
-    id="houzez-search-form"
-    action="{{ url_for('get_search_result') }}"
-    method="GET"
-  >
-    <!-- Hidden field for status -->
-    <input type="hidden" name="status" id="search-status" value="a-vendre" />
+{% macro search_feature() %}
+<div class="max-w-full w-full lg:max-w-[90%] mx-auto mt-6">
+  <form id="search-form" action="{{ url_for('get_search_result') }}" method="GET">
+    <div class="flex flex-row gap-1 z-2 justify-center" id="contract-button-group">
+      <label class="flex text-left">
+        <input type="radio" id="radio-vente" name="listing_type" value="vente" class="hidden peer" checked>
+        <div
+          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
+          Vente
+        </div>
+      </label>
 
-    <!-- Tabs -->
-    <ul class="flex justify-center gap-1 mb-0 text-dark" role="tablist">
-      <li>
-        <button
-          type="button"
-          class="search-tab active font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
-          data-val="a-vendre"
-        >
-          À Vendre
-        </button>
-      </li>
-      <li>
-        <button
-          type="button"
-          class="search-tab font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
-          data-val="location"
-        >
+      <label class="flex text-left">
+        <input type="radio" id="radio-location" name="listing_type" value="location" class="hidden peer">
+        <div
+          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
           Location
-        </button>
-      </li>
-      <li>
-        <button
-          type="button"
-          class="search-tab font-poppins font-medium text-sm px-[30px] py-3 rounded-t-[5px] bg-white/50 transition-colors"
-          data-val="location-meublee"
-        >
-          Location Meublée
-        </button>
-      </li>
-    </ul>
-
-    <!-- Search Fields -->
-    <div class="bg-white rounded-xl p-5 shadow-xl">
-      <div class="flex gap-2 justify-center items-end">
-        <!-- Type de bien -->
-        <div class="flex-1 w-full relative">
-          <label
-            class="block font-poppins text-xs font-medium text-dark mb-1 text-left"
-          >
-            Type de bien
-          </label>
-
-          <!-- Hidden multi-select (keeps form submission working) -->
-          <select name="type[]" id="field-types" multiple class="hidden">
-            <option value="appartement">Appartement</option>
-            <option value="bureau">Bureau</option>
-            <option value="espace-coworking">Espace de Coworking</option>
-            <option value="local-commercial">Local Commercial</option>
-            <option value="studio">Studio</option>
-            <option value="terrain">Terrain</option>
-            <option value="terrain-agricole">Terrain Agricole</option>
-            <option value="villa">Villa</option>
-          </select>
-
-          <!-- Trigger field -->
-          <div
-            id="type-trigger"
-            class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-xs text-left text-input-muted font-poppins bg-white cursor-pointer relative bg-no-repeat bg-[right_12px_center] flex items-center"
-            style="
-              background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-            "
-          >
-            <span id="type-placeholder">Sélectionner</span>
-          </div>
-
-          <!-- Dropdown panel -->
-          <div
-            id="type-dropdown"
-            class="absolute top-full left-0 mt-1 bg-white shadow-lg rounded-b min-w-full opacity-0 invisible transition-all duration-200 z-50 p-2"
-          >
-            <div
-              data-val="appartement"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Appartement
-            </div>
-            <div
-              data-val="bureau"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Bureau
-            </div>
-            <div
-              data-val="espace-coworking"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Espace de Coworking
-            </div>
-            <div
-              data-val="local-commercial"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Local Commercial
-            </div>
-            <div
-              data-val="studio"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Studio
-            </div>
-            <div
-              data-val="terrain"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Terrain
-            </div>
-            <div
-              data-val="terrain-agricole"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Terrain Agricole
-            </div>
-            <div
-              data-val="villa"
-              class="type-option block px-4 py-2 text-sm text-dark hover:text-brand-red hover:bg-gray-50 rounded cursor-pointer"
-            >
-              Villa
-            </div>
-          </div>
         </div>
+      </label>
 
-        <!-- Pays -->
-        <div class="flex-1 w-full">
-          <label
-            class="block font-poppins text-xs font-medium text-dark mb-1 text-left"
-          >
-            Pays
-          </label>
-          <select
-            name="country[]"
-            id="field-country"
-            class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
-            style="
-              background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-            "
-          >
-            <option value="">Tous les pays</option>
-            <option value="ci" data-ref="ci">Côte d'Ivoire</option>
-            <option value="gh" data-ref="gh">Ghana</option>
-            <option value="ng" data-ref="ng">Nigéria</option>
-            <option value="sn" data-ref="sn">Sénégal</option>
-          </select>
+      <label class="flex text-left ">
+        <input type="radio" id="radio-meublee" name="listing_type" value="meublee" class="hidden peer">
+        <div
+          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
+          Location meublée
         </div>
-
-        <!-- Régions -->
-        <div class="flex-1 w-full">
-          <label
-            class="block font-poppins text-xs font-medium text-dark mb-1 text-left"
-          >
-            Régions
-          </label>
-          <select
-            name="states[]"
-            id="field-regions"
-            class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
-            style="
-              background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-            "
-          >
-            <option value="">Toutes les régions</option>
-            <option value="abidjan" data-belong="ci">Abidjan</option>
-            <option value="accra" data-belong="gh">Accra</option>
-            <option value="dakar-rg" data-belong="sn">Dakar Région</option>
-            <option value="diourbel-rg" data-belong="sn">
-              Diourbel Région
-            </option>
-            <option value="lagos" data-belong="ng">Lagos</option>
-            <option value="louga-rg" data-belong="sn">Louga Région</option>
-            <option value="matam-rg" data-belong="sn">Matam Région</option>
-            <option value="saint-louis-rg" data-belong="sn">
-              Saint-Louis Région
-            </option>
-            <option value="thies-rg" data-belong="sn">Thies Région</option>
-          </select>
-        </div>
-
-        <!-- Villes (commented out) -->
-        <!--
-          <div class="flex-1">
-            <label class="block font-poppins text-xs font-medium text-dark mb-1 text-left">
-              Villes
-            </label>
-            <select
-              name="location[]"
-              id="field-cities"
-              class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
-              style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);"
-            >
-              <option value="">Toutes les villes</option>
-              <option value="guediawaye" data-belong="thies-rg">Guediawaye</option>
-              <option value="ikeja" data-belong="lagos">Ikeja</option>
-              <option value="keur-massar" data-belong="dakar-rg">Keur Massar</option>
-              <option value="koumassi" data-belong="abidjan">Koumassi</option>
-              <option value="linguere" data-belong="louga-rg">Linguère</option>
-              <option value="marcory" data-belong="abidjan">Marcory</option>
-              <option value="mataheko" data-belong="accra">Mataheko</option>
-              <option value="matam" data-belong="matam-rg">Matam</option>
-              <option value="mbacke" data-belong="diourbel-rg">Mbacké</option>
-              <option value="mbour" data-belong="diourbel-rg">Mbour</option>
-              <option value="pikine" data-belong="dakar-rg">Pikine</option>
-              <option value="rufisque" data-belong="dakar-rg">Rufisque</option>
-              <option value="saint-louis" data-belong="saint-louis-rg">Saint-Louis</option>
-              <option value="thies" data-belong="thies-rg">Thiès</option>
-              <option value="yopougon" data-belong="abidjan">Yopougon</option>
-            </select>
-          </div>
-          -->
-
-        <!-- Pièces (commented out) -->
-        <!--
-          <div class="flex-1">
-            <label class="block font-poppins text-xs font-medium text-dark mb-1 text-left">
-              Pièces
-            </label>
-            <select
-              name="rooms"
-              id="field-rooms"
-              class="w-full h-10 px-3 pr-8 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red appearance-none bg-no-repeat bg-[right_12px_center]"
-              style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);"
-            >
-              <option value="">Sélectionner</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="any">Tout</option>
-            </select>
-          </div>
-          -->
-
-        <!-- Prix max -->
-        <div class="flex-1 w-full">
-          <label
-            class="block font-poppins text-xs font-medium text-dark mb-1 text-left"
-          >
-            Prix max
-          </label>
-          <input
-            type="text"
-            name="max-price"
-            placeholder="Montant"
-            class="w-full h-10 px-3 border border-border-input rounded-[5px] text-sm text-input-muted font-poppins bg-white focus:outline-none focus:border-brand-red"
-          />
-        </div>
-
-        <!-- Search Button -->
-        <div class="flex-1">
-          <button
-            type="submit"
-            class="w-full h-10 bg-primary hover:bg-primary-hover text-white rounded-[5px] flex items-center justify-center transition-colors"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </button>
-        </div>
+      </label>
+    </div>
+    <div
+      class="box-border bg-neutral-200/25 backdrop-blur-md border border-white/20 shadow-xl flex flex-wrap gap-2 p-4 font-jakarta items-end rounded-xl z-3">
+      <div class="flex flex-col basis-full box-border md:flex-1">
+        <label for="property-type" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+          Type de bien
+        </label>
+        <select id="property-type" name="property-type"
+          class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+          <option value="villa" class="text-neutral-800">Villas</option>
+          <option value="appartement" class="text-neutral-800">Appartements</option>
+          <option value="terrain" class="text-neutral-800">Terrains</option>
+          <option value="bureau" class="text-neutral-800">bureaux</option>
+          <option value="chambre" class="text-neutral-800">Chambres</option>
+          <option value="studio" class="text-neutral-800">Studios</option>
+          <option value="terrain-agricole" class="text-neutral-800">Terrains Agricoles</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-2 basis-full md:flex-2"">
+                        <div class=" flex flex-col">
+        <label for="country" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">Pays</label>
+        <select id="country" name="country"
+          class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+          <option value="sn" class="text-neutral-800">Sénégal</option>
+          <option value="ci" class="text-neutral-800">Côte d'Ivoire</option>
+          <option value="ma" class="text-neutral-800">Maroc</option>
+          <option value="ng" class="text-neutral-800">Nigeria</option>
+          <option value="gn" class="text-neutral-800">Guinée</option>
+          <option value="ml" class="text-neutral-800">Mali</option>
+          <option value="bf" class="text-neutral-800">Burkina Faso</option>
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label for="city" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+          Ville</label>
+        <select id="city" name="city"
+          class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+          <option value="">Chargement...</option>
+        </select>
       </div>
     </div>
-  </form>
+    <div class="flex flex-col basis-full box-border md:flex-1">
+      <label id="price-label" for="max-price" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+        Prix de vente maximum
+      </label>
+      <input type="number" id="max-price" name="max_price" placeholder="Ex: 50 000 000"
+        class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+    </div>
+    <button type="submit"
+      class="flex flex-1 basis-[100%] md:basis-1 bg-primary text-white font-jakarta font-bold text-sm items-center justify-center gap-1 rounded-lg h-8.5 mt-2 md:mt-0"><i
+        class="fa-solid fa-search"></i>Recherche</button>
 </div>
+
+</form>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. DATA STRUCTURES
+    const rules = {
+      "vente": {
+        "label": "Prix de vente max",
+        "placeholder": "50 000 000",
+        "allowed": ["villa", "terrain", "appartement", "bureau", "terrain-agricole"]
+      },
+      "location": {
+        "label": "Loyer max",
+        "placeholder": "250 000",
+        "allowed": ["villa", "appartement", "bureau", "chambre", "terrain-agricole"]
+      },
+      "meublee": {
+        "label": "Loyer max (par jour)",
+        "placeholder": "40 000",
+        "allowed": ["villa", "appartement", "studio"]
+      }
+    };
+
+    const geo_rules = {
+      "sn": [
+        { "label": "Dakar", "value": "sn-dk" },
+        { "label": "Keur Massar", "value": "sn-km" },
+        { "label": "Diamniadio", "value": "sn-dm" },
+        { "label": "Saly", "value": "sn-sl" },
+        { "label": "Saint-Louis", "value": "sn-st" },
+        { "label": "Thiès", "value": "sn-th" },
+        { "label": "Ziguinchor", "value": "sn-zg" }
+      ],
+      "ci": [
+        { "label": "Abidjan", "value": "ci-ab" },
+        { "label": "Yamoussoukro", "value": "ci-ya" },
+        { "label": "San-Pédro", "value": "ci-sp" },
+        { "label": "Bouaké", "value": "ci-bk" },
+        { "label": "Assinie", "value": "ci-as" },
+        { "label": "Grand-Bassam", "value": "ci-gb" }
+      ],
+      "ma": [
+        { "label": "Casablanca", "value": "ma-cs" },
+        { "label": "Marrakech", "value": "ma-mr" },
+        { "label": "Rabat", "value": "ma-rb" },
+        { "label": "Tanger", "value": "ma-tg" },
+        { "label": "Agadir", "value": "ma-ag" }
+      ],
+      "ng": [
+        { "label": "Lagos", "value": "ng-lg" },
+        { "label": "Abuja", "value": "ng-ab" },
+        { "label": "Port Harcourt", "value": "ng-ph" },
+        { "label": "Ibadan", "value": "ng-ib" }
+      ],
+      "gn": [
+        { "label": "Conakry", "value": "gn-ck" },
+        { "label": "Kindia", "value": "gn-kn" },
+        { "label": "Boké", "value": "gn-bk" },
+        { "label": "Kamsar", "value": "gn-ks" }
+      ],
+      "ml": [
+        { "label": "Bamako", "value": "ml-bm" },
+        { "label": "Sikasso", "value": "ml-sk" },
+        { "label": "Kayes", "value": "ml-ky" }
+      ],
+      "bf": [
+        { "label": "Ouagadougou", "value": "bf-ou" },
+        { "label": "Bobo-Dioulasso", "value": "bf-bd" },
+        { "label": "Koudougou", "value": "bf-kd" }
+      ]
+    };
+
+    // 2. DOM SELECTORS
+    const listing_typeRadios = document.querySelectorAll('input[name="listing_type"]');
+    const propertySelect = document.getElementById('property-type');
+    const countrySelect = document.getElementById('country');
+    const citySelect = document.getElementById('city');
+    const priceLabel = document.getElementById('price-label');
+    const priceInput = document.getElementById('max-price');
+
+    // 3. LOGIC FUNCTIONS
+
+    // Function A: Handle Contract Changes (Property types & Pricing UI)
+    const applyRules = (listing_typeType) => {
+      const config = rules[listing_typeType];
+
+      // Update Label and Placeholder
+      priceLabel.textContent = config.label;
+      priceInput.placeholder = config.placeholder;
+
+      // Filter Property Types
+      Array.from(propertySelect.options).forEach(opt => {
+        const isAllowed = config.allowed.includes(opt.value);
+        opt.hidden = !isAllowed;
+        opt.disabled = !isAllowed;
+      });
+
+      // Safety reset if current selection becomes hidden
+      if (propertySelect.selectedOptions[0]?.hidden) {
+        propertySelect.value = config.allowed[0];
+      }
+    };
+
+    // Function B: Handle Country Changes (City injection)
+    const updateCities = (countryCode) => {
+      citySelect.innerHTML = '<option value="" class="text-neutral-800">Toutes les villes</option>';
+      const cities = geo_rules[countryCode];
+
+      if (cities) {
+        cities.forEach(city => {
+          const opt = document.createElement('option');
+          opt.value = city.value;
+          opt.textContent = city.label;
+          opt.classList.add('text-neutral-800');
+          citySelect.appendChild(opt);
+        });
+      }
+    };
+
+    // 4. EVENT LISTENERS
+    listing_typeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => applyRules(e.target.value));
+    });
+
+    countrySelect.addEventListener('change', (e) => updateCities(e.target.value));
+
+    // 5. INITIALIZATION (Sync UI on Page Load)
+    const activelisting_type = document.querySelector('input[name="listing_type"]:checked').value;
+    applyRules(activelisting_type);
+    updateCities(countrySelect.value);
+  });
+</script>
 {% endmacro %}

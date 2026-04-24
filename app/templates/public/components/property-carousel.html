@@ -1,27 +1,28 @@
 {% macro carousel_card(listing) %}
-    {% if listing.type == "sale" %}
-        {% set tag_label = "À Vendre" %}
-    {% elif listing.type == "rent" %}
-        {% set tag_label = "À Louer" %}
-    {% else %}
-        {% set tag_label = "Location Meublée" %}
-    {% endif %}
-    <a href="{{ listing.link }}"
-    class="relative flex-shrink-0 w-full md:w-[calc(50%-7.21px)] lg:w-[calc(33.333%-9.99px)] rounded-xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden flex flex-col h-[400px]">
-        <img src="{{ listing.bg_image | default('/static/images/placeholder-listing.webp') }}" 
-         alt="{{ listing.title }}"
-         class="absolute inset-0 w-full h-full object-cover object-top">
+{% if listing.type == "sale" %}
+{% set tag_label = "À Vendre" %}
+{% elif listing.type == "rent" %}
+{% set tag_label = "À Louer" %}
+{% else %}
+{% set tag_label = "Location Meublée" %}
+{% endif %}
+<div
+    class="swiper-slide relative rounded-xl shadow-sm hover:shadow-xl transition-shadow overflow-hidden flex flex-col !h-[400px]">
+    <img src="{{ listing.bg_image | default('/static/images/placeholder-listing.webp') }}" alt="{{ listing.title }}"
+        class="absolute inset-0 w-full h-full object-cover object-top">
     <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
     </div>
     <div class="relative z-10 flex justify-between p-3">
         <div class="flex items-center gap-2 flex-wrap">
             {% if listing.is_featured %}
-            <span class="bg-amber-600 text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
-            En vedette
+            <span
+                class="bg-amber-600 text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
+                En vedette
             </span>
             {% endif %}
-            <span class="bg-primary text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
-            {{ tag_label }}
+            <span
+                class="bg-primary text-white text-[10px] uppercase font-bold px-2 py-1 leading-none rounded-full inline-flex items-center">
+                {{ tag_label }}
             </span>
         </div>
         <button
@@ -30,120 +31,144 @@
             <i class="fa-regular fa-heart text-sm"></i>
         </button>
     </div>
-    <div
-        class="absolute z-10 inset-x-3 bottom-3 bg-neutral-400/5 backdrop-blur-sm p-3 rounded-lg border border-white/15">
-        <div class="flex items-start justify-between gap-2 mb-2">
-            <h2 class="font-jakarta font-bold text-sm text-white leading-tight">
-            {{ listing.title }}
-            </h2>
-            <div class="shrink-0 flex px-2 py-1 bg-white rounded-md">
-                <p class="font-jakarta font-bold text-primary text-[10px]">
+    <div class="absolute z-10 inset-x-3 bottom-3 flex flex-col">
+        <div
+            class="self-end w-fit px-3 py-2 bg-neutral-50 backdrop-blur-sm rounded-t-md border-white/15 border-t border-x">
+            <p class="font-jakarta font-extrabold text-primary text-xs">
                 {{ listing.price }} {{ listing.currency | default('F CFA') }}
-                </p>
+            </p>
+        </div>
+        <div class="bg-neutral-400/5 backdrop-blur-sm p-3 rounded-b-lg rounded-tl-lg border border-white/15">
+            <div class="flex items-start justify-between gap-2 mb-2">
+                <h2 class="font-jakarta font-bold text-sm text-white leading-tight text-left">
+                    <a href="{{ listing.link }}"
+                        class=" hover:text-primary after:absolute after:inset-0 after:z-10 line-clamp-2">
+                        {{ listing.title }}
+                    </a>
+                </h2>
+            </div>
+            <p class="flex items-center gap-1.5 text-[11px] text-gray-200 mb-3"><i
+                    class="fa-solid fa-location-dot text-white"></i> {{ listing.location }}</p>
+            <div class="flex items-center gap-2 text-[10.5px] text-gray-100 border-t border-gray-200/20 pt-3">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-house"></i>
+                    {{ listing.property_type }}</span>
+
+                {% if listing.bedroom_nbr %}
+                <span class="flex items-center gap-1"><i class="fa-solid fa-bed"></i> {{ listing.bedroom_nbr }}
+                    Ch.</span>
+                {% endif %}
+
+                {% if listing.bthroom_nbr %}
+                <span class="flex items-center gap-1"><i class="fa-solid fa-bath"></i> {{ listing.bthroom_nbr }}
+                    SDB</span>
+                {% endif %}
+
+                {% if listing.land_size %}
+                <span class="flex items-center gap-1"><i class="fa-solid fa-vector-square"></i> {{ listing.land_size }}
+                    m²</span>
+                {% endif%}
             </div>
         </div>
-        <p class="flex items-center gap-1.5 text-[11px] text-gray-200 mb-3"><i
-                class="fa-solid fa-location-dot text-white"></i> {{ listing.location }}</p>
-        <div
-            class="flex items-center gap-3 text-[10px] text-gray-100 border-t border-gray-200/20 pt-3">
-            <span class="flex items-center gap-1"><i class="fa-solid fa-house"></i> {{ listing.property_type }}</span>
-
-            {% if listing.bedroom_nbr %}
-            <span class="flex items-center gap-1"><i class="fa-solid fa-bed"></i> {{ listing.bedroom_nbr }} Ch.</span>
-            {% endif %}
-
-            {% if listing.bthroom_nbr %}
-            <span class="flex items-center gap-1"><i class="fa-solid fa-bath"></i> {{ listing.bthroom_nbr }} SDB</span>
-            {% endif %}
-
-            {% if listing.land_size %}
-            <span class="flex items-center gap-1"><i class="fa-solid fa-vector-square"></i> {{ listing.land_size }} m²</span>
-            {% endif%}
-        </div>
     </div>
-    </a>
+</div>
 {% endmacro %}
 
-{% macro property_carousel(listing_list) %}
-    <!-- ========== PROPERTY CAROUSEL ========== -->
-        <div class="max-w-site mx-auto px-4">
-            <!-- Carousel Navigation -->
-            <div class="flex justify-end gap-2 mb-2 pr-3">
-                <button id="carousel-prev"
-                    class="w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+{% macro property_carousel(section_data, listing_list) %}
+<section id="content-start" class="section-card-container pt-0 md:pt-11 md:pb-11">
+    <div class="section-card-layout-featured gap-2">
+        <h2 class="section-featured-title">
+            {{ section_data.title | safe }}
+        </h2>
+        <p class="section-paragraph text-center">
+            {{ section_data.subtitle | safe }}
+        <div class="w-[100%] mx-auto">
+            <div class="flex justify-end gap-2 mb-4">
+                <button
+                    class="swiper-prev-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
-                <button id="carousel-next"
-                    class="w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors">
+                <button
+                    class="swiper-next-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Cards Container -->
-            <div class="overflow-hidden px-4">
-                <div id="property-carousel" class="flex transition-transform duration-500 ease-in-out gap-4">
-                {% for item in listing_list %}
+            <div class="swiper myPropertySwiper !px-1">
+                <div class="swiper-wrapper">
+                    {% for item in listing_list %}
                     {{ carousel_card(item) }}
-                {% endfor %}
+                    {% endfor %}
                 </div>
+
+                <div class="swiper-pagination md:hidden mt-8"></div>
             </div>
         </div>
+    </div>
+</section>
+
 {% endmacro %}
 
 {% macro carousel_js() %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 <script>
-        // ===== Property Carousel =====
-        document.addEventListener('DOMContentLoaded', function() {
-            var carousel = document.getElementById('property-carousel');
-        var prevBtn = document.getElementById('carousel-prev');
-        var nextBtn = document.getElementById('carousel-next');
-        var currentIndex = 0;
+    window.addEventListener('load', function () {
+        const swiper = new Swiper('.myPropertySwiper', {
+            slidesPerView: 1.075,
+            spaceBetween: 8,
+            autoHeight: false,
+            speed: 700,
+            loop: false,
+            navigation: {
+                nextEl: '.swiper-next-custom',
+                prevEl: '.swiper-prev-custom',
+            },
+            breakpoints: {
+                768: { slidesPerView: 2.1 },
+                1024: { slidesPerView: 3.1 }
+            },
+            on: {
+                slideChange: async function () {
+                    const visibleSlides = Math.ceil(this.params.slidesPerView);
+                    const totalSlides = this.slides.length;
+                    const currentIndex = this.activeIndex;
 
-        function getCardWidth() {
-            var card = carousel.querySelector('a');
-            if (!card) return 400;
-            console.log(card.offsetWidth);
-            return card.offsetWidth + 16;
-             // 16px gap (gap-4)
-        }
+                    if (currentIndex >= totalSlides - visibleSlides - 1) {
+                        if (this.isLoading || this.allLoaded) return;
+                        this.isLoading = true;
 
+                        const offset = totalSlides;
 
+                        try {
+                            const response = await fetch(`/carousel/loadmore?offset=${offset}&limit=3`);
+                            const html = await response.text();
 
-        function getVisibleCards() {
-            if (window.innerWidth >= 1024) return 3;
-            if (window.innerWidth >= 768) return 2;
-            return 1;
-        }
+                            if (html.trim() !== "") {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = html;
+                                const newSlides = tempDiv.querySelectorAll('.swiper-slide');
 
-        function getTotalCards() {
-            return carousel.querySelectorAll('a').length;
-        }
-
-        function updateCarousel() {
-            var maxIndex = getTotalCards() - getVisibleCards();
-            if (currentIndex < 0) currentIndex = 0;
-            if (currentIndex > maxIndex) currentIndex = maxIndex;
-            var offset = currentIndex * getCardWidth();
-            carousel.style.transform = 'translateX(-' + offset + 'px)';
-        }
-
-        prevBtn.addEventListener('click', function () {
-            currentIndex--;
-            updateCarousel();
-            console.log("Prev button clicked!");
-        });
-
-        nextBtn.addEventListener('click', function () {
-            currentIndex++;
-            updateCarousel();
-        });
-
-        window.addEventListener('resize', updateCarousel);
-        });
-        
-    </script>
+                                if (newSlides.length > 0) {
+                                    newSlides.forEach(slide => {
+                                        this.appendSlide(slide.outerHTML);
+                                    });
+                                } else {
+                                    this.allLoaded = true;
+                                }
+                            }
+                        }
+                        catch (e) {
+                            console.error(e);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    }
+                }
+            }
+        }); // Close Swiper
+    }); // Close Window Listener
+</script>
 {% endmacro %}

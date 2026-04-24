@@ -16,7 +16,7 @@ class PropertyGallery(Base):
         unique=True,
         nullable=False,
     )
-    images = Column(FileStorageField(upload_storage="images", multiple=True), nullable=True)
+    images = Column(FileStorageField(upload_storage="images", multiple=True, extra={"acl": "public-read"}), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

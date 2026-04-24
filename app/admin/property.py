@@ -17,6 +17,7 @@ from admin.choices import (
     load_property_rent_type_choices,
 )
 from models.property_gallery import PropertyGallery
+from core.files import PropertyImageFile
 
 STATUS_CHOICES = [
     ("free", "Libre"),
@@ -226,7 +227,7 @@ class PropertyView(AdminModelView):
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
         try:
             data = await self._arrange_data(request, data)
-            gallery_files = self._unpack_gallery(data.get("gallery_images"))
+            raw_gallery = data.get("gallery_images")
             self._prepare_file_fields_for_populate(data)
             await self.validate(request, data)
 
@@ -236,6 +237,8 @@ class PropertyView(AdminModelView):
             await self.before_create(request, data, obj)
             await session.flush()  # obtenir obj.id sans commit
 
+            agency_name = obj.agency.name if obj.agency else None
+            gallery_files = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
             if gallery_files:
                 session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
 
@@ -249,7 +252,7 @@ class PropertyView(AdminModelView):
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
         try:
             data = await self._arrange_data(request, data, True)
-            gallery_files = self._unpack_gallery(data.get("gallery_images"))
+            raw_gallery = data.get("gallery_images")
             self._prepare_file_fields_for_populate(data)
             await self.validate(request, data)
 
@@ -259,6 +262,8 @@ class PropertyView(AdminModelView):
             session.add(obj)
             await self.before_edit(request, data, obj)
 
+            agency_name = obj.agency.name if obj.agency else None
+            gallery_files = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
             if gallery_files:
                 from sqlalchemy import select
                 result = await session.execute(
@@ -286,7 +291,7 @@ class PropertyView(AdminModelView):
         await warm_choices_cache(request.state.session)
 
     @staticmethod
-    def _unpack_gallery(raw: Any) -> list:
+    def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None) -> list:
         """Dépaquette le (files, should_delete) produit par ImageField.parse_form_data."""
         if raw is None:
             return []
@@ -294,7 +299,17 @@ class PropertyView(AdminModelView):
             files, should_delete = raw
             if should_delete or not files:
                 return []
-            return files if isinstance(files, list) else [files]
+            files = files if isinstance(files, list) else [files]
+            return [
+                PropertyImageFile(
+                    content=f.file,
+                    filename=f.filename,
+                    content_type=f.content_type,
+                    agency_name=agency_name,
+                    property_id=property_id,
+                )
+                for f in files
+            ]
         return []
 
     @staticmethod

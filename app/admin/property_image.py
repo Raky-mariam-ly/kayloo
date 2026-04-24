@@ -2,11 +2,14 @@ import uuid as _uuid
 from typing import Any, Dict
 
 from fastapi import Request
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import DateTimeField, ImageField, StringField
 from admin.base import AdminModelView, SectionField, UUIDEnumField
 from admin.choices import load_property_choices
+from core.files import PropertyImageFile
+from models.property import Property as PropertyModel
 
 
 class PropertyImageView(AdminModelView):
@@ -57,12 +60,29 @@ class PropertyImageView(AdminModelView):
                 except (ValueError, AttributeError):
                     property_id = pid_raw
 
-            # Créer un enregistrement par fichier — sqlalchemy-file gère le stockage
+            # Charger le name de l'agence depuis la propriété
+            agency_name = None
+            if property_id is not None:
+                from models.agency import Agency
+                row = await session.execute(
+                    select(Agency.name)
+                    .join(PropertyModel, PropertyModel.agency_id == Agency.id)
+                    .where(PropertyModel.id == property_id)
+                )
+                agency_name = row.scalar_one_or_none()
+
+            # Créer un enregistrement par fichier avec le chemin S3 structuré
             first_obj = None
             for file in files:
                 obj = self.model()
                 obj.property_id = property_id
-                obj.url = file  # assignation : sqlalchemy-file sauvegarde dans StorageManager
+                obj.url = PropertyImageFile(
+                    content=file.file,
+                    filename=file.filename,
+                    content_type=file.content_type,
+                    agency_name=agency_name,
+                    property_id=property_id,
+                )
                 session.add(obj)
                 if first_obj is None:
                     first_obj = obj

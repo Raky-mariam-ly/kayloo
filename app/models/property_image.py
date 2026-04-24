@@ -11,7 +11,7 @@ class PropertyImage(Base):
 
     id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, nullable=False)
     property_id = Column(UUID(as_uuid=True), ForeignKey("property_property.id"), nullable=False)
-    url = Column(FileStorageField(upload_storage="images"), nullable=False)
+    url = Column(FileStorageField(upload_storage="images", extra={"acl": "public-read"}), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)

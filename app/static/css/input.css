@@ -8,6 +8,8 @@
 
 @import "./styles/static-layout.css";
 
+@import "./styles/auth-modal.css";
+
 @theme {
   /* ── Brand Colors ─────────────────────────────────────── */
   --color-primary: #d60000;

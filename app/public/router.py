@@ -169,3 +169,7 @@ async def get_listing_details(
     if id:
         await _record_view(session, id, request)
     return templates.TemplateResponse(request, "public/pages/properties/details.html")
+
+@router.get("/cgu", response_class=HTMLResponse)
+async def get_CGU(request: Request, session=Depends(get_db)):
+    return templates.TemplateResponse(request, "public/pages/legal/cgu.html", context={})

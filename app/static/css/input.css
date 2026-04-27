@@ -85,6 +85,19 @@ html {
   scroll-behavior: smooth;
 }
 
+@layer base {
+  /* Global select option styling for dark-themed dropdowns */
+  select option {
+    @apply bg-gray-800 text-white;
+  }
+  
+  select option:hover,
+    select option:checked,
+    select option:focus {
+    @apply bg-primary text-white;
+  }
+}
+
 /* ── Utilities for Repeating Patterns ────────────────────── */
 @utility card-overlay {
   position: absolute;
@@ -107,6 +120,7 @@ html {
 @utility shadow-card-hover {
   box-shadow: var(--shadow-card-hover);
 }
+
 
 /* ── Fade-In Animation (hero + content sections) ────────── */
 @keyframes fadeIn {

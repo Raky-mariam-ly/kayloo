@@ -173,3 +173,12 @@ async def get_listing_details(
 @router.get("/cgu", response_class=HTMLResponse)
 async def get_CGU(request: Request, session=Depends(get_db)):
     return templates.TemplateResponse(request, "public/pages/legal/cgu.html", context={})
+
+@router.get("/mot-de-passe-oublie", response_class=HTMLResponse)
+async def forgot_password(request: Request):
+    return templates.TemplateResponse(request, "public/pages/forgot-password.html", {})
+
+@router.get("/reset-password", response_class=HTMLResponse)
+async def reset_password(request: Request):
+    # No token validation for UI testing
+    return templates.TemplateResponse(request, "public/pages/reset-password.html", {})

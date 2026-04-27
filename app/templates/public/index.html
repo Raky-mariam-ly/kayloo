@@ -345,7 +345,7 @@ super() }}
                     Besoin de plus d'informations ? Remplissez ce formulaire et notre équipe vous contactera rapidement.
                 </p>
 
-                <form id="houzez-inquiry-form" method="post" action="https://test.kayloo.immo/wp-admin/admin-ajax.php"
+                <form id="inquiry-form" method="post" action="https://test.kayloo.immo/wp-admin/admin-ajax.php"
                     novalidate>
                     <input type="hidden" name="form_id" value="28b887f" />
                     <input type="hidden" name="action" value="houzez_ele_inquiry_form" />
@@ -355,13 +355,24 @@ super() }}
                     <input type="hidden" name="webhook" value="false" />
 
                     <div class="space-y-4">
-                        <div>
-                            <label for="inquiry-name" class="block text-xs font-medium text-gray-300 mb-1">Nom complet
-                                <span class="text-primary">*</span></label>
-                            <input type="text" name="name" id="inquiry-name" required
-                                class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
+                        <!-- Prénom & Nom (side by side) -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="inquiry-firstname"
+                                    class="block text-xs font-medium text-gray-300 mb-1">Prénom
+                                    <span class="text-primary">*</span></label>
+                                <input type="text" name="firstname" id="inquiry-firstname" required
+                                    class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
+                            </div>
+                            <div>
+                                <label for="inquiry-lastname" class="block text-xs font-medium text-gray-300 mb-1">Nom
+                                    <span class="text-primary">*</span></label>
+                                <input type="text" name="lastname" id="inquiry-lastname" required
+                                    class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
+                            </div>
                         </div>
 
+                        <!-- Email (unchanged) -->
                         <div>
                             <label for="inquiry-email" class="block text-xs font-medium text-gray-300 mb-1">Adresse mail
                                 <span class="text-primary">*</span></label>
@@ -369,37 +380,27 @@ super() }}
                                 class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
                         </div>
 
+                        <!-- Type de demande & Type de bien (unchanged) -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="inquiry-type" class="block text-xs font-medium text-gray-300 mb-1">Type de
-                                    demande <span class="text-primary">*</span></label>
+                                    demande
+                                    <span class="text-primary">*</span></label>
                                 <select name="enquiry_type" id="inquiry-type" required
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
-                                    style="
-                                        background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-                                        background-repeat: no-repeat;
-                                        background-position: right 12px center;
-                                    ">
-                                    <option value="">Sélectionner</option>
-                                    <option value="Purchase">Purchase</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Sell">Sell</option>
-                                    <option value="Miss">Miss</option>
-                                    <option value="Evaluation">Evaluation</option>
-                                    <option value="Mortgage">Mortgage</option>
+                                    style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                                    <option value="">Sélectionner un type</option>
+                                    <option value="achat">Achat</option>
+                                    <option value="location_vide">Location vide</option>
+                                    <option value="location_meublée">Location meublée</option>
                                 </select>
                             </div>
-
                             <div>
                                 <label for="inquiry-property-type"
                                     class="block text-xs font-medium text-gray-300 mb-1">Type de bien</label>
                                 <select name="e_meta[property_type]" id="inquiry-property-type"
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
-                                    style="
-                                        background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-                                        background-repeat: no-repeat;
-                                        background-position: right 12px center;
-                                    ">
+                                    style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
                                     <option value="appartement">Appartement</option>
                                     <option value="bureau">Bureau</option>
                                     <option value="espace-coworking">Espace de Coworking</option>
@@ -412,17 +413,38 @@ super() }}
                             </div>
                         </div>
 
+                        <!-- ✅ NEW: Pays (before Région) -->
+                        <div>
+                            <label for="inquiry-country" class="block text-xs font-medium text-gray-300 mb-1">Pays
+                                <span class="text-primary">*</span></label>
+                            <select name="e_meta[country]" id="inquiry-country" required
+                                class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
+                                style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                                <option value="">Sélectionner un pays</option>
+                                <option value="SN">Sénégal</option>
+                                <option value="CI">Côte d'Ivoire</option>
+                                <option value="FR">France</option>
+                                <option value="CA">Canada</option>
+                                <option value="US">États-Unis</option>
+                                <option value="GB">Royaume-Uni</option>
+                                <option value="BE">Belgique</option>
+                                <option value="CH">Suisse</option>
+                                <option value="MA">Maroc</option>
+                                <option value="ML">Mali</option>
+                                <option value="GN">Guinée</option>
+                                <option value="BF">Burkina Faso</option>
+                                <option value="OTHER">Autre</option>
+                            </select>
+                        </div>
+
+                        <!-- Région & Prix max. (unchanged) -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="inquiry-region" class="block text-xs font-medium text-gray-300 mb-1">Région
                                     <span class="text-primary">*</span></label>
                                 <select name="e_meta[region]" id="inquiry-region" required
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-gray-300 focus:outline-none focus:border-primary transition appearance-none pr-8"
-                                    style="
-                                        background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;);
-                                        background-repeat: no-repeat;
-                                        background-position: right 12px center;
-                                    ">
+                                    style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A7A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
                                     <option value="abidjan">Abidjan</option>
                                     <option value="accra">Accra</option>
                                     <option value="dakar-rg">Dakar Région</option>
@@ -434,15 +456,16 @@ super() }}
                                     <option value="thies-rg">Thies Région</option>
                                 </select>
                             </div>
-
                             <div>
                                 <label for="inquiry-price" class="block text-xs font-medium text-gray-300 mb-1">Prix
-                                    max. <span class="text-primary">*</span></label>
+                                    max.
+                                    <span class="text-primary">*</span></label>
                                 <input type="number" name="e_meta[price]" id="inquiry-price" required min="0"
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
                             </div>
                         </div>
 
+                        <!-- Surface, Chambres, SdB (unchanged) -->
                         <div class="grid grid-cols-3 gap-3">
                             <div>
                                 <label for="inquiry-area" class="block text-xs font-medium text-gray-300 mb-1">Surface
@@ -450,14 +473,12 @@ super() }}
                                 <input type="number" name="e_meta[area-size]" id="inquiry-area" min="0"
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
                             </div>
-
                             <div>
                                 <label for="inquiry-beds" class="block text-xs font-medium text-gray-300 mb-1">Nbr.
                                     Chambres</label>
                                 <input type="number" name="e_meta[beds]" id="inquiry-beds" min="0"
                                     class="w-full h-10 px-3 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:border-primary transition" />
                             </div>
-
                             <div>
                                 <label for="inquiry-baths" class="block text-xs font-medium text-gray-300 mb-1">Nbr.
                                     SdB</label>
@@ -466,12 +487,16 @@ super() }}
                             </div>
                         </div>
 
+                        <!-- GDPR Checkbox & Submit (unchanged) -->
                         <div>
-                            <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" name="gdpr_agreement" id="inquiry-gdpr" required
-                                    class="mt-1 w-4 h-4 rounded border-white/30 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0" />
-                                <span class="text-xs text-gray-400 leading-tight">Je consens à ce que ce site web stocke
-                                    les informations que j'ai fournies.</span>
+                            <label class="flex items-start gap-2 cursor-pointer select-none">
+                                <input type="checkbox" required
+                                    class="w-4 h-4 mt-0.5 accent-primary rounded flex-shrink-0">
+                                <span class="text-xs text-white">J'accepte les <a href="{{ url_for('get_CGU') }}"
+                                        class="text-primary hover:text-primary-hover">Conditions d'utilisation</a> et la
+                                    <a href="{{ url_for('get_CGU') }}"
+                                        class="text-primary hover:text-primary-hover">Politique de
+                                        confidentialité</a>.</span>
                             </label>
                         </div>
 

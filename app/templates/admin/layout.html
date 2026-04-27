@@ -217,7 +217,7 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                         <a href="{{ url_for(__name__, path='/profile') }}"
                                            class="dropdown-item">
-                                            <i class="fa fa-user me-2"></i>Mon profil
+                                            <i class="fa fa-user me-2"></i>My Profile
                                         </a>
                                         <div class="dropdown-divider"></div>
                                         <a href="{{ request.url_for(__name__ ~ ':logout') }}"
@@ -239,7 +239,7 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                             {% if _sidebar_user and _sidebar_user.role in ('manager', 'agent') %}
 
                             {# ── VUE D'ENSEMBLE ── #}
-                            <li class="nav-item"><span class="mgr-section-label">Vue d'ensemble</span></li>
+                            <li class="nav-item"><span class="mgr-section-label">Overview</span></li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path == '/admin/dashboard' %}active{% endif %}"
                                    href="{{ url_for(__name__, path='/dashboard') }}">
@@ -248,51 +248,51 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/activites' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/activites') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/activities' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/activities') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-list"></i></span>
-                                    <span class="nav-link-title">Activités</span>
+                                    <span class="nav-link-title">Activities</span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/statistiques' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/statistiques') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/statistics' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/statistics') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-bar-chart"></i></span>
-                                    <span class="nav-link-title">Statistiques</span>
+                                    <span class="nav-link-title">Statistics</span>
                                 </a>
                             </li>
 
                             {# ── PROPRIÉTÉS ── #}
-                            <li class="nav-item mt-1"><span class="mgr-section-label">Propriétés</span></li>
+                            <li class="nav-item mt-1"><span class="mgr-section-label">Properties</span></li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path.startswith('/admin/property') and 'create' not in request.url.path %}active{% endif %}"
                                    href="{{ url_for(__name__ ~ ':list', identity='property') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-home"></i></span>
-                                    <span class="nav-link-title">Propriétés</span>
+                                    <span class="nav-link-title">Properties</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {% if '/admin/property/create' in request.url.path %}active{% endif %}"
                                    href="{{ url_for(__name__ ~ ':create', identity='property') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-plus-circle"></i></span>
-                                    <span class="nav-link-title">Créer une annonce</span>
+                                    <span class="nav-link-title">New Listing</span>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/favoris' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/favoris') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/favorites' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/favorites') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-heart"></i></span>
-                                    <span class="nav-link-title">Favoris</span>
+                                    <span class="nav-link-title">Favorites</span>
                                 </a>
                             </li>
 
                             {# ── CRM ── #}
                             <li class="nav-item mt-1"><span class="mgr-section-label">CRM</span></li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/offres' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/offres') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/offers' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/offers') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-tag"></i></span>
-                                    <span class="nav-link-title">Offres</span>
+                                    <span class="nav-link-title">Offers</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -303,15 +303,15 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/demandes' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/demandes') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/requests' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/requests') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-comments"></i></span>
-                                    <span class="nav-link-title">Demandes de renseignements</span>
+                                    <span class="nav-link-title">Information Requests</span>
                                 </a>
                             </li>
 
                             {# ── ÉQUIPE ── #}
-                            <li class="nav-item mt-1"><span class="mgr-section-label">Équipe</span></li>
+                            <li class="nav-item mt-1"><span class="mgr-section-label">Team</span></li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path.startswith('/admin/agent') and 'create' not in request.url.path %}active{% endif %}"
                                    href="{{ url_for(__name__ ~ ':list', identity='agent') }}">
@@ -323,12 +323,12 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                                 <a class="nav-link {% if '/admin/agent/create' in request.url.path %}active{% endif %}"
                                    href="{{ url_for(__name__ ~ ':create', identity='agent') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-user-plus"></i></span>
-                                    <span class="nav-link-title">Ajouter un agent</span>
+                                    <span class="nav-link-title">Add Agent</span>
                                 </a>
                             </li>
 
                             {# ── AUTRES ── #}
-                            <li class="nav-item mt-1"><span class="mgr-section-label">Autres</span></li>
+                            <li class="nav-item mt-1"><span class="mgr-section-label">Other</span></li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path == '/admin/messages' %}active{% endif %}"
                                    href="{{ url_for(__name__, path='/messages') }}">
@@ -338,12 +338,12 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                             </li>
 
                             {# ── COMPTE ── #}
-                            <li class="nav-item mt-1"><span class="mgr-section-label">Compte</span></li>
+                            <li class="nav-item mt-1"><span class="mgr-section-label">Account</span></li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path.startswith('/admin/profile') %}active{% endif %}"
                                    href="{{ url_for(__name__, path='/profile') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-user-circle"></i></span>
-                                    <span class="nav-link-title">Mon profil</span>
+                                    <span class="nav-link-title">My Profile</span>
                                 </a>
                             </li>
 
@@ -361,17 +361,17 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                             {% endfor %}
 
                             <li class="nav-item">
-                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Propriétés</p>
+                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Properties</p>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.url.path == '/admin/favoris' %}active{% endif %}"
-                                   href="{{ url_for(__name__, path='/favoris') }}">
+                                <a class="nav-link {% if request.url.path == '/admin/favorites' %}active{% endif %}"
+                                   href="{{ url_for(__name__, path='/favorites') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-heart"></i></span>
-                                    <span class="nav-link-title">Favoris</span>
+                                    <span class="nav-link-title">Favorites</span>
                                 </a>
                             </li>
                             <li class="nav-item mt-2">
-                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Autres</p>
+                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Other</p>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path == '/admin/messages' %}active{% endif %}"
@@ -384,19 +384,19 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                             {# COMPTE for viewer #}
                             {% if current_user %}
                             <li class="nav-item mt-3">
-                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Compte</p>
+                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Account</p>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path.startswith('/admin/profile') %}active fw-bold{% endif %}"
                                    href="{{ url_for(__name__, path='/profile') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-user-circle"></i></span>
-                                    <span class="nav-link-title">Mon profil</span>
+                                    <span class="nav-link-title">My Profile</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ request.url_for(__name__ ~ ':logout') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-sign-out"></i></span>
-                                    <span class="nav-link-title">Se déconnecter</span>
+                                    <span class="nav-link-title">Sign Out</span>
                                 </a>
                             </li>
                             {% endif %}
@@ -417,19 +417,19 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                             {# ── COMPTE section ── #}
                             {% if current_user %}
                             <li class="nav-item mt-3">
-                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Compte</p>
+                                <p style="font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.25rem 1rem .1rem;margin:0;">Account</p>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link {% if request.url.path.startswith('/admin/profile') %}active fw-bold{% endif %}"
                                    href="{{ url_for(__name__, path='/profile') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-user-circle"></i></span>
-                                    <span class="nav-link-title">Mon profil</span>
+                                    <span class="nav-link-title">My Profile</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ request.url_for(__name__ ~ ':logout') }}">
                                     <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="fa fa-sign-out"></i></span>
-                                    <span class="nav-link-title">Se déconnecter</span>
+                                    <span class="nav-link-title">Sign Out</span>
                                 </a>
                             </li>
                             {% endif %}
@@ -553,7 +553,7 @@ header.navbar .nav-item.dropdown .avatar.avatar-sm img {
                                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                         <a href="{{ url_for(__name__, path='/profile') }}"
                                            class="dropdown-item">
-                                            <i class="fa fa-user me-2"></i>Mon profil
+                                            <i class="fa fa-user me-2"></i>My Profile
                                         </a>
                                         <div class="dropdown-divider"></div>
                                         <a href="{{ request.url_for(__name__ ~ ':logout') }}"

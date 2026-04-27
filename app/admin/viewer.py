@@ -4,27 +4,27 @@ from starlette.templating import Jinja2Templates
 from starlette_admin import CustomView
 
 
-class ViewerFavorisView(CustomView):
+class ViewerFavoritesView(CustomView):
     def __init__(self):
         super().__init__(
-            label="Favoris",
+            label="Favorites",
             icon="fa fa-heart",
-            path="/favoris",
-            template_path="viewer_favoris.html",
-            name="viewer_favoris",
+            path="/favorites",
+            template_path="viewer_favorites.html",
+            name="viewer_favorites",
             methods=["GET"],
             add_to_menu=False,
         )
 
     def is_accessible(self, request: Request) -> bool:
         user = getattr(request.state, "user", None)
-        return user is not None and user.role in ("viewer", "manager", "agent")
+        return user is not None and user.role in ("viewer", "manager")
 
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
         return templates.TemplateResponse(
             request=request,
             name=self.template_path,
-            context={"title": "Mes favoris"},
+            context={"title": "My Favorites"},
         )
 
 
@@ -42,7 +42,7 @@ class ViewerMessagesView(CustomView):
 
     def is_accessible(self, request: Request) -> bool:
         user = getattr(request.state, "user", None)
-        return user is not None and user.role in ("viewer", "manager", "agent")
+        return user is not None and user.role in ("viewer", "manager")
 
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
         return templates.TemplateResponse(

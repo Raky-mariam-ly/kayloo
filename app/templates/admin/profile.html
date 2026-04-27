@@ -109,102 +109,106 @@
 {% endblock %}
 
 {% block content %}
-{% set active_tab = tab or 'profil' %}
+{% set active_tab = tab or 'profile' %}
 
 <div class="container-xl py-4">
-  <h2 class="mb-4 fw-bold" style="color:#1a1a2e;">Paramètres du compte</h2>
+  <h2 class="mb-4 fw-bold" style="color:#1a1a2e;">Account Settings</h2>
 
   <div class="row g-4 align-items-start">
 
-    {# ── Sidebar gauche ── #}
+    {# ── Left sidebar ── #}
     <div class="col-lg-3">
       <div class="card settings-sidebar">
         <div class="card-body">
 
-          <p class="settings-section-label">Mon compte</p>
-          <a class="settings-nav-link {% if active_tab == 'profil' %}active{% endif %}"
-             href="?tab=profil">
-            <i class="fa fa-user"></i> Mon profil
+          <p class="settings-section-label">My Account</p>
+          <a class="settings-nav-link {% if active_tab == 'profile' %}active{% endif %}"
+             href="?tab=profile">
+            <i class="fa fa-user"></i> My Profile
           </a>
           <a class="settings-nav-link {% if active_tab == 'social' %}active{% endif %}"
              href="?tab=social">
-            <i class="fa fa-share-alt"></i> Réseaux sociaux
+            <i class="fa fa-share-alt"></i> Social Networks
           </a>
           {% if user.role in ('manager', 'agent') %}
-          <a class="settings-nav-link {% if active_tab == 'agence' %}active{% endif %}"
-             href="?tab=agence">
-            <i class="fa fa-building"></i> Mon agence
+          <a class="settings-nav-link {% if active_tab == 'agency' %}active{% endif %}"
+             href="?tab=agency">
+            <i class="fa fa-building"></i> My Agency
           </a>
           {% endif %}
 
-          <p class="settings-section-label mt-2">Sécurité</p>
+          <p class="settings-section-label mt-2">Security</p>
           <a class="settings-nav-link {% if active_tab == 'password' %}active{% endif %}"
              href="?tab=password">
-            <i class="fa fa-lock"></i> Mot de passe
+            <i class="fa fa-lock"></i> Password
           </a>
           <a class="settings-nav-link {% if active_tab == 'delete' %}active{% endif %}"
              href="?tab=delete">
-            <i class="fa fa-trash"></i> Supprimer le compte
+            <i class="fa fa-trash"></i> Delete Account
           </a>
 
         </div>
       </div>
     </div>
 
-    {# ── Contenu droit ── #}
+    {# ── Right content ── #}
     <div class="col-lg-9">
 
-      {# Alerts globaux #}
+      {# Global alerts #}
       {% if success == '1' %}
       <div class="alert-success-custom">
-        <i class="fa fa-check-circle me-2"></i>Modifications enregistrées avec succès.
+        <i class="fa fa-check-circle me-2"></i>Changes saved successfully.
       </div>
       {% endif %}
       {% if success == 'password' %}
       <div class="alert-success-custom">
-        <i class="fa fa-check-circle me-2"></i>Mot de passe mis à jour avec succès.
+        <i class="fa fa-check-circle me-2"></i>Password updated successfully.
       </div>
       {% endif %}
       {% if success == 'agency' %}
       <div class="alert-success-custom">
-        <i class="fa fa-check-circle me-2"></i>Informations de l'agence mises à jour avec succès.
+        <i class="fa fa-check-circle me-2"></i>Agency information updated successfully.
       </div>
       {% endif %}
       {% if error == 'invalid_format' %}
       <div class="alert-error-custom">
-        <i class="fa fa-exclamation-circle me-2"></i>Format non supporté. Utilisez JPG, PNG, WEBP ou GIF.
+        <i class="fa fa-exclamation-circle me-2"></i>Unsupported format. Please use JPG, PNG, WEBP, or GIF.
       </div>
       {% elif error == 'password_mismatch' %}
       <div class="alert-error-custom">
-        <i class="fa fa-exclamation-circle me-2"></i>Les mots de passe ne correspondent pas.
+        <i class="fa fa-exclamation-circle me-2"></i>Passwords do not match.
       </div>
       {% elif error == 'password_empty' %}
       <div class="alert-error-custom">
-        <i class="fa fa-exclamation-circle me-2"></i>Veuillez saisir un mot de passe.
+        <i class="fa fa-exclamation-circle me-2"></i>Please enter a password.
       </div>
       {% elif error == 'password_short' %}
       <div class="alert-error-custom">
-        <i class="fa fa-exclamation-circle me-2"></i>Le mot de passe doit contenir au moins 8 caractères.
+        <i class="fa fa-exclamation-circle me-2"></i>Password must be at least 8 characters.
       </div>
       {% elif error %}
       <div class="alert-error-custom">
-        <i class="fa fa-exclamation-circle me-2"></i>Une erreur est survenue, veuillez réessayer.
+        <i class="fa fa-exclamation-circle me-2"></i>An error occurred, please try again.
       </div>
       {% endif %}
 
       {# ══════════════════════════════════════════════════════════════
-         TAB: Mon profil
+         TAB: My Profile
       ══════════════════════════════════════════════════════════════ #}
-      {% if active_tab == 'profil' %}
+      {% if active_tab == 'profile' %}
       <div class="card">
         <div class="card-body p-4">
 
           {# Avatar #}
-          <p class="settings-section-title">Photo de profil</p>
+          <p class="settings-section-title">Profile Photo</p>
           <div class="d-flex align-items-center gap-3 mb-4">
             <div class="profile-avatar">
               {% if user.avatar_url %}
-                <img src="/static/{{ user.avatar_url }}" alt="{{ user.first_name }}">
+                {% if user.avatar_url.startswith('http') %}
+                  <img src="{{ user.avatar_url }}" alt="{{ user.first_name }}">
+                {% else %}
+                  <img src="/static/{{ user.avatar_url }}" alt="{{ user.first_name }}">
+                {% endif %}
               {% else %}
                 <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38"
                      viewBox="0 0 24 24" fill="none" stroke="#adb5bd"
@@ -220,7 +224,7 @@
                     enctype="multipart/form-data"
                     id="avatar-form">
                 <label class="btn btn-kayloo-outline btn-sm" style="cursor:pointer;">
-                  <i class="fa fa-camera me-1"></i> Changer l'avatar
+                  <i class="fa fa-camera me-1"></i> Change Avatar
                   <input type="file" name="avatar" accept="image/*" class="d-none"
                          onchange="document.getElementById('avatar-form').submit()">
                 </label>
@@ -231,14 +235,14 @@
 
           <hr class="my-3">
 
-          {# Informations personnelles #}
-          <p class="settings-section-title">Informations personnelles</p>
+          {# Personal information #}
+          <p class="settings-section-title">Personal Information</p>
           <form method="POST" action="{{ url_for(__name__, path='/profile') }}">
-            <input type="hidden" name="_tab" value="profil">
+            <input type="hidden" name="_tab" value="profile">
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label-sm">Nom d'utilisateur</label>
+                <label class="form-label-sm">Username</label>
                 <input type="text" class="form-control" value="{{ user.email.split('@')[0] }}"
                        readonly disabled style="background:#f8f9fa;color:#6c757d;">
               </div>
@@ -251,12 +255,12 @@
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label-sm" for="first_name">Prénom</label>
+                <label class="form-label-sm" for="first_name">First Name</label>
                 <input type="text" class="form-control" id="first_name" name="first_name"
                        value="{{ user.first_name or '' }}">
               </div>
               <div class="col-md-6">
-                <label class="form-label-sm" for="last_name">Nom de famille</label>
+                <label class="form-label-sm" for="last_name">Last Name</label>
                 <input type="text" class="form-control" id="last_name" name="last_name"
                        value="{{ user.last_name or '' }}">
               </div>
@@ -264,15 +268,15 @@
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label-sm" for="phone_number">Numéro de portable</label>
+                <label class="form-label-sm" for="phone_number">Mobile Number</label>
                 <input type="text" class="form-control" id="phone_number" name="phone_number"
                        placeholder="Enter your phone number"
                        value="{{ user.phone_number or '' }}">
               </div>
               <div class="col-md-6">
-                <label class="form-label-sm" for="office_phone">Numéro de bureau</label>
+                <label class="form-label-sm" for="office_phone">Office Number</label>
                 <input type="text" class="form-control" id="office_phone" name="office_phone"
-                       placeholder="Enter your phone number"
+                       placeholder="Enter your office number"
                        value="{{ user.office_phone or '' }}">
               </div>
             </div>
@@ -281,11 +285,11 @@
               <div class="col-md-6">
                 <label class="form-label-sm" for="whatsapp_number">WhatsApp</label>
                 <input type="text" class="form-control" id="whatsapp_number" name="whatsapp_number"
-                       placeholder="Enter your whatsapp number"
+                       placeholder="Enter your WhatsApp number"
                        value="{{ user.whatsapp_number or '' }}">
               </div>
               <div class="col-md-6">
-                <label class="form-label-sm" for="company_name">Nom de la compagnie</label>
+                <label class="form-label-sm" for="company_name">Company Name</label>
                 <input type="text" class="form-control" id="company_name" name="company_name"
                        placeholder="Enter your company name"
                        value="{{ user.company_name or '' }}">
@@ -293,21 +297,21 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label-sm" for="address">Adresse</label>
+              <label class="form-label-sm" for="address">Address</label>
               <input type="text" class="form-control" id="address" name="address"
                      placeholder="Enter your address"
                      value="{{ user.address or '' }}">
             </div>
 
             <div class="mb-4">
-              <label class="form-label-sm" for="bio">À propos de moi</label>
+              <label class="form-label-sm" for="bio">About Me</label>
               <textarea class="form-control" id="bio" name="bio" rows="4"
-                        placeholder="Décrivez-vous en quelques mots...">{{ user.bio or '' }}</textarea>
+                        placeholder="Tell us a bit about yourself...">{{ user.bio or '' }}</textarea>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-              <button type="reset" class="btn btn-outline-secondary">Annuler</button>
-              <button type="submit" class="btn btn-kayloo">Enregistrer</button>
+              <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+              <button type="submit" class="btn btn-kayloo">Save</button>
             </div>
           </form>
 
@@ -315,12 +319,12 @@
       </div>
 
       {# ══════════════════════════════════════════════════════════════
-         TAB: Réseaux sociaux
+         TAB: Social Networks
       ══════════════════════════════════════════════════════════════ #}
       {% elif active_tab == 'social' %}
       <div class="card">
         <div class="card-body p-4">
-          <p class="settings-section-title">Réseaux sociaux &amp; site web</p>
+          <p class="settings-section-title">Social Networks &amp; Website</p>
 
           <form method="POST" action="{{ url_for(__name__, path='/profile') }}">
             <input type="hidden" name="_tab" value="social">
@@ -393,58 +397,58 @@
 
             <div class="mb-4">
               <label class="form-label-sm" for="siteweb_url">
-                <i class="fa fa-globe me-1"></i> Site Internet
+                <i class="fa fa-globe me-1"></i> Website
               </label>
               <input type="url" class="form-control" id="siteweb_url" name="siteweb_url"
-                     placeholder="https://monsite.com"
+                     placeholder="https://yourwebsite.com"
                      value="{{ user.siteweb_url or '' }}">
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-              <button type="reset" class="btn btn-outline-secondary">Annuler</button>
-              <button type="submit" class="btn btn-kayloo">Enregistrer</button>
+              <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+              <button type="submit" class="btn btn-kayloo">Save</button>
             </div>
           </form>
         </div>
       </div>
 
       {# ══════════════════════════════════════════════════════════════
-         TAB: Mon agence (manager uniquement)
+         TAB: My Agency (manager only)
       ══════════════════════════════════════════════════════════════ #}
-      {% elif active_tab == 'agence' and user.role in ('manager', 'agent') %}
+      {% elif active_tab == 'agency' and user.role in ('manager', 'agent') %}
       <div class="card">
         <div class="card-body p-4">
 
           {% if not agency %}
           <div class="alert-error-custom">
-            <i class="fa fa-exclamation-circle me-2"></i>Aucune agence associée à votre compte.
+            <i class="fa fa-exclamation-circle me-2"></i>No agency associated with your account.
           </div>
           {% else %}
 
           <p class="settings-section-title">
-            <i class="fa fa-building me-2" style="color:#a80000;"></i>Informations de l'agence
+            <i class="fa fa-building me-2" style="color:#a80000;"></i>Agency Information
           </p>
 
           <form method="POST" action="{{ url_for(__name__, path='/profile/agency') }}">
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label-sm" for="agency_name">Nom de l'agence</label>
+                <label class="form-label-sm" for="agency_name">Agency Name</label>
                 <input type="text" class="form-control" id="agency_name" name="name"
-                       placeholder="Nom de votre agence"
+                       placeholder="Your agency name"
                        value="{{ agency.name or '' }}">
               </div>
               <div class="col-md-6">
                 <label class="form-label-sm" for="agency_email">Email</label>
                 <input type="email" class="form-control" id="agency_email" name="email"
-                       placeholder="contact@agence.com"
+                       placeholder="contact@agency.com"
                        value="{{ agency.email or '' }}">
               </div>
             </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
-                <label class="form-label-sm" for="agency_phone">Téléphone</label>
+                <label class="form-label-sm" for="agency_phone">Phone</label>
                 <input type="text" class="form-control" id="agency_phone" name="phone_number"
                        placeholder="+XXX XXX XXX XXX"
                        value="{{ agency.phone_number or '' }}">
@@ -461,15 +465,15 @@
 
             <div class="mb-4">
               <label class="form-label-sm" for="agency_siteweb">
-                <i class="fa fa-globe me-1"></i> Site Internet
+                <i class="fa fa-globe me-1"></i> Website
               </label>
               <input type="url" class="form-control" id="agency_siteweb" name="siteweb_url"
-                     placeholder="https://monagence.com"
+                     placeholder="https://youragency.com"
                      value="{{ agency.siteweb_url or '' }}">
             </div>
 
             <hr class="my-3">
-            <p class="settings-section-title">Réseaux sociaux de l'agence</p>
+            <p class="settings-section-title">Agency Social Networks</p>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
@@ -519,8 +523,8 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-              <button type="reset" class="btn btn-outline-secondary">Annuler</button>
-              <button type="submit" class="btn btn-kayloo">Enregistrer</button>
+              <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+              <button type="submit" class="btn btn-kayloo">Save</button>
             </div>
           </form>
 
@@ -529,56 +533,56 @@
       </div>
 
       {# ══════════════════════════════════════════════════════════════
-         TAB: Mot de passe
+         TAB: Password
       ══════════════════════════════════════════════════════════════ #}
       {% elif active_tab == 'password' %}
       <div class="card">
         <div class="card-body p-4">
-          <p class="settings-section-title">Changer le mot de passe</p>
+          <p class="settings-section-title">Change Password</p>
           <p class="text-muted mb-4" style="font-size:.9rem;">
-            Choisissez un mot de passe fort d'au moins 8 caractères.
+            Choose a strong password of at least 8 characters.
           </p>
 
           <form method="POST" action="{{ url_for(__name__, path='/profile/change-password') }}">
             <div class="row g-3 mb-4">
               <div class="col-md-6">
-                <label class="form-label-sm" for="new_password">Nouveau mot de passe</label>
+                <label class="form-label-sm" for="new_password">New Password</label>
                 <input type="password" class="form-control" id="new_password" name="new_password"
-                       placeholder="Entrez le nouveau mot de passe">
+                       placeholder="Enter your new password">
               </div>
               <div class="col-md-6">
-                <label class="form-label-sm" for="confirm_password">Confirmer le mot de passe</label>
+                <label class="form-label-sm" for="confirm_password">Confirm Password</label>
                 <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                       placeholder="Répétez le nouveau mot de passe">
+                       placeholder="Repeat your new password">
               </div>
             </div>
             <div class="d-flex justify-content-end">
-              <button type="submit" class="btn btn-kayloo">Mettre à jour le mot de passe</button>
+              <button type="submit" class="btn btn-kayloo">Update Password</button>
             </div>
           </form>
         </div>
       </div>
 
       {# ══════════════════════════════════════════════════════════════
-         TAB: Supprimer le compte
+         TAB: Delete Account
       ══════════════════════════════════════════════════════════════ #}
       {% elif active_tab == 'delete' %}
       <div class="card border-danger">
         <div class="card-body p-4">
-          <p class="settings-section-title" style="color:#a80000;">Supprimer le compte</p>
+          <p class="settings-section-title" style="color:#a80000;">Delete Account</p>
           <p class="text-muted mb-2" style="font-size:.9rem;">
-            Cette action va <strong>désactiver définitivement</strong> votre compte.
-            Vous ne pourrez plus vous connecter.
+            This action will <strong>permanently deactivate</strong> your account.
+            You will no longer be able to log in.
           </p>
           <p class="mb-4" style="font-size:.85rem;color:#721c24;background:#f8d7da;border:1px solid #f5c6cb;border-radius:6px;padding:.65rem 1rem;">
             <i class="fa fa-exclamation-triangle me-2"></i>
-            Cette action est irréversible. Toutes vos données resteront en base mais votre accès sera révoqué.
+            This action is irreversible. All your data will remain in the database but your access will be revoked.
           </p>
           <form method="POST" action="{{ url_for(__name__, path='/profile/delete') }}"
-                onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');">
+                onsubmit="return confirm('Are you sure you want to delete your account? This action is irreversible.');">
             <div class="d-flex justify-content-end">
               <button type="submit" class="btn btn-danger">
-                <i class="fa fa-trash me-1"></i> Supprimer mon compte
+                <i class="fa fa-trash me-1"></i> Delete My Account
               </button>
             </div>
           </form>

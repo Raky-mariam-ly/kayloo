@@ -8,13 +8,12 @@ import uuid
 
 
 PIPELINE_COLUMNS = [
-    {"key": "new", "label": "Nouveau", "color": "#0ca678", "bg": "#e8f4f8"},
-    {"key": "contacted", "label": "Contacté", "color": "#206bc4", "bg": "#e0f0ff"},
-    {"key": "qualified", "label": "Qualifié", "color": "#6654a4", "bg": "#e8e0ff"},
-    {"key": "negotiation", "label": "Négociation",
-        "color": "#9654a4", "bg": "#f0e0ff"},
-    {"key": "won", "label": "Gagné", "color": "#2fb344", "bg": "#d2f4e8"},
-    {"key": "lost", "label": "Perdu", "color": "#d63939", "bg": "#fde0e0"},
+    {"key": "new", "label": "New", "color": "#0ca678", "bg": "#e8f4f8"},
+    {"key": "contacted", "label": "Contacted", "color": "#206bc4", "bg": "#e0f0ff"},
+    {"key": "qualified", "label": "Qualified", "color": "#6654a4", "bg": "#e8e0ff"},
+    {"key": "negotiation", "label": "Negotiation", "color": "#9654a4", "bg": "#f0e0ff"},
+    {"key": "won", "label": "Won", "color": "#2fb344", "bg": "#d2f4e8"},
+    {"key": "lost", "label": "Lost", "color": "#d63939", "bg": "#fde0e0"},
 ]
 
 VALID_TRANSITIONS = {
@@ -27,19 +26,19 @@ VALID_TRANSITIONS = {
 }
 
 SOURCE_LABELS = {
-    "website": "Site web",
-    "mobile_app": "App mobile",
-    "phone": "Téléphone",
-    "walk_in": "Visite",
-    "referral": "Recommandation",
-    "social_media": "Réseaux sociaux",
+    "website": "Website",
+    "mobile_app": "Mobile App",
+    "phone": "Phone",
+    "walk_in": "Walk-in",
+    "referral": "Referral",
+    "social_media": "Social Media",
 }
 
 PRIORITY_META = {
-    "low": {"label": "Basse", "color": "#a0aec0"},
-    "medium": {"label": "Moyenne", "color": "#f59f00"},
-    "high": {"label": "Haute", "color": "#fd7e14"},
-    "urgent": {"label": "Urgente", "color": "#d63939"},
+    "low": {"label": "Low", "color": "#a0aec0"},
+    "medium": {"label": "Medium", "color": "#f59f00"},
+    "high": {"label": "High", "color": "#fd7e14"},
+    "urgent": {"label": "Urgent", "color": "#d63939"},
 }
 
 
@@ -61,7 +60,7 @@ class LeadKanbanView(CustomView):
         session: AsyncSession = request.state.session
         agency_id = await get_user_agency_id(session, user) if user else None
         if not agency_id:
-            return JSONResponse({"detail": "Accès refusé — aucune agence liée"}, 403)
+            return JSONResponse({"detail": "Access denied — no linked agency"}, 403)
 
         request.state._agency_id = agency_id
 
@@ -88,14 +87,13 @@ class LeadKanbanView(CustomView):
         if not lead:
             return JSONResponse({"detail": "Lead not found"}, 404)
 
-        # Verify lead belongs to user's agency
         if lead.agency_id != agency_id:
-            return JSONResponse({"detail": "Accès refusé"}, 403)
+            return JSONResponse({"detail": "Access denied"}, 403)
 
         allowed = VALID_TRANSITIONS.get(lead.status, [])
         if new_status not in allowed:
             return JSONResponse(
-                {"detail": f"Transition {lead.status} → {new_status} non autorisée"},
+                {"detail": f"Transition {lead.status} → {new_status} not allowed"},
                 400,
             )
 

@@ -16,7 +16,7 @@ class CountryView(AdminModelView):
     repository_class = CountryRepository
 
     fields = [
-        StringField("code", required=True, label="Code pays (ISO-2)"),
+        StringField("code", required=True, label="Country Code (ISO-2)"),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True),
         StringField("created_by", read_only=True),
@@ -25,16 +25,14 @@ class CountryView(AdminModelView):
     ]
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
-        """Raise FormValidationError to display error in forms"""
         errors: Dict[str, str] = dict()
         code = (data.get("code") or "").strip().upper()
         data["code"] = code
 
-        # Vérification sécurisée si le code existe dans les données
         if not code or len(code) != 2:
             errors["code"] = "Ensure code has exactly 02 characters"
-            
+
         if len(errors) > 0:
             raise FormValidationError(errors)
-            
+
         return await super().validate(request, data)

@@ -13,28 +13,28 @@ from services.lead import LeadService
 
 
 SOURCE_CHOICES = [
-    ("website", "Site web"),
-    ("mobile_app", "Application mobile"),
-    ("phone", "Téléphone"),
-    ("walk_in", "Visite"),
-    ("referral", "Recommandation"),
-    ("social_media", "Réseaux sociaux"),
+    ("website", "Website"),
+    ("mobile_app", "Mobile App"),
+    ("phone", "Phone"),
+    ("walk_in", "Walk-in"),
+    ("referral", "Referral"),
+    ("social_media", "Social Media"),
 ]
 
 STATUS_CHOICES = [
-    ("new", "Nouveau"),
-    ("contacted", "Contacté"),
-    ("qualified", "Qualifié"),
-    ("negotiation", "Négociation"),
-    ("won", "Gagné"),
-    ("lost", "Perdu"),
+    ("new", "New"),
+    ("contacted", "Contacted"),
+    ("qualified", "Qualified"),
+    ("negotiation", "Negotiation"),
+    ("won", "Won"),
+    ("lost", "Lost"),
 ]
 
 PRIORITY_CHOICES = [
-    ("low", "Basse"),
-    ("medium", "Moyenne"),
-    ("high", "Haute"),
-    ("urgent", "Urgente"),
+    ("low", "Low"),
+    ("medium", "Medium"),
+    ("high", "High"),
+    ("urgent", "Urgent"),
 ]
 
 
@@ -47,18 +47,18 @@ class LeadView(AdminModelView):
 
     fields = [
         StringField("contact_id", label="Contact ID", exclude_from_list=True),
-        StringField("property_id", label="Bien ID", exclude_from_list=True),
+        StringField("property_id", label="Property ID", exclude_from_list=True),
         UUIDEnumField("agency_id", choices_loader=load_agency_choices,
-                      label="Agence", coerce=uuid.UUID, exclude_from_list=True),
+                      label="Agency", coerce=uuid.UUID, exclude_from_list=True),
         EnumField("source", choices=SOURCE_CHOICES, label="Source"),
-        EnumField("status", choices=STATUS_CHOICES, label="Statut"),
-        EnumField("priority", choices=PRIORITY_CHOICES, label="Priorité"),
-        NumberField("probability", label="Probabilité (%)",
-                    help_text="0-100 — mis à jour auto lors des transitions"),
-        DateField("expected_close", label="Clôture prévue"),
-        NumberField("deal_value", label="Valeur négociée",
-                    help_text="Laissez vide pour utiliser le prix du bien"),
-        StringField("lost_reason", label="Raison perte", exclude_from_list=True),
+        EnumField("status", choices=STATUS_CHOICES, label="Status"),
+        EnumField("priority", choices=PRIORITY_CHOICES, label="Priority"),
+        NumberField("probability", label="Probability (%)",
+                    help_text="0-100 — auto-updated on transitions"),
+        DateField("expected_close", label="Expected Close"),
+        NumberField("deal_value", label="Deal Value",
+                    help_text="Leave empty to use property price"),
+        StringField("lost_reason", label="Lost Reason", exclude_from_list=True),
         TextAreaField("notes", label="Notes", exclude_from_list=True),
         DateTimeField("created_at", read_only=True),
         StringField("created_by", read_only=True, exclude_from_list=True),
@@ -66,5 +66,3 @@ class LeadView(AdminModelView):
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]

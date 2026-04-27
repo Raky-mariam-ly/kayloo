@@ -14,33 +14,25 @@ from models.property import Property as PropertyModel
 
 class PropertyImageView(AdminModelView):
     fields = [
-        # ── Bien associé ──
-        SectionField("_sec_bien", label="Bien associé"),
+        SectionField("_sec_property", label="Associated Property"),
         UUIDEnumField("property_id", choices_loader=load_property_choices,
-                      label="Bien", coerce=_uuid.UUID, required=True),
+                      label="Property", coerce=_uuid.UUID, required=True),
 
-        # ── Images ──
-        SectionField("_sec_images", label="Images (sélectionnez une ou plusieurs)"),
+        SectionField("_sec_images", label="Images (select one or more)"),
         ImageField("url", label="Photos", required=True, multiple=True),
 
-        # ── Audit ──
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
         StringField("created_by", read_only=True, exclude_from_list=True),
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
-
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        """Crée un enregistrement PropertyImage par photo uploadée."""
         try:
             data = await self._arrange_data(request, data)
             await self.validate(request, data)
             session: AsyncSession = request.state.session
 
-            # Récupérer les fichiers uploadés depuis ImageField(multiple=True)
             url_raw = data.get("url")
             files = []
             if isinstance(url_raw, tuple) and len(url_raw) == 2:
@@ -49,9 +41,8 @@ class PropertyImageView(AdminModelView):
                     files = val if isinstance(val, list) else [val]
 
             if not files:
-                raise FormValidationError({"url": "Au moins une image est requise"})
+                raise FormValidationError({"url": "At least one image is required"})
 
-            # Récupérer le property_id
             pid_raw = data.get("property_id")
             property_id = None
             if pid_raw is not None:
@@ -60,7 +51,6 @@ class PropertyImageView(AdminModelView):
                 except (ValueError, AttributeError):
                     property_id = pid_raw
 
-            # Charger le name de l'agence depuis la propriété
             agency_name = None
             if property_id is not None:
                 from models.agency import Agency
@@ -71,7 +61,6 @@ class PropertyImageView(AdminModelView):
                 )
                 agency_name = row.scalar_one_or_none()
 
-            # Créer un enregistrement par fichier avec le chemin S3 structuré
             first_obj = None
             for file in files:
                 obj = self.model()
@@ -94,12 +83,12 @@ class PropertyImageView(AdminModelView):
             return first_obj
 
         except Exception as e:
-            return self.handle_exception(e)
+            raise e
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = {}
         if not data.get("property_id"):
-            errors["property_id"] = "Le bien est obligatoire"
+            errors["property_id"] = "Property is required"
         if errors:
             raise FormValidationError(errors)
         return await super().validate(request, data)

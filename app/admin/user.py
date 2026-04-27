@@ -15,20 +15,20 @@ class UserView(AdminModelView):
 
     fields = [
         StringField("email", label="Email", required=True),
-        PasswordField("hashed_password", label="Mot de passe"),
-        StringField("last_name", label="Nom"),
-        StringField("first_name", label="Prénom"),
-        EnumField("gender", choices=GENDER_TYPES, select2=False, label="Genre"),
-        StringField("phone_number", label="Téléphone"),
-        StringField("office_phone", label="Téléphone bureau", exclude_from_list=True),
+        PasswordField("hashed_password", label="Password"),
+        StringField("last_name", label="Last Name"),
+        StringField("first_name", label="First Name"),
+        EnumField("gender", choices=GENDER_TYPES, select2=False, label="Gender"),
+        StringField("phone_number", label="Phone"),
+        StringField("office_phone", label="Office Phone", exclude_from_list=True),
         StringField("whatsapp_number", label="WhatsApp", exclude_from_list=True),
-        StringField("company_name", label="Compagnie", exclude_from_list=True),
-        StringField("address", label="Adresse", exclude_from_list=True),
+        StringField("company_name", label="Company", exclude_from_list=True),
+        StringField("address", label="Address", exclude_from_list=True),
         TextAreaField("bio", label="Bio", exclude_from_list=True),
-        EnumField("role", choices=AVAILABLE_USER_ROLES, select2=False, label="Rôle"),
-        BooleanField("is_active", label="Actif"),
-        BooleanField("is_verified", label="Vérifié"),
-        BooleanField("is_superuser", label="Super admin"),
+        EnumField("role", choices=AVAILABLE_USER_ROLES, select2=False, label="Role"),
+        BooleanField("is_active", label="Active"),
+        BooleanField("is_verified", label="Verified"),
+        BooleanField("is_superuser", label="Super Admin"),
         StringField("avatar_url", label="Avatar URL"),
         StringField("facebook_url", label="Facebook", exclude_from_list=True),
         StringField("x_url", label="X (Twitter)", exclude_from_list=True),
@@ -36,11 +36,11 @@ class UserView(AdminModelView):
         StringField("instagram_url", label="Instagram", exclude_from_list=True),
         StringField("youtube_url", label="YouTube", exclude_from_list=True),
         StringField("tiktok_url", label="TikTok", exclude_from_list=True),
-        StringField("siteweb_url", label="Site web", exclude_from_list=True),
-        DateTimeField("created_at", label="Créé le", read_only=True),
-        DateTimeField("updated_at", label="Modifié le", read_only=True),
-        StringField("created_by", label="Créé par", read_only=True),
-        StringField("updated_by", label="Modifié par", read_only=True),
+        StringField("siteweb_url", label="Website", exclude_from_list=True),
+        DateTimeField("created_at", label="Created On", read_only=True),
+        DateTimeField("updated_at", label="Updated On", read_only=True),
+        StringField("created_by", label="Created By", read_only=True),
+        StringField("updated_by", label="Updated By", read_only=True),
     ]
     fields_default_sort = [User.last_name, ("first_name", True)]
     exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by",
@@ -51,14 +51,6 @@ class UserView(AdminModelView):
     exclude_fields_from_edit = [
         "hashed_password", "created_at", "updated_at", "created_by", "updated_by"]
     exclude_fields_from_detail = ["hashed_password"]
-
-    _GENDER_NORMALIZE = {'male': 'M', 'Male': 'M', 'MALE': 'M',
-                         'female': 'F', 'Female': 'F', 'FEMALE': 'F'}
-
-    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-        if data.get('gender') in self._GENDER_NORMALIZE:
-            data['gender'] = self._GENDER_NORMALIZE[data['gender']]
-        return await super().edit(request, pk, data)
 
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
         try:
@@ -71,7 +63,7 @@ class UserView(AdminModelView):
                 gender=data["gender"],
             )
         except Exception:
-            raise FormValidationError({"email": "Cet email est déjà utilisé ou invalide."})
+            raise FormValidationError({"email": "This email is already used or invalid."})
         if user is None:
-            raise FormValidationError({"email": "Cet email est déjà utilisé."})
+            raise FormValidationError({"email": "This email is already used."})
         return user

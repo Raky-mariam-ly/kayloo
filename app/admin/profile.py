@@ -1,22 +1,20 @@
+import io
 import os
-import uuid
 
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 from starlette.templating import Jinja2Templates
 from starlette_admin import CustomView
+from admin.base import _is_agent
 
 
-AVATAR_UPLOAD_DIR = "static/uploads/avatars"
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
 class ProfileView(CustomView):
-    """Profile page — GET shows the form, POST saves it."""
-
     def __init__(self):
         super().__init__(
-            label="Mon profil",
+            label="My Profile",
             icon="fa fa-user-circle",
             path="/profile",
             template_path="profile.html",
@@ -33,19 +31,16 @@ class ProfileView(CustomView):
             return await self._save_profile(request)
         return await self._get_profile(request, templates)
 
-    # ── GET ────────────────────────────────────────────────────────────────
-
     async def _get_profile(self, request: Request, templates: Jinja2Templates) -> Response:
         from sqlalchemy import select as sa_select
         from models.agent import Agent
         from models.agency import Agency
 
         user = request.state.user
-        tab = request.query_params.get("tab", "profil")
+        tab = request.query_params.get("tab", "profile")
 
-        # Charger l'agence si l'utilisateur est manager
         agency = None
-        if user.role in ("manager", "agent"):
+        if _is_agent(request):
             session = request.state.session
             result = await session.execute(
                 sa_select(Agency)
@@ -58,7 +53,7 @@ class ProfileView(CustomView):
             request=request,
             name=self.template_path,
             context={
-                "title": "Mon profil",
+                "title": "My Profile",
                 "user": user,
                 "agency": agency,
                 "tab": tab,
@@ -66,8 +61,6 @@ class ProfileView(CustomView):
                 "error": request.query_params.get("error"),
             },
         )
-
-    # ── POST: save profile info ────────────────────────────────────────────
 
     async def _save_profile(self, request: Request) -> Response:
         from core.auth import User
@@ -77,7 +70,7 @@ class ProfileView(CustomView):
         user = request.state.user
         form = await request.form()
 
-        tab = (form.get("_tab") or "profil").strip()
+        tab = (form.get("_tab") or "profile").strip()
 
         updates = {}
         for field in [
@@ -89,7 +82,6 @@ class ProfileView(CustomView):
             val = (form.get(field) or "").strip()
             updates[field] = val if val else None
 
-        # Required fields must not be empty
         if not updates["first_name"]:
             updates["first_name"] = user.first_name
         if not updates["last_name"]:
@@ -115,8 +107,6 @@ class ProfileView(CustomView):
 
 
 class ProfileChangePasswordView(CustomView):
-    """Change password — POST only."""
-
     def __init__(self):
         super().__init__(
             label="",
@@ -160,8 +150,6 @@ class ProfileChangePasswordView(CustomView):
 
 
 class ProfileDeleteView(CustomView):
-    """Delete (deactivate) account — POST only."""
-
     def __init__(self):
         super().__init__(
             label="",
@@ -182,20 +170,16 @@ class ProfileDeleteView(CustomView):
         session = request.state.session
         user = request.state.user
 
-        # Deactivate instead of hard delete for safety
         await session.execute(
             sa_update(User).where(User.id == user.id).values(is_active=False)
         )
         await session.commit()
 
-        # Clear session and redirect to login
         request.session.clear()
         return RedirectResponse(url="/admin/login", status_code=303)
 
 
 class ProfileUploadView(CustomView):
-    """Handles avatar file upload — POST only, no menu entry."""
-
     def __init__(self):
         super().__init__(
             label="",
@@ -211,11 +195,10 @@ class ProfileUploadView(CustomView):
 
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
         from core.auth import User
+        from core.files import AvatarFile
         from sqlalchemy import update as sa_update
 
-        # Redirect target: strip /upload suffix
         profile_url = request.url.path.rsplit("/", 1)[0]
-
         session = request.state.session
         user = request.state.user
         form = await request.form()
@@ -228,28 +211,21 @@ class ProfileUploadView(CustomView):
         if ext not in ALLOWED_EXTENSIONS:
             return RedirectResponse(url=profile_url + "?error=invalid_format", status_code=303)
 
-        os.makedirs(AVATAR_UPLOAD_DIR, exist_ok=True)
-        filename = f"{uuid.uuid4()}{ext}"
-        dest = os.path.join(AVATAR_UPLOAD_DIR, filename)
-
         contents = await avatar.read()
-        with open(dest, "wb") as f:
-            f.write(contents)
-
-        # Supprimer l'ancien avatar du disque
-        old_avatar = getattr(user, "avatar_url", None)
-        if old_avatar and old_avatar.startswith("uploads/avatars/"):
-            old_path = os.path.join("static", old_avatar)
-            if os.path.isfile(old_path):
-                try:
-                    os.remove(old_path)
-                except OSError:
-                    pass
+        avatar_file = AvatarFile(
+            content=io.BytesIO(contents),
+            filename=avatar.filename,
+            content_type=avatar.content_type,
+            user_id=str(user.id),
+        )
+        try:
+            avatar_file.save_to_storage("images")
+            new_url = avatar_file["url"]
+        except Exception:
+            return RedirectResponse(url=profile_url + "?error=upload_failed", status_code=303)
 
         await session.execute(
-            sa_update(User).where(User.id == user.id).values(
-                avatar_url=f"uploads/avatars/{filename}"
-            )
+            sa_update(User).where(User.id == user.id).values(avatar_url=new_url)
         )
         await session.commit()
         await session.refresh(user)
@@ -258,8 +234,6 @@ class ProfileUploadView(CustomView):
 
 
 class ProfileAgencyView(CustomView):
-    """Saves agency info from the manager's profile page — POST only."""
-
     def __init__(self):
         super().__init__(
             label="",
@@ -271,8 +245,7 @@ class ProfileAgencyView(CustomView):
         )
 
     def is_accessible(self, request: Request) -> bool:
-        user = getattr(request.state, "user", None)
-        return user is not None and user.role in ("manager", "agent")
+        return _is_agent(request)
 
     async def render(self, request: Request, templates: Jinja2Templates) -> Response:
         from sqlalchemy import update as sa_update, select as sa_select
@@ -284,7 +257,6 @@ class ProfileAgencyView(CustomView):
         user = request.state.user
         form = await request.form()
 
-        # Trouver l'agence du manager
         result = await session.execute(
             sa_select(Agency)
             .join(Agent, Agent.agency_id == Agency.id)
@@ -293,7 +265,7 @@ class ProfileAgencyView(CustomView):
         agency = result.scalar_one_or_none()
 
         if agency is None:
-            return RedirectResponse(url=profile_url + "?tab=agence&error=no_agency", status_code=303)
+            return RedirectResponse(url=profile_url + "?tab=agency&error=no_agency", status_code=303)
 
         updates = {}
         for field in ["name", "email", "phone_number", "siteweb_url",
@@ -307,4 +279,4 @@ class ProfileAgencyView(CustomView):
         )
         await session.commit()
 
-        return RedirectResponse(url=profile_url + "?tab=agence&success=agency", status_code=303)
+        return RedirectResponse(url=profile_url + "?tab=agency&success=agency", status_code=303)

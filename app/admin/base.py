@@ -1,3 +1,5 @@
+import os
+import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type, Union
 from uuid import UUID
@@ -12,8 +14,7 @@ from starlette_admin.helpers import RequestAction
 
 
 class SafeEnumField(EnumField):
-    """EnumField qui retourne la valeur brute si elle n'est pas trouvée dans les choices
-    (ex : valeur inactive ou cache désynchronisé) au lieu de lever ValueError."""
+    """EnumField that returns the raw value when not found in choices instead of raising ValueError."""
 
     async def serialize_value(self, request: Request, value: Any, action: RequestAction) -> Any:
         try:
@@ -28,7 +29,7 @@ UPLOAD_DIR = "static/uploads"
 
 
 class UUIDEnumField(EnumField):
-    """EnumField qui convertit les UUID en string avant la comparaison avec les choices."""
+    """EnumField that converts UUIDs to string before comparing with choices."""
 
     async def serialize_value(self, request: Request, value: Any, action: RequestAction) -> Any:
         if value is not None:
@@ -41,7 +42,7 @@ class UUIDEnumField(EnumField):
 
 @dataclass
 class SectionField(BaseField):
-    """Affiche un titre de section dans le formulaire create/edit."""
+    """Renders a section heading inside create/edit forms."""
 
     form_template: str = "forms/section.html"
     display_template: str = "forms/section.html"
@@ -63,7 +64,7 @@ class SectionField(BaseField):
 
 
 async def _save_upload_file(file: UploadFile) -> str:
-    """Sauvegarde un UploadFile sur disque et retourne l'URL."""
+    """Save an UploadFile to disk and return its URL."""
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
     if not ext:
@@ -77,7 +78,7 @@ async def _save_upload_file(file: UploadFile) -> str:
 
 @dataclass
 class ImageUploadField(ImageField):
-    """ImageField qui sauvegarde le fichier(s) uploadé(s) sur disque et stocke l'URL."""
+    """ImageField that saves uploaded file(s) to disk and stores the URL."""
 
     async def parse_form_data(
         self, request: Request, form_data: FormData, action: RequestAction
@@ -90,12 +91,12 @@ class ImageUploadField(ImageField):
         if file_value is None:
             return None, False
 
-        # Cas multiple : liste de fichiers
+        # Multiple files: list of UploadFile
         if isinstance(file_value, list):
             urls = [await _save_upload_file(f) for f in file_value if isinstance(f, UploadFile)]
             return (urls if urls else None), False
 
-        # Cas simple : un seul fichier
+        # Single file
         if isinstance(file_value, UploadFile):
             return await _save_upload_file(file_value), False
 
@@ -106,7 +107,7 @@ class ImageUploadField(ImageField):
     ) -> Any:
         if not isinstance(value, str) or not value:
             return None
-        # Le JS de starlette-admin utilise new URL(d.url) → URL absolue requise
+        # starlette-admin JS uses new URL(d.url) — absolute URL required
         base = str(request.base_url).rstrip("/")
         absolute_url = base + value if value.startswith("/") else value
         img = {
@@ -114,13 +115,13 @@ class ImageUploadField(ImageField):
             "filename": value.split("/")[-1],
             "content-type": "image/jpeg",
         }
-        # multiple=True : le template itère sur data → retourner une liste
+        # multiple=True: template iterates over data — return a list
         return [img] if self.multiple else img
 
 
 @dataclass
 class PropertyImagesField(ImageUploadField):
-    """Champ multi-upload lié à la relation Property.images (liste de PropertyImage)."""
+    """Multi-upload field linked to the Property.images relation (list of PropertyImage)."""
 
     multiple: bool = True
 
@@ -159,7 +160,7 @@ AUDIT_FIELDS_EXCLUDE = ["created_at", "updated_at", "created_by", "updated_by"]
 
 
 def _is_full_admin(request) -> bool:
-    """Superadmin ou admin — accès complet."""
+    """Superadmin or admin — full access."""
     user = getattr(request.state, "user", None)
     if user is None:
         return False
@@ -167,9 +168,9 @@ def _is_full_admin(request) -> bool:
 
 
 def _is_agent(request) -> bool:
-    """Manager (= agent) — accès limité à son agence."""
+    """Manager (= agent) — access limited to their own agency."""
     user = getattr(request.state, "user", None)
-    return user is not None and user.role in ("manager", "agent")
+    return user is not None and user.role == "manager"
 
 
 class AdminModelView(ModelView):

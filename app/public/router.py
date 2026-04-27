@@ -138,7 +138,7 @@ async def get_reset_password(
     token: str = Query(default=""),
 ):
     return templates.TemplateResponse(
-        request, "public/pages/reset_password.html",
+        request, "admin/reset_password.html",
         context={"token": token},
     )
 

@@ -20,52 +20,52 @@ from models.property_gallery import PropertyGallery
 from core.files import PropertyImageFile
 
 STATUS_CHOICES = [
-    ("free", "Libre"),
-    ("for_sale", "À vendre"),
-    ("for_rent", "À louer"),
-    ("reserved", "Réservé"),
-    ("rented", "Loué"),
-    ("sold", "Vendu"),
-    ("under_construction", "En construction"),
+    ("free", "Free"),
+    ("for_sale", "For Sale"),
+    ("for_rent", "For Rent"),
+    ("reserved", "Reserved"),
+    ("rented", "Rented"),
+    ("sold", "Sold"),
+    ("under_construction", "Under Construction"),
 ]
 
 USAGE_CHOICES = [
-    ("residential", "Résidentiel"),
+    ("residential", "Residential"),
     ("commercial", "Commercial"),
-    ("office", "Bureau"),
-    ("industrial", "Industriel"),
-    ("land", "Terrain"),
-    ("mixed", "Mixte"),
+    ("office", "Office"),
+    ("industrial", "Industrial"),
+    ("land", "Land"),
+    ("mixed", "Mixed"),
 ]
 
 BASE_PRICE_TYPE_CHOICES = [
-    ("fixed", "Prix fixe"),
-    ("per_night", "Par nuit"),
-    ("per_week", "Par semaine"),
-    ("per_month", "Par mois"),
-    ("per_year", "Par an"),
+    ("fixed", "Fixed Price"),
+    ("per_night", "Per Night"),
+    ("per_week", "Per Week"),
+    ("per_month", "Per Month"),
+    ("per_year", "Per Year"),
 ]
 
 RENTAL_PERIOD_CHOICES = [
-    ("daily", "Journalier"),
-    ("weekly", "Hebdomadaire"),
-    ("monthly", "Mensuel"),
-    ("yearly", "Annuel"),
+    ("daily", "Daily"),
+    ("weekly", "Weekly"),
+    ("monthly", "Monthly"),
+    ("yearly", "Yearly"),
 ]
 
 MANAGED_BY_CHOICES = [
-    ("agency", "Agence"),
-    ("owner", "Propriétaire"),
-    ("platform", "Plateforme"),
+    ("agency", "Agency"),
+    ("owner", "Owner"),
+    ("platform", "Platform"),
 ]
 
 CURRENCY_CHOICES = [
-    ("XOF", "XOF — Franc CFA (BCEAO)"),
-    ("XAF", "XAF — Franc CFA (BEAC)"),
-    ("GNF", "GNF — Franc guinéen"),
-    ("MAD", "MAD — Dirham marocain"),
+    ("XOF", "XOF — CFA Franc (BCEAO)"),
+    ("XAF", "XAF — CFA Franc (BEAC)"),
+    ("GNF", "GNF — Guinean Franc"),
+    ("MAD", "MAD — Moroccan Dirham"),
     ("EUR", "EUR — Euro"),
-    ("USD", "USD — Dollar américain"),
+    ("USD", "USD — US Dollar"),
 ]
 
 
@@ -80,95 +80,95 @@ class PropertyView(AdminModelView):
         SectionField("_sec_identification", label="Identification"),
         StringField("code", label="Code"),
         StringField("label", label="Label"),
-        EnumField("status", choices=STATUS_CHOICES, label="Statut"),
+        EnumField("status", choices=STATUS_CHOICES, label="Status"),
         SafeEnumField("type", choices_loader=load_property_type_choices, label="Type"),
         EnumField("usage", choices=USAGE_CHOICES, label="Usage", exclude_from_list=True),
 
         # ── Relations ──
         SectionField("_sec_relations", label="Relations", exclude_from_list=True),
         UUIDEnumField("building_id", choices_loader=load_building_choices,
-                      label="Immeuble", coerce=uuid.UUID, exclude_from_list=True),
+                      label="Building", coerce=uuid.UUID, exclude_from_list=True),
         UUIDEnumField("agency_id", choices_loader=load_agency_choices,
-                      label="Agence", coerce=uuid.UUID, exclude_from_list=True),
+                      label="Agency", coerce=uuid.UUID, exclude_from_list=True),
 
         # ── Classification ──
         SectionField("_sec_classification", label="Classification", exclude_from_list=True),
         EnumField("status_before_reserved", choices=STATUS_CHOICES,
-                  label="Statut avant réservation", exclude_from_list=True),
+                  label="Status Before Reservation", exclude_from_list=True),
         SafeEnumField("rent_type", choices_loader=load_property_rent_type_choices,
-                      label="Type de location", exclude_from_list=True),
+                      label="Rental Type", exclude_from_list=True),
         EnumField("rental_period", choices=RENTAL_PERIOD_CHOICES,
-                  label="Période de location", exclude_from_list=True),
+                  label="Rental Period", exclude_from_list=True),
         EnumField("managed_by", choices=MANAGED_BY_CHOICES,
-                  label="Géré par", exclude_from_list=True),
+                  label="Managed By", exclude_from_list=True),
 
-        # ── Localisation ──
-        SectionField("_sec_localisation", label="Localisation", exclude_from_list=True),
+        # ── Location ──
+        SectionField("_sec_location", label="Location", exclude_from_list=True),
         SafeEnumField("country", choices_loader=load_country_choices,
-                      label="Pays", exclude_from_list=True),
+                      label="Country", exclude_from_list=True),
         SafeEnumField("city", choices_loader=load_city_choices,
-                      label="Ville", exclude_from_list=True),
+                      label="City", exclude_from_list=True),
         SafeEnumField("zone", choices_loader=load_zone_choices,
                       label="Zone", exclude_from_list=True),
-        StringField("street", label="Rue", exclude_from_list=True),
-        StringField("address", label="Adresse", exclude_from_list=True),
-        StringField("level", label="Niveau", exclude_from_list=True),
+        StringField("street", label="Street", exclude_from_list=True),
+        StringField("address", label="Address", exclude_from_list=True),
+        StringField("level", label="Level", exclude_from_list=True),
         StringField("position", label="Position", exclude_from_list=True),
-        StringField("apartment_number", label="N° Appartement", exclude_from_list=True),
+        StringField("apartment_number", label="Apt Number", exclude_from_list=True),
 
         # ── Description ──
         SectionField("_sec_description", label="Description", exclude_from_list=True),
         TextAreaField("description", label="Description", exclude_from_list=True),
-        ImageField("image_url", label="Image de couverture", exclude_from_list=True),
-        ImageField("gallery_images", label="Galerie de photos", multiple=True, exclude_from_list=True),
+        ImageField("image_url", label="Cover Image", exclude_from_list=True),
+        ImageField("gallery_images", label="Photo Gallery", multiple=True, exclude_from_list=True),
 
-        # ── Caractéristiques physiques ──
-        SectionField("_sec_physique", label="Caractéristiques", exclude_from_list=True),
+        # ── Physical features ──
+        SectionField("_sec_features", label="Features", exclude_from_list=True),
         DecimalField("surface", label="Surface (m²)", min=0, step="0.01"),
-        IntegerField("bed_room_count", label="Chambres", min=0),
-        IntegerField("bath_room_count", label="Salles de bain", min=0),
-        IntegerField("kitchen_count", label="Cuisines", min=0),
-        IntegerField("living_room_count", label="Salons", min=0),
-        IntegerField("build_year", label="Année", min=1800, max=2100, exclude_from_list=True),
+        IntegerField("bed_room_count", label="Bedrooms", min=0),
+        IntegerField("bath_room_count", label="Bathrooms", min=0),
+        IntegerField("kitchen_count", label="Kitchens", min=0),
+        IntegerField("living_room_count", label="Living Rooms", min=0),
+        IntegerField("build_year", label="Year Built", min=1800, max=2100, exclude_from_list=True),
         DecimalField("lng", label="Longitude", min=-180, max=180, step="0.000001", exclude_from_list=True),
         DecimalField("lat", label="Latitude", min=-90, max=90, step="0.000001", exclude_from_list=True),
 
         # ── Acquisition ──
         SectionField("_sec_acquisition", label="Acquisition", exclude_from_list=True),
-        DateField("acquisition_date", label="Date d'acquisition", exclude_from_list=True),
-        FloatField("acquisition_price", label="Prix d'acquisition", exclude_from_list=True),
-        FloatField("acquisition_fee", label="Frais d'acquisition", exclude_from_list=True),
-        DateField("free_since", label="Libre depuis", exclude_from_list=True),
+        DateField("acquisition_date", label="Acquisition Date", exclude_from_list=True),
+        FloatField("acquisition_price", label="Acquisition Price", exclude_from_list=True),
+        FloatField("acquisition_fee", label="Acquisition Fee", exclude_from_list=True),
+        DateField("free_since", label="Available Since", exclude_from_list=True),
 
-        # ── Financier ──
-        SectionField("_sec_financier", label="Financier", exclude_from_list=True),
-        EnumField("currency", choices=CURRENCY_CHOICES, label="Devise", exclude_from_list=True),
+        # ── Financial ──
+        SectionField("_sec_financial", label="Financial", exclude_from_list=True),
+        EnumField("currency", choices=CURRENCY_CHOICES, label="Currency", exclude_from_list=True),
         EnumField("base_price_type", choices=BASE_PRICE_TYPE_CHOICES,
-                  label="Type prix de base", exclude_from_list=True),
-        FloatField("price", label="Prix"),
-        FloatField("base_price", label="Prix de base", exclude_from_list=True),
-        FloatField("extra_price", label="Prix extra", exclude_from_list=True),
-        FloatField("sale_price", label="Prix de vente", exclude_from_list=True),
-        FloatField("rent_price", label="Loyer", exclude_from_list=True),
-        FloatField("syndic_amount", label="Charges syndic", exclude_from_list=True),
+                  label="Base Price Type", exclude_from_list=True),
+        FloatField("price", label="Price"),
+        FloatField("base_price", label="Base Price", exclude_from_list=True),
+        FloatField("extra_price", label="Extra Price", exclude_from_list=True),
+        FloatField("sale_price", label="Sale Price", exclude_from_list=True),
+        FloatField("rent_price", label="Rent", exclude_from_list=True),
+        FloatField("syndic_amount", label="Condo Fees", exclude_from_list=True),
 
-        # ── Taux ──
-        SectionField("_sec_taux", label="Taux", exclude_from_list=True),
-        DecimalField("vat_rate", label="TVA", min=0, max=100, step="0.01", exclude_from_list=True),
+        # ── Rates ──
+        SectionField("_sec_rates", label="Rates", exclude_from_list=True),
+        DecimalField("vat_rate", label="VAT", min=0, max=100, step="0.01", exclude_from_list=True),
         DecimalField("tom_rate", label="TOM", min=0, max=100, step="0.01", exclude_from_list=True),
         DecimalField("ir_rate", label="IR", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("mgmt_rate", label="Gestion", min=0, max=100, step="0.01", exclude_from_list=True),
+        DecimalField("mgmt_rate", label="Management", min=0, max=100, step="0.01", exclude_from_list=True),
         DecimalField("commission_rate", label="Commission", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("deposit_rate", label="Caution", min=0, max=100, step="0.01", exclude_from_list=True),
+        DecimalField("deposit_rate", label="Deposit", min=0, max=100, step="0.01", exclude_from_list=True),
 
         # ── Flags ──
         SectionField("_sec_flags", label="Options", exclude_from_list=True),
-        BooleanField("is_hidden", label="Caché"),
-        BooleanField("is_exposed", label="Exposé"),
-        BooleanField("is_saleable", label="En vente"),
-        BooleanField("is_managed", label="Géré"),
-        BooleanField("archived", label="Archivé"),
-        BooleanField("is_featured", label="En vedette", exclude_from_list=True),
+        BooleanField("is_hidden", label="Hidden"),
+        BooleanField("is_exposed", label="Exposed"),
+        BooleanField("is_saleable", label="For Sale"),
+        BooleanField("is_managed", label="Managed"),
+        BooleanField("archived", label="Archived"),
+        BooleanField("is_featured", label="Featured", exclude_from_list=True),
 
         # ── Audit ──
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
@@ -214,15 +214,13 @@ class PropertyView(AdminModelView):
                 try:
                     v = float(val)
                     if v < 0 or v > 100:
-                        errors[f] = "Doit être entre 0 et 100"
+                        errors[f] = "Must be between 0 and 100"
                 except (ValueError, TypeError):
-                    errors[f] = "Valeur numérique invalide"
+                    errors[f] = "Invalid numeric value"
         if errors:
             from starlette_admin.exceptions import FormValidationError
             raise FormValidationError(errors)
         return await super().validate(request, data)
-
-    # ── Gallery — create / edit en une seule transaction ────────────────────
 
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
         try:
@@ -235,7 +233,7 @@ class PropertyView(AdminModelView):
             obj = await self._populate_obj(request, self.model(), data)
             session.add(obj)
             await self.before_create(request, data, obj)
-            await session.flush()  # obtenir obj.id sans commit
+            await session.flush()
 
             agency_name = obj.agency.name if obj.agency else None
             gallery_files, _ = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
@@ -247,7 +245,7 @@ class PropertyView(AdminModelView):
             await self.after_create(request, obj)
             return obj
         except Exception as e:
-            return self.handle_exception(e)
+            raise e
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
         try:
@@ -283,7 +281,7 @@ class PropertyView(AdminModelView):
             await self.after_edit(request, obj)
             return obj
         except Exception as e:
-            return self.handle_exception(e)
+            raise e
 
     async def after_create(self, request: Request, obj: Any) -> None:
         from admin.choices import warm_choices_cache
@@ -295,10 +293,6 @@ class PropertyView(AdminModelView):
 
     @staticmethod
     def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None):
-        """Dépaquette le (files, should_delete) produit par ImageField.parse_form_data.
-
-        Returns (files, should_delete) où should_delete=True signale une suppression.
-        """
         if raw is None:
             return [], False
         if isinstance(raw, tuple) and len(raw) == 2:
@@ -322,11 +316,6 @@ class PropertyView(AdminModelView):
 
     @staticmethod
     def _prepare_file_fields_for_populate(data: Dict[str, Any]) -> None:
-        """
-        Ensure all FileField values are non-None for Starlette-Admin _populate_obj.
-        Also neutralize gallery_images because it's not a Property model attribute.
-        """
         if data.get("image_url") is None:
             data["image_url"] = (None, False)
-        # Keep FileField non-None while preventing setattr on unknown attribute.
         data["gallery_images"] = ([], False)

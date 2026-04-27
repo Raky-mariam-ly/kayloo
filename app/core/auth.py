@@ -33,7 +33,7 @@ Base = declarative_base()
 class User(SQLAlchemyBaseUserTableUUID, Base):
     first_name = Column(Text, nullable=False)
     last_name = Column(Text, nullable=False)
-    gender = Column(String(10), nullable=True)
+    gender = Column(String(1), nullable=True)
     phone_number = Column(Text, nullable=True)
     role = Column(Text, nullable=False, default="viewer")
     avatar_url = Column(Text, nullable=True)
@@ -103,8 +103,6 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         )
 
     async def generate_reset_url(self, user: User) -> str:
-        """Génère un token de réinitialisation et retourne l'URL complète.
-        Utilisé par l'endpoint admin pour afficher le lien en mode dev."""
         from fastapi_users.jwt import generate_jwt
         from core.config import get_settings
 
@@ -245,10 +243,10 @@ class FastapiUsersAuthProvider(AuthProvider):
         )
 
         if user is None or not user.is_active:
-            raise LoginFailed("Email ou mot de passe incorrect")
+            raise LoginFailed("Incorrect email or password")
 
         if not user.is_superuser and user.role not in ADMIN_ROLES:
-            raise LoginFailed("Accès non autorisé")
+            raise LoginFailed("Unauthorized")
 
         request.session.update({"session": await token_manager.write_token(user)})
         return response
@@ -265,8 +263,7 @@ class FastapiUsersAuthProvider(AuthProvider):
 
         if user and user.is_active:
             request.state.user = user
-            # Si l'utilisateur est un manager (= agent), charger son agency_id pour le filtrage
-            if user.role in ("manager", "agent"):
+            if user.role == "manager":
                 from models.agent import Agent
                 result = await session.execute(
                     sa_select(Agent.agency_id).where(Agent.user_id == user.id)
@@ -279,10 +276,13 @@ class FastapiUsersAuthProvider(AuthProvider):
         return False
 
     def get_admin_user(self, request: Request) -> AdminUser | None:
-        user: User = request.state.user  # Retrieve current user
+        user: User = request.state.user
         photo_url = None
-        if user.avatar_url is not None:
-            photo_url = request.url_for("static", path=user.avatar_url)
+        if user.avatar_url:
+            if user.avatar_url.startswith("http"):
+                photo_url = user.avatar_url
+            else:
+                photo_url = str(request.url_for("static", path=user.avatar_url))
         return AdminUser(username=user.email, photo_url=photo_url)
 
     async def logout(self, request: Request, response: Response) -> Response:

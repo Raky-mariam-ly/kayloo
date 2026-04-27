@@ -22,8 +22,8 @@ class ConversationView(AdminModelView):
         )
 
     fields = [
-        StringField("subject", label="Sujet"),
-        StringField("property_id", label="Bien ID", exclude_from_list=True),
+        StringField("subject", label="Subject"),
+        StringField("property_id", label="Property ID", exclude_from_list=True),
         StringField("lead_id", label="Lead ID", exclude_from_list=True),
         DateTimeField("created_at", read_only=True),
         DateTimeField("updated_at", read_only=True),

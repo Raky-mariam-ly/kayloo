@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 
-# ── module-level caches (populated once at startup via warm_choices_cache) ────
+# module-level caches — populated once at startup via warm_choices_cache
 _country_choices:            list[tuple[str, str]] = []
 _city_choices:               list[tuple[str, str]] = []
 _zone_choices:               list[tuple[str, str]] = []
@@ -17,8 +17,6 @@ _property_choices:           list[tuple[str, str]] = []
 
 
 async def warm_choices_cache(session: AsyncSession) -> None:
-    """Populate all choices caches using the existing async session.
-    Called once at startup — no extra DB connection needed."""
     global _country_choices, _city_choices, _zone_choices, _user_choices, _agency_choices
     global _property_type_choices, _property_rent_type_choices
     global _city_id_choices, _building_choices, _property_choices
@@ -101,8 +99,6 @@ async def warm_choices_cache(session: AsyncSession) -> None:
     ]
 
 
-# ── choices_loader functions (sync — starlette-admin les appelle de manière sync) ──
-
 def load_country_choices(request: Request) -> list[tuple[str, str]]:
     return _country_choices
 
@@ -141,126 +137,3 @@ def load_building_choices(request: Request) -> list[tuple[str, str]]:
 
 def load_property_choices(request: Request) -> list[tuple[str, str]]:
     return _property_choices
-
-
-def _get_sync_conn():
-    db_url = os.environ.get("DATABASE_URL", "").replace("+asyncpg", "")
-    return psycopg2.connect(db_url)
-
-
-def load_country_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT code, coalesce(name, code) FROM country WHERE is_active = true ORDER BY name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], f"{r[1]} ({r[0]})" if r[1] else r[0]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_city_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT code, name FROM city WHERE is_active = true ORDER BY name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], f"{r[1]} ({r[0]})" if r[1] else r[0]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_user_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id::text, first_name || ' ' || last_name || ' (' || email || ')' FROM \"user\" WHERE is_active = true ORDER BY first_name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_agency_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id::text, name || ' (' || country || ')' FROM agency WHERE is_active = true ORDER BY name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_property_type_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT code, label FROM property_type WHERE is_active = true ORDER BY label"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_property_rent_type_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT code, label FROM property_rent_type WHERE is_active = true ORDER BY label"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_city_id_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id::text, name || ' (' || code || ')' FROM city WHERE is_active = true ORDER BY name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_building_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id::text, name FROM building ORDER BY name"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-
-
-def load_property_choices(request: Request):
-    conn = _get_sync_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id::text, COALESCE(label, code, id::text) FROM property_property ORDER BY label"
-            )
-            rows = cur.fetchall()
-        return [(r[0], r[1]) for r in rows]
-    finally:
-        conn.close()
-

@@ -1,8 +1,12 @@
 {% extends "base.html" %}
+{% block head %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/fslightbox@3.4.1/index.min.js" defer></script>
+{% endblock%}
 {% block title %}Local commercial à louer – Sacré-Cœur 3, Dakar – Kayloo{% endblock %}
 {% block content %}
-<section class="max-w-site mx-auto px-0 md:px-6 lg:px-8">
-    <nav class="hidden md:flex items-center text-[10px] uppercase tracking-widest text-muted my-4"
+<section class="max-w-site mx-auto px-0 sm:px-6 lg:px-8">
+    <nav class="hidden sm:flex items-center text-[10px] uppercase tracking-widest text-muted my-4"
         aria-label="Fil d'Ariane">
         <a href="/" class="hover:text-hover-blue transition-colors"><i class="fa-solid fa-house"></i></a>
         <span class="mx-3 opacity-30">/</span>
@@ -11,31 +15,42 @@
         <span class="text-dark font-bold">Sacré-Cœur 3</span>
     </nav>
     <div
-        class="bg-white max-w-site mx-auto md:px-6 md:pt-6 lg:px-8 lg:pt-8 overflow-hidden md:rounded-t-xl shadow-sm overflow-hidden">
-        <div class="w-full max-w-7xl mx-auto">
+        class="bg-white max-w-site mx-auto sm:px-6 sm:pt-6 lg:px-8 lg:pt-8 overflow-hidden sm:rounded-t-xl shadow-sm overflow-hidden">
+        <div class="relative w-full max-w-7xl mx-auto">
 
             <div
-                class="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] lg:grid-cols-[3fr_1fr] gap-2 h-[350px] md:h-[450px] md:rounded-2xl overflow-hidden border border-gray-200">
+                class="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] lg:grid-cols-[10fr_5fr] gap-2 h-[350px] md:h-[400px] sm:rounded-2xl overflow-hidden border border-gray-200">
 
-                <div class="relative w-full h-full overflow-hidden">
+                <a href="https://picsum.photos/seed/dakar1/2560/1600" class="w-full h-full overflow-hidden"
+                    data-fslightbox="gallery">
                     <img src="https://picsum.photos/seed/dakar1/1200/800"
                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-                </div>
+                </a>
 
                 <div class="hidden md:flex flex-col gap-2 h-full overflow-hidden">
 
-                    <div class="flex-1 overflow-hidden">
+                    <a href="https://picsum.photos/seed/dakar2/2560/1600" class="flex-1 overflow-hidden"
+                        data-fslightbox="gallery">
                         <img src="https://picsum.photos/seed/dakar2/600/600" class="w-full h-full object-cover" />
-                    </div>
+                    </a>
 
-                    <div class="relative flex-1 overflow-hidden">
+                    <a href="https://picsum.photos/seed/dakar3/2560/1600" class="relative flex-1 overflow-hidden"
+                        data-fslightbox="gallery">
                         <img src="https://picsum.photos/seed/dakar3/600/601" class="w-full h-full object-cover" />
                         <button
                             class="absolute inset-0 bg-black/40 hover:bg-black/60 transition-all flex items-center justify-center text-white font-bold">
                             + 15 Photos
                         </button>
-                    </div>
+                    </a>
 
+                </div>
+
+                <div class="absolute bottom-4 right-4 md:hidden z-10">
+                    <a href="https://picsum.photos/seed/dakar1/2560/1600" data-fslightbox="gallery"
+                        class="bg-white backdrop-blur-md hover:bg-gray-50 rounded-lg px-3.5 py-2 flex items-center gap-2 shadow-sm text-primary text-sm font-jakarta font-bold transition-colors">
+                        <i class="fa-regular fa-images"></i>
+                        <span>+15 Photo(s)</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -43,12 +58,12 @@
 </section>
 
 <section class="font-jakarta max-w-site mx-auto px-0 sm:px-6 md:px-6 lg:px-8">
-    <div class="bg-white max-w-site mx-auto px-4 py-6 lg:py-8 sm:px-6 lg:px-8 md:rounded-b-xl shadow-sm">
+    <div class="bg-white max-w-site mx-auto px-4 py-6 lg:py-8 sm:px-6 lg:px-8 sm:rounded-b-xl shadow-sm">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div class="flex-1">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="bg-primary text-white text-[10px] uppercase px-2 py-0.5 rounded font-bold">A
-                        Louer</span>
+                    <span class="bg-primary text-white text-[10px] uppercase px-2 py-0.5 rounded font-bold">
+                        À Louer</span>
                     <span class="text-[11px] text-muted font-medium">Ref: #KY-2026</span>
                 </div>
 
@@ -63,13 +78,14 @@
             </div>
 
             <div
-                class="bg-surface lg:bg-transparent p-4 lg:p-0 rounded-xl border border-border-light lg:border-0 flex justify-between items-center lg:block">
+                class="bg-surface lg:bg-transparent p-4 lg:p-0 lg:self-center rounded-xl border border-border-light lg:border-0 flex justify-between items-center lg:block">
                 <div>
-                    <p class="text-muted text-[10px] uppercase tracking-widest font-bold lg:mb-1">Prix Mensuel</p>
                     <div class="flex items-baseline gap-1">
-                        <span class="text-2xl md:text-4xl font-black text-primary">450 000</span>
+                        <span class="text-2xl md:text-4xl font-[800] font-jakarta text-primary">450 000</span>
                         <span class="text-sm font-bold text-primary">FCFA</span>
                     </div>
+                    <p class="text-muted text-[10px] lg:text-xs uppercase tracking-widest font-bold lg:mb-2">Par Mois
+                    </p>
                 </div>
                 <div class="flex gap-1">
                     <a href="tel:+221..."
@@ -87,54 +103,42 @@
 
         <div
             class="flex justify-start md:justify-between flex-wrap items-center mt-5 pt-5 border-t border-border-default gap-4 md:gap-8 font-jakarta md:divide-x divide-gray-200">
-            <div class="flex items-center gap-3 grow basis-1/3 md:basis-auto">
-                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary">
+            <div class="flex items-center gap-2 grow basis-1/3 md:basis-auto">
+                <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-primary">
                     <i class="fa-solid fa-building-user"></i>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-muted font-bold">Type</p>
-                    <p class="text-sm font-bold text-dark">Appartement</p>
-                </div>
+                <p class="text-sm font-bold text-dark">Appartement F3</p>
             </div>
 
-            <div class="flex items-center gap-3 grow basis-1/3 md:basis-auto">
-                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary">
+            <div class="flex items-center gap-2 grow basis-1/3 md:basis-auto">
+                <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-primary">
                     <i class="fa-solid fa-bed"></i>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-muted font-bold">Chambres</p>
-                    <p class="text-sm font-bold text-dark">3</p>
-                </div>
+                <p class="text-sm font-bold text-dark">
+                    3
+                    <span class="font-medium text-muted text-xs">Chambre(s)</span>
+                </p>
             </div>
 
-            <div class="flex items-center gap-3 grow basis-1/3 md:basis-auto">
-                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary">
+            <div class="flex items-center gap-2 grow basis-1/3 md:basis-auto">
+                <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-primary">
                     <i class="fa-solid fa-bath"></i>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-muted font-bold">SDB</p>
-                    <p class="text-sm font-bold text-dark">2</p>
-                </div>
+                <p class="text-sm font-bold text-dark">2 <span class="font-medium text-muted text-xs">SDB(s)</span></p>
             </div>
 
-            <div class="flex items-center gap-3 grow basis-1/3 md:basis-auto">
-                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary">
+            <div class="flex items-center gap-2 grow basis-1/3 md:basis-auto">
+                <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-primary">
                     <i class="fa-solid fa-ruler-combined"></i>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-muted font-bold">Surface</p>
-                    <p class="text-sm font-bold text-dark">110 m²</p>
-                </div>
+                <p class="text-sm font-bold text-dark">110 <span class="font-medium text-muted text-xs">m²</span></p>
             </div>
 
-            <div class="flex items-center gap-3 grow basis-1/3 md:basis-auto">
-                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-primary">
+            <div class="flex items-center gap-2 grow basis-1/3 md:basis-auto">
+                <div class="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-primary">
                     <i class="fa-solid fa-layer-group"></i>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase text-muted font-bold">Niveau</p>
-                    <p class="text-sm font-bold text-dark">4ème Étage</p>
-                </div>
+                <p class="text-sm font-bold text-dark">4ème Étage</p>
             </div>
         </div>
     </div>
@@ -144,13 +148,13 @@
        SECTION 3: MAIN CONTENT + SIDEBAR
   ==================================================== -->
 <section class="py-4">
-    <div class="max-w-site mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-site mx-auto sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-4">
             <!-- LEFT COLUMN -->
-            <div class="lg:w-2/3 flex flex-col bg-white rounded-xl shadow-sm p-6 gap-8">
+            <div class="lg:w-2/3 flex flex-col bg-white sm:rounded-xl shadow-sm p-6 gap-10 md:gap-12">
                 <!-- Description -->
                 <article class="" id="description">
-                    <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-1 border-b-1 border-gray-200 mb-2">
+                    <h2 class="font-jakarta text-xl font-bold text-dark pb-2 border-b-1 border-gray-200 mb-2">
                         Description
                     </h2>
                     <div class="text-text-body leading-relaxed space-y-3 text-sm">
@@ -171,7 +175,7 @@
 
                 <!-- Amenities -->
                 <article class="" id="amenities">
-                    <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-1 border-b-1 border-gray-200 mb-2">
+                    <h2 class="font-jakarta text-xl font-bold text-dark pb-2 border-b-2 border-gray-200 mb-4">
                         Commodités
                     </h2>
                     <ul class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
@@ -191,7 +195,7 @@
                 <!-- Address -->
                 <article class="" id="address">
                     <div class="flex justify-between items-center pb-4 mb-4 border-b-2 border-gray-200">
-                        <h2 class="font-jakarta text-[1.1rem] font-bold text-dark ">
+                        <h2 class="font-jakarta text-xl font-bold text-dark">
                             Adresse</h2>
                         <a href="http://maps.google.com/?q=Rue%2012,%20Sacr%C3%A9-C%C5%93ur%203,%20Dakar"
                             target="_blank"
@@ -228,9 +232,9 @@
 
                 <!-- Property Details -->
                 <article class="" id="details">
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 pb-2 border-b-2 border-gray-200">
-                        <h2 class="font-jakarta text-[1.1rem] font-bold text-dark">Détails</h2>
+                    <div class="flex flex-row justify-between items-center gap-2 mb-4 pb-2 border-b-2 border-gray-200">
+                        <h2 class="font-jakarta text-xl font-bold text-dark">Détails
+                        </h2>
                         <span class="text-xs text-gray-400 flex items-center gap-1">
                             <i class="fa-solid fa-rotate"></i>
                             Mis à jour le avril 6, 2026 à 12:55
@@ -274,7 +278,7 @@
 
                 <!-- Gallery Photos -->
                 <article class="" id="gallery">
-                    <h2 class="font-jakarta text-[1.1rem] font-bold text-dark pb-1 border-b-1 border-gray-200 mb-2">
+                    <h2 class="font-jakarta text-xl font-bold text-dark pb-2 border-b-1 border-gray-200 mb-4">
                         Photos
                     </h2>
                     <div class="grid grid-cols-2 gap-3">
@@ -373,7 +377,7 @@ Bonjour, je suis intéressé(e) par [Local commercial à louer – Sacré-Cœur 
   ==================================================== -->
 <section class="py-10" id="similar-listings">
     <div class="max-w-site mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="font-jakarta text-xl font-bold text-dark mb-6 flex items-center gap-2">
+        <h2 class="font-jakarta text-2xl font-bold text-dark mb-6 flex items-center gap-2">
             <i class="fa-solid fa-list-ul text-primary"></i>
             Annonces similaires
         </h2>

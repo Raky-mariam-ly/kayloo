@@ -151,8 +151,8 @@ AVAILABLE_USER_ROLES = [
 ]
 
 GENDER_TYPES = [
-    ("M", "Male"),
-    ("F", "Female"),
+    ("M", "M"),
+    ("F", "F"),
 ]
 
 AUDIT_FIELDS_EXCLUDE = ["created_at", "updated_at", "created_by", "updated_by"]

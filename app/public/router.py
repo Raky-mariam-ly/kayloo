@@ -64,7 +64,6 @@ async def load_more_listings(
     limit: int = Query(3)
     ):
     more_listings = homepage_listings[offset : offset + limit]
-    print(f"DEBUG: Found {len(more_listings)} items for offset {offset} and for limit {limit}") # Check your terminal!
     if not more_listings:
         return ""
     
@@ -94,7 +93,6 @@ async def get_locataire(request: Request, session=Depends(get_db)):
 @router.get("/vente-acheteur", response_class=HTMLResponse)
 async def get_acheteur(request: Request, session=Depends(get_db)):
     logging.info(f"Home page accessed from {request.client.host}")
-    home
     return templates.TemplateResponse(request, "public/pages/vente-acheteur.html", context={
         "carousel_section_data": carousel_vente_acheteur_text,
         "listings": homepage_listings
@@ -131,7 +129,6 @@ async def get_agencies(request: Request, session=Depends(get_db)):
 @router.get("/agents", response_class=HTMLResponse)
 async def get_agents(request: Request, session=Depends(get_db)):
     logging.info(f"Home page accessed from {request.client.host}")
-    home
     return templates.TemplateResponse(request, "public/pages/partners/listing.html", context={
         "heading": "Nos agents immobiliers partenaires"
     })
@@ -147,9 +144,9 @@ async def get_partners(request: Request, session=Depends(get_db)):
 @router.get("/resultats", response_class=HTMLResponse)
 async def get_search_result(
     request: Request,
-    listing_type: str = Query(None, alias="listing-type"),
-    property_type: str = Query(None, alias="property-type"),
-    country: str = Query(...),
+    listing_type: str = Query(None, alias="listing_type"),
+    property_type: str = Query(None, alias="property_type"),
+    country: Optional[str] = Query(None),
     city: Optional[str] = None,
     max_price: Optional[str] = None,
     session=Depends(get_db)):
@@ -157,7 +154,9 @@ async def get_search_result(
     return templates.TemplateResponse(
         request=request,
         name="public/pages/properties/search.html",
-        context={"listings": search_listings}
+        context={"request": request,
+            "listings": search_listings
+            }
     )
 
 @router.get("/details-annonce", response_class=HTMLResponse)

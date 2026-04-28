@@ -64,8 +64,10 @@ def configure_storage() -> None:
             settings.s3_secret_key,
             host=host,
             secure=settings.s3_secure,
-            region=settings.s3_region,  # required for v4 signature signing
         )
+        # Bypass constructor's AWS-region validation, then set the actual
+        # signing region so v4 HMAC uses "fra1" instead of the default "us-east-1".
+        driver.region_name = settings.s3_region
         StorageManager.add_storage(
             "images", _get_or_create_container(driver, settings.s3_bucket)
         )

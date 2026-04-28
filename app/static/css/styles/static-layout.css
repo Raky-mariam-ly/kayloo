@@ -1,0 +1,42 @@
+@layer components {
+  .section-card-container {
+    @apply max-w-site mx-auto pt-6 md:pt-11 md:px-4;
+  }
+  
+  .section-card-layout, .section-card-layout-reverse, .section-card-layout-featured {
+    @apply flex flex-col items-center gap-6 border border-neutral-200 bg-white px-5
+    pt-8 pb-8 md:shadow-md md:rounded-xl md:p-10;
+  }
+  
+  .section-card-layout-featured {
+    @apply lg:flex-col;
+  }
+  
+  .section-card-layout {
+    @apply lg:flex-row;
+  }
+  
+  .section-card-layout-reverse {
+    @apply lg:flex-row-reverse;
+  }
+  
+  .section-card-image-container, .section-card-mockup-container {
+    @apply w-full overflow-hidden lg:h-auto lg:self-stretch lg:w-1/2;
+  }
+  
+  .section-card-image-container {
+    @apply h-[250px] rounded-xl shadow-sm md:h-[300px] lg:h-auto lg:self-stretch;
+  }
+  
+  .section-card-mockup-container {
+    @apply h-[300px] md:h-[400px] lg:h-auto lg:self-stretch;
+  }
+  
+  .section-card-image {
+    @apply h-full w-full object-cover object-center;
+  }
+  
+  .section-card-mockup {
+    @apply h-full w-full object-contain object-center;
+  }
+}

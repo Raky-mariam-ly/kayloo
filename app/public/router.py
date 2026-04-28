@@ -91,10 +91,13 @@ def _cover_image_url(prop) -> str:
 
 
 def _gallery_image_urls(prop) -> list:
-    """Return gallery images (images relation only, not the cover)."""
+    """Return gallery images from PropertyGallery.images (multi-file FileStorageField)."""
+    gallery = getattr(prop, "gallery", None)
+    if not gallery or not gallery.images:
+        return []
     urls = []
-    for img_obj in (prop.images or []):
-        url = _extract_url(img_obj.url)
+    for img in gallery.images:
+        url = _extract_url(img)
         if url:
             urls.append(url)
     return urls

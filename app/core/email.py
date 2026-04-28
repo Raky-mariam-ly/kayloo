@@ -15,20 +15,21 @@ def _send_smtp(to: str, subject: str, html_body: str) -> None:
     """Envoi synchrone — exécuté dans un thread pour ne pas bloquer l'event loop."""
     settings = get_settings()
 
+    environment = getattr(settings, "environment", None)
     if not settings.smtp_user or not settings.smtp_password:
-        logger.warning(
-            "SMTP non configuré — email simulé en mode dev.\n"
-            "  À      : %s\n"
-            "  Sujet  : %s\n"
-            "  Contenu: (voir le lien ci-dessous si c'est un reset password)",
-            to, subject,
+        if environment == "dev":
+            logger.warning(
+                "SMTP non configuré — email simulé en mode dev.\n"
+                "  À      : %s\n"
+                "  Sujet  : %s\n"
+                "  Contenu: non journalisé pour éviter toute fuite d'informations sensibles.",
+                to, subject,
+            )
+            return
+        raise RuntimeError(
+            f"Configuration SMTP incomplète pour l'environnement '{environment}': "
+            "smtp_user et smtp_password sont requis pour envoyer des emails."
         )
-        # En dev : extraire et afficher le lien de réinitialisation depuis le corps HTML
-        import re
-        links = re.findall(r'href="(http[^"]+reset-password[^"]*)"', html_body)
-        if links:
-            logger.warning("  --> LIEN DE RÉINITIALISATION : %s", links[0])
-        return
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject

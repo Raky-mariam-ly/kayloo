@@ -8,13 +8,18 @@ from sqlalchemy_file.storage import StorageManager
 from core.config import get_settings
 
 # sqlalchemy_file's delete_file does path.split("/") which breaks on nested
-# paths like "images/agency/property/uuid/file.ext". Patch to split on first
-# "/" only so file_id can contain sub-directories.
+# paths like "images/agency/property/uuid/file.ext". Also, calling
+# container.delete(file_id) is wrong for libcloud — the correct call is
+# container.get_object(name).delete(). Both issues fixed here.
 @classmethod  # type: ignore[misc]
 def _delete_file_fixed(cls, path: str) -> None:
     upload_storage, file_id = path.split("/", 1)
-    storage = cls.get(upload_storage)
-    storage.delete(file_id)
+    container = cls.get(upload_storage)
+    try:
+        obj = container.get_object(file_id)
+        obj.delete()
+    except Exception:
+        pass  # file already gone or inaccessible — safe to ignore
 
 StorageManager.delete_file = _delete_file_fixed
 

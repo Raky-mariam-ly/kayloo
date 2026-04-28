@@ -1,0 +1,5 @@
+{% from "public/components/property-carousel.html" import carousel_card %}
+
+{% for listing in listings %}
+{{ carousel_card(listing) }}
+{% endfor %}

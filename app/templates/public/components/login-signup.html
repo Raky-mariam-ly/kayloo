@@ -1,0 +1,222 @@
+{# ── Trigger Button ──────────────────────────────────────────────────────── #}
+{% macro trigger_btn() %}
+<button id="auth-trigger"
+    class="bg-primary hover:bg-primary-hover text-white font-['Plus_Jakarta_Sans'] text-sm font-medium px-[15px] py-2 rounded-[5px] transition cursor-pointer">
+    Connexion / Inscription
+</button>
+{% endmacro %}
+
+{# ── Auth Modal ──────────────────────────────────────────────────────────── #}
+{% macro modal() %}
+<div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4 py-8" role="dialog"
+    aria-modal="true">
+    <!-- Backdrop -->
+    <div id="auth-backdrop" class="absolute inset-0 bg-black/60"></div>
+
+    <!-- Panel -->
+    <div
+        class="relative z-10 w-full max-w-[520px] bg-white rounded-[11px] shadow-[0_20px_60px_rgba(0,0,0,0.25)] overflow-hidden">
+        <div class="h-1.5 bg-primary w-full"></div>
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-8 pt-6 pb-0">
+            <a href="/" class="block">
+                <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
+                    class="h-8 w-auto" />
+            </a>
+            <button id="auth-close" class="text-muted hover:text-dark transition text-xl leading-none"
+                aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="flex mt-6 border-b border-border-input mx-8 text-sm">
+            <button id="tab-login" onclick="window.authSwitchTab('login')" class="auth-tab-base auth-tab-active">
+                Se connecter
+            </button>
+            <button id="tab-signup" onclick="window.authSwitchTab('signup')" class="auth-tab-base">
+                Créer un compte
+            </button>
+        </div>
+        <!-- ── LOGIN FORM ─────────────────────────────────────────────── -->
+        <div id="panel-login" class="px-8 pt-3 pb-8">
+            <h2 class="font-jakarta text-[22px] font-bold text-dark mb-1">Bon retour !</h2>
+            <p class="text-sm text-muted mb-6">Connectez-vous à votre espace Kayloo.</p>
+
+            <form class="space-y-3">
+                <div>
+                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Adresse
+                        e-mail</label>
+                    <input type="email" placeholder="exemple@email.com"
+                        class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                </div>
+                <div>
+                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Mot de passe</label>
+                    <div class="relative">
+                        <input type="password" placeholder="••••••••"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                        <button type="button"
+                            class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" class="w-4 h-4 accent-primary rounded" />
+                        <span class="text-sm text-text-body">Se souvenir de moi</span>
+                    </label>
+                    <a href="{{ url_for('forgot_password')}}"
+                        class="text-sm text-primary hover:text-primary-hover font-medium">Mot de passe oublié
+                        ?</a>
+                </div>
+                <button type="submit"
+                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">Se
+                    connecter</button>
+            </form>
+        </div>
+
+        <!-- ── SIGNUP FORM ────────────────────────────────────────────── -->
+        <div id="panel-signup" class="hidden px-8 pt-3 pb-8">
+            <h2 class="font-jakarta text-[22px] font-bold text-dark mb-1">Créez votre compte</h2>
+            <p class="text-sm text-muted mb-6">Rejoignez Kayloo et accédez à toutes nos offres.</p>
+
+            <form class="space-y-3">
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Prénom</label>
+                        <input type="text" placeholder="Mouhammed"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                    </div>
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Nom</label>
+                        <input type="text" placeholder="Dia"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Adresse
+                            e-mail</label>
+                        <input type="email" placeholder="exemple@email.com"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                    </div>
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Téléphone <span
+                                class="text-xs font-normal text-muted">(facultatif)</span></label>
+                        <input type="tel" placeholder="+221 77 000 00 00"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Je suis…</label>
+                        <select
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition">
+                            <option disabled selected>Choisissez un profil</option>
+                            <option>Particulier</option>
+                            <option>Agence immobilière</option>
+                            <option>Investisseur / Diaspora</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Pays de
+                            résidence</label>
+                        <input type="text" placeholder="Sénégal"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Mot de passe</label>
+                    <div class="relative">
+                        <input type="password" placeholder="8 caractères minimum"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                        <button type="button"
+                            class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"><i
+                                class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Confirmer le mot de
+                        passe</label>
+                    <div class="relative">
+                        <input type="password" placeholder="••••••••"
+                            class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
+                        <button type="button"
+                            class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"><i
+                                class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+                <label class="flex items-start gap-2 cursor-pointer select-none">
+                    <input type="checkbox" required class="w-4 h-4 mt-0.5 accent-primary rounded flex-shrink-0" />
+                    <span class="text-sm text-text-body">J'accepte les <a href="{{ url_for('get_CGU') }}"
+                            class="text-primary hover:text-primary-hover">Conditions d'utilisation</a> et la <a
+                            href="{{ url_for('get_CGU') }}" class="text-primary hover:text-primary-hover">Politique de
+                            confidentialité</a>.</span>
+                </label>
+                <button type="submit"
+                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">Créer
+                    mon compte</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── JS LOGIC ─────────────────────────────────────────────────────────── -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('auth-modal');
+        const trigger = document.getElementById('auth-trigger');
+        const closeBtn = document.getElementById('auth-close');
+        const backdrop = document.getElementById('auth-backdrop');
+        const tabLogin = document.getElementById('tab-login');
+        const tabSignup = document.getElementById('tab-signup');
+        const panelLogin = document.getElementById('panel-login');
+        const panelSignup = document.getElementById('panel-signup');
+
+        // Modal Controls
+        const openModal = () => modal?.classList.remove('hidden');
+        const closeModal = () => modal?.classList.add('hidden');
+
+        trigger?.addEventListener('click', openModal);
+        closeBtn?.addEventListener('click', closeModal);
+        backdrop?.addEventListener('click', closeModal);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        // Tab Switcher
+        window.authSwitchTab = function (tab) {
+            const isLogin = tab === 'login';
+
+            // Toggle panels
+            document.getElementById('panel-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('panel-signup').classList.toggle('hidden', isLogin);
+
+            // Toggle active class
+            const tLogin = document.getElementById('tab-login');
+            const tSignup = document.getElementById('tab-signup');
+
+            if (isLogin) {
+                tLogin.classList.add('auth-tab-active');
+                tSignup.classList.remove('auth-tab-active');
+            } else {
+                tSignup.classList.add('auth-tab-active');
+                tLogin.classList.remove('auth-tab-active');
+            }
+        };
+
+        // Password Visibility Toggle
+        document.querySelectorAll('.toggle-pwd').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = btn.previousElementSibling;
+                const icon = btn.querySelector('i');
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                icon.classList.toggle('fa-eye', !isPassword);
+                icon.classList.toggle('fa-eye-slash', isPassword);
+            });
+        });
+    });
+</script>
+{% endmacro %}

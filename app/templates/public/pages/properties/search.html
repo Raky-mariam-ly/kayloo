@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% from "public/components/property-search.html" import display_card %}
+{% block title %}Résultats de recherche - Kayloo{% endblock %}
+{% block content %}
+<!-- MAP BANNER (static placeholder) -->
+<section class="relative bg-gray-200 overflow-hidden" style="height: 340px">
+    <img src="https://picsum.photos/seed/hero1/1920/400" alt="Carte des propriétés"
+        class="w-full h-full object-cover opacity-60" />
+    <div class="absolute inset-0 flex items-center justify-center">
+        <div class="bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 shadow-lg text-center">
+            <p class="font-jakarta font-bold text-dark text-lg mb-1">
+                <i class="fa-solid fa-map-location-dot text-primary mr-2"></i>
+                Carte interactive des propriétés
+            </p>
+            <p class="text-sm text-gray-500">Visualisez les biens sur la carte</p>
+        </div>
+    </div>
+    <!-- Map control buttons (decorative) -->
+    <div class="absolute top-4 left-4 flex flex-col gap-2">
+        <button
+            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md w-8 h-8 flex items-center justify-center shadow-sm text-dark text-sm transition-colors"
+            aria-label="Zoom avant">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <button
+            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md w-8 h-8 flex items-center justify-center shadow-sm text-dark text-sm transition-colors"
+            aria-label="Zoom arrière">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+    </div>
+    <div class="absolute top-4 right-4">
+        <button
+            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md px-3 h-8 flex items-center gap-2 shadow-sm text-dark text-xs font-medium transition-colors">
+            <i class="fa-solid fa-expand"></i>
+            <span>Plein écran</span>
+        </button>
+    </div>
+</section>
+
+<!-- ADVANCED SEARCH BAR -->
+<section class="bg-white border-b border-gray-100 shadow-sm">
+    <div class="max-w-site mx-auto px-4">
+        <!-- Collapsible toggle -->
+        <button
+            class="w-full flex items-center justify-between py-3 text-sm font-semibold text-dark hover:text-primary transition-colors"
+            onclick="document.getElementById('search-panel').classList.toggle('hidden')">
+            <span class="flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-primary"></i>
+                Recherche Avancée
+            </span>
+            <i class="fa-solid fa-chevron-down text-primary transition-transform" id="search-chevron"></i>
+        </button>
+        <!-- Search panel -->
+        <div id="search-panel" class="pb-5">
+            <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 items-end">
+                <!-- Statut -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Statut</label>
+                    <div class="relative">
+                        <select
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="location" selected>Location</option>
+                            <option value="vente">Vente</option>
+                        </select>
+                        <i
+                            class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Type de bien -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Type de bien</label>
+                    <div class="relative">
+                        <select
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="">Tous les types</option>
+                            <option value="appartement">Appartement</option>
+                            <option value="villa">Villa</option>
+                            <option value="bureau">Bureau</option>
+                            <option value="local-commercial">Local Commercial</option>
+                            <option value="studio">Studio</option>
+                            <option value="terrain">Terrain Agricole</option>
+                        </select>
+                        <i
+                            class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Localisation -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Localisation</label>
+                    <div class="relative">
+                        <input type="text" placeholder="Ville, quartier..."
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body focus:outline-none focus:border-primary pl-9" />
+                        <i
+                            class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    </div>
+                </div>
+                <!-- Budget max -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Budget max (FCFA)</label>
+                    <div class="relative">
+                        <input type="number" placeholder="Budget maximum"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body focus:outline-none focus:border-primary" />
+                    </div>
+                </div>
+                <!-- Search button -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-transparent uppercase tracking-wide select-none">.</label>
+                    <button type="submit"
+                        class="bg-primary hover:bg-primary-hover text-white font-semibold px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm transition-colors">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Rechercher
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- RESULTS SECTION -->
+<section class="py-8 bg-neutral-100">
+    <div class="max-w-site mx-auto px-4">
+        <!-- Breadcrumb -->
+        <nav class="mb-4" aria-label="Fil d'Ariane">
+            <ol class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+                <li>
+                    <a href="../index.html" class="hover:text-primary transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-house text-xs"></i>
+                        Accueil
+                    </a>
+                </li>
+                <li class="text-gray-300"><i class="fa-solid fa-chevron-right text-xs"></i></li>
+                <li class="text-dark font-medium">Résultats de recherche</li>
+            </ol>
+        </nav>
+
+        <!-- Title row + View toggle + Sort -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="font-jakarta font-bold text-2xl text-dark">Résultats de recherche</h1>
+                <p class="text-sm text-gray-500 mt-0.5"><strong class="text-dark">24 résultats</strong> trouvés</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Sort -->
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 whitespace-nowrap">Trier par :</span>
+                    <div class="relative">
+                        <select
+                            class="appearance-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="">Ordre par défaut</option>
+                            <option value="a_price">Prix (croissant)</option>
+                            <option value="d_price">Prix (décroissant)</option>
+                            <option value="featured_first">Annonces en avant d'abord</option>
+                            <option value="d_date">Date (récente à ancienne)</option>
+                            <option value="a_date">Date (ancienne à récente)</option>
+                            <option value="a_title">Titre A-Z</option>
+                            <option value="d_title">Titre Z-A</option>
+                        </select>
+                        <i
+                            class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- View toggle -->
+                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                    <button
+                        class="px-3 py-2 text-gray-400 hover:text-dark hover:bg-gray-50 transition-colors border-r border-gray-200"
+                        aria-label="Vue liste" title="Vue liste">
+                        <i class="fa-solid fa-list text-sm"></i>
+                    </button>
+                    <button class="px-3 py-2 text-white bg-primary" aria-label="Vue grille" title="Vue grille">
+                        <i class="fa-solid fa-grip text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for listing in listings %}
+            {{ display_card(listing) }}
+            {% endfor %}
+        </div>
+        <!-- END Cards Grid -->
+
+        <!-- Load More / Pagination indicator -->
+        <div class="mt-10 flex flex-col items-center gap-4">
+            <p class="text-sm text-gray-500">
+                Affichage de <strong class="text-dark">24</strong> résultats sur <strong class="text-dark">24</strong>
+            </p>
+            <!-- Pagination (shown for context, currently all results visible) -->
+            <nav class="flex items-center gap-1" aria-label="Pagination">
+                <button
+                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-colors"
+                    aria-label="Page précédente" disabled>
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </button>
+                <button
+                    class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-semibold"
+                    aria-current="page">
+                    1
+                </button>
+                <button
+                    class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-primary hover:text-primary transition-colors"
+                    aria-label="Page suivante" disabled>
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </button>
+            </nav>
+        </div>
+    </div>
+</section>
+{% endblock %}

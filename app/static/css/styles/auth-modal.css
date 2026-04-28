@@ -1,0 +1,11 @@
+@layer components {
+  .auth-tab-base, .auth-tab-active {
+    @apply font-jakarta text-muted flex-1 rounded-t-md border border-b-0
+    border-transparent bg-transparent px-4 py-3 text-sm font-semibold transition
+    hover:text-dark;
+  }
+  
+  .auth-tab-active {
+    @apply bg-primary border-primary text-white;
+  }
+}

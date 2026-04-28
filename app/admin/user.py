@@ -1,11 +1,22 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 from starlette.requests import Request
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import EnumField, StringField, PasswordField, DateTimeField, BooleanField, TextAreaField
 
 from core.auth import User, create_user
-from admin.base import AdminModelView, AVAILABLE_USER_ROLES, GENDER_TYPES
+from admin.base import AdminModelView, SafeEnumField, AVAILABLE_USER_ROLES, GENDER_TYPES, _is_full_admin, _is_agent
+
+_MANAGER_ROLE_CHOICES: List[Tuple[str, str]] = [
+    ("manager", "Manager"),
+    ("viewer", "Viewer"),
+]
+
+
+def _load_role_choices(request: Request) -> List[Tuple[str, str]]:
+    if _is_full_admin(request):
+        return AVAILABLE_USER_ROLES
+    return _MANAGER_ROLE_CHOICES
 
 
 class UserView(AdminModelView):
@@ -25,7 +36,7 @@ class UserView(AdminModelView):
         StringField("company_name", label="Company", exclude_from_list=True),
         StringField("address", label="Address", exclude_from_list=True),
         TextAreaField("bio", label="Bio", exclude_from_list=True),
-        EnumField("role", choices=AVAILABLE_USER_ROLES, select2=False, label="Role"),
+        SafeEnumField("role", choices_loader=_load_role_choices, select2=False, label="Role"),
         BooleanField("is_active", label="Active"),
         BooleanField("is_verified", label="Verified"),
         BooleanField("is_superuser", label="Super Admin"),
@@ -52,18 +63,21 @@ class UserView(AdminModelView):
         "hashed_password", "created_at", "updated_at", "created_by", "updated_by"]
     exclude_fields_from_detail = ["hashed_password"]
 
+    def is_accessible(self, request) -> bool:
+        return _is_full_admin(request) or _is_agent(request)
+
+    def can_delete(self, request) -> bool:
+        return _is_full_admin(request)
+
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        try:
-            user = await create_user(
-                email=data["email"],
-                password=data["hashed_password"],
-                first_name=data["first_name"],
-                last_name=data["last_name"],
-                phone_number=data["phone_number"],
-                gender=data["gender"],
-            )
-        except Exception:
-            raise FormValidationError({"email": "This email is already used or invalid."})
+        user = await create_user(
+            email=data["email"],
+            password=data["hashed_password"],
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            phone_number=data["phone_number"],
+            gender=data["gender"],
+        )
         if user is None:
             raise FormValidationError({"email": "This email is already used."})
         return user

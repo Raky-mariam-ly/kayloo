@@ -88,7 +88,6 @@ class PropertyImageView(AdminModelView):
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = {}
         if not data.get("property_id"):
-            errors["property_id"] = "Property is required"
         if errors:
             raise FormValidationError(errors)
         return await super().validate(request, data)

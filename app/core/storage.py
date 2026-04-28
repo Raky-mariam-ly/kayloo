@@ -3,7 +3,7 @@ import os
 from urllib.parse import urlparse
 
 from libcloud.storage.providers import get_driver
-from libcloud.storage.types import ContainerDoesNotExistError
+from libcloud.storage.types import ContainerDoesNotExistError, Provider
 from sqlalchemy_file.storage import StorageManager
 from core.config import get_settings
 
@@ -50,28 +50,20 @@ def configure_storage() -> None:
         and settings.s3_endpoint
         and settings.s3_bucket
     ):
-        endpoint = urlparse(settings.s3_endpoint)
-        host = endpoint.netloc or endpoint.path
-        # Accept both endpoint styles:
-        # - fra1.digitaloceanspaces.com
-        # - <bucket>.fra1.digitaloceanspaces.com
-        bucket_prefix = f"{settings.s3_bucket}."
-        if host.startswith(bucket_prefix):
-            host = host[len(bucket_prefix) :]
-        cls = get_driver("s3")
+        # Use the dedicated DigitalOcean Spaces driver — it has its own
+        # VALID_REGIONS list (fra1, nyc3, ams3, …) and sets the correct
+        # signing host automatically, avoiding the AWS-region validation
+        # that rejects DO region names.
+        cls = get_driver(Provider.DIGITALOCEAN_SPACES)
         driver = cls(
             settings.s3_access_key,
             settings.s3_secret_key,
-            host=host,
-            secure=settings.s3_secure,
+            region=settings.s3_region,
         )
-        # Bypass constructor's AWS-region validation, then set the actual
-        # signing region so v4 HMAC uses "fra1" instead of the default "us-east-1".
-        driver.region_name = settings.s3_region
         StorageManager.add_storage(
             "images", _get_or_create_container(driver, settings.s3_bucket)
         )
-        logger.info("Storage: S3 backend active — bucket=%s endpoint=%s", settings.s3_bucket, host)
+        logger.info("Storage: DigitalOcean Spaces active — bucket=%s region=%s", settings.s3_bucket, settings.s3_region)
         return
 
     os.makedirs(UPLOAD_DIR, mode=0o755, exist_ok=True)

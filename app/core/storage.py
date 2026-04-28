@@ -64,7 +64,7 @@ def configure_storage() -> None:
             settings.s3_secret_key,
             host=host,
             secure=settings.s3_secure,
-            # DigitalOcean Spaces uses the host, not an AWS-style region
+            region=settings.s3_region,  # required for v4 signature signing
         )
         StorageManager.add_storage(
             "images", _get_or_create_container(driver, settings.s3_bucket)

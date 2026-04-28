@@ -91,12 +91,10 @@ class ImageUploadField(ImageField):
         if file_value is None:
             return None, False
 
-        # Multiple files: list of UploadFile
         if isinstance(file_value, list):
             urls = [await _save_upload_file(f) for f in file_value if isinstance(f, UploadFile)]
             return (urls if urls else None), False
 
-        # Single file
         if isinstance(file_value, UploadFile):
             return await _save_upload_file(file_value), False
 
@@ -213,10 +211,9 @@ class AdminModelView(ModelView):
             return query.filter(self.model.agency_id == agency_id)
         return query
 
-    async def is_accessible(self, request: Request) -> bool:
+    def is_accessible(self, request: Request) -> bool:
         if self.agency_scoped:
-            agency_id = await self._get_agency_id(request)
-            return agency_id is not None
+            return getattr(request.state, "agent_agency_id", None) is not None
         return _is_full_admin(request)
 
     async def count(
@@ -294,10 +291,12 @@ class AdminModelView(ModelView):
             count += 1
         return count
 
-    async def after_create(self, request: Request, obj: Any) -> None:
+    async def _refresh_choices(self, request: Request) -> None:
         from admin.choices import warm_choices_cache
         await warm_choices_cache(request.state.session)
 
+    async def after_create(self, request: Request, obj: Any) -> None:
+        await self._refresh_choices(request)
+
     async def after_edit(self, request: Request, obj: Any) -> None:
-        from admin.choices import warm_choices_cache
-        await warm_choices_cache(request.state.session)
+        await self._refresh_choices(request)

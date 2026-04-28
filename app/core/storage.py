@@ -21,14 +21,10 @@ def _get_or_create_container(driver, name: str):
 
 def configure_storage() -> None:
     """
-    Configure le backend de stockage de fichiers via apache-libcloud.
+    Configure the file storage backend via apache-libcloud.
 
-    En développement : stockage local dans static/uploads/.
-    En production, remplacer le driver local par S3 ou MinIO :
-
-        from libcloud.storage.types import Provider
-        cls = get_driver(Provider.S3)
-        driver = cls("access_key", "secret_key", region="eu-west-1")
+    Development: local storage in static/uploads/.
+    Production: S3 or MinIO — set S3_* environment variables to activate.
     """
     settings = get_settings()
 
@@ -52,16 +48,16 @@ def configure_storage() -> None:
             settings.s3_secret_key,
             host=host,
             secure=settings.s3_secure,
-            # region non passé : DigitalOcean Spaces utilise l'host, pas une région AWS
+            # DigitalOcean Spaces uses the host, not an AWS-style region
         )
         StorageManager.add_storage(
             "images", _get_or_create_container(driver, settings.s3_bucket)
         )
-        logger.info("Storage: S3 backend actif — bucket=%s endpoint=%s", settings.s3_bucket, host)
+        logger.info("Storage: S3 backend active — bucket=%s endpoint=%s", settings.s3_bucket, host)
         return
 
     os.makedirs(UPLOAD_DIR, mode=0o755, exist_ok=True)
     cls = get_driver("local")
     driver = cls(UPLOAD_DIR)
     StorageManager.add_storage("images", _get_or_create_container(driver, "images"))
-    logger.warning("Storage: backend LOCAL actif (%s) — variables S3 manquantes", UPLOAD_DIR)
+    logger.warning("Storage: LOCAL backend active (%s) — S3 variables missing", UPLOAD_DIR)

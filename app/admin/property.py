@@ -76,7 +76,6 @@ class PropertyView(AdminModelView):
     detail_template = "property_detail.html"
 
     fields = [
-        # ── Identification ──
         SectionField("_sec_identification", label="Identification"),
         StringField("code", label="Code"),
         StringField("label", label="Label"),
@@ -84,14 +83,12 @@ class PropertyView(AdminModelView):
         SafeEnumField("type", choices_loader=load_property_type_choices, label="Type"),
         EnumField("usage", choices=USAGE_CHOICES, label="Usage", exclude_from_list=True),
 
-        # ── Relations ──
         SectionField("_sec_relations", label="Relations", exclude_from_list=True),
         UUIDEnumField("building_id", choices_loader=load_building_choices,
                       label="Building", coerce=uuid.UUID, exclude_from_list=True),
         UUIDEnumField("agency_id", choices_loader=load_agency_choices,
                       label="Agency", coerce=uuid.UUID, exclude_from_list=True),
 
-        # ── Classification ──
         SectionField("_sec_classification", label="Classification", exclude_from_list=True),
         EnumField("status_before_reserved", choices=STATUS_CHOICES,
                   label="Status Before Reservation", exclude_from_list=True),
@@ -102,7 +99,6 @@ class PropertyView(AdminModelView):
         EnumField("managed_by", choices=MANAGED_BY_CHOICES,
                   label="Managed By", exclude_from_list=True),
 
-        # ── Location ──
         SectionField("_sec_location", label="Location", exclude_from_list=True),
         SafeEnumField("country", choices_loader=load_country_choices,
                       label="Country", exclude_from_list=True),
@@ -116,13 +112,11 @@ class PropertyView(AdminModelView):
         StringField("position", label="Position", exclude_from_list=True),
         StringField("apartment_number", label="Apt Number", exclude_from_list=True),
 
-        # ── Description ──
         SectionField("_sec_description", label="Description", exclude_from_list=True),
         TextAreaField("description", label="Description", exclude_from_list=True),
         ImageField("image_url", label="Cover Image", exclude_from_list=True),
         ImageField("gallery_images", label="Photo Gallery", multiple=True, exclude_from_list=True),
 
-        # ── Physical features ──
         SectionField("_sec_features", label="Features", exclude_from_list=True),
         DecimalField("surface", label="Surface (m²)", min=0, step="0.01"),
         IntegerField("bed_room_count", label="Bedrooms", min=0),
@@ -133,14 +127,12 @@ class PropertyView(AdminModelView):
         DecimalField("lng", label="Longitude", min=-180, max=180, step="0.000001", exclude_from_list=True),
         DecimalField("lat", label="Latitude", min=-90, max=90, step="0.000001", exclude_from_list=True),
 
-        # ── Acquisition ──
         SectionField("_sec_acquisition", label="Acquisition", exclude_from_list=True),
         DateField("acquisition_date", label="Acquisition Date", exclude_from_list=True),
         FloatField("acquisition_price", label="Acquisition Price", exclude_from_list=True),
         FloatField("acquisition_fee", label="Acquisition Fee", exclude_from_list=True),
         DateField("free_since", label="Available Since", exclude_from_list=True),
 
-        # ── Financial ──
         SectionField("_sec_financial", label="Financial", exclude_from_list=True),
         EnumField("currency", choices=CURRENCY_CHOICES, label="Currency", exclude_from_list=True),
         EnumField("base_price_type", choices=BASE_PRICE_TYPE_CHOICES,
@@ -152,7 +144,6 @@ class PropertyView(AdminModelView):
         FloatField("rent_price", label="Rent", exclude_from_list=True),
         FloatField("syndic_amount", label="Condo Fees", exclude_from_list=True),
 
-        # ── Rates ──
         SectionField("_sec_rates", label="Rates", exclude_from_list=True),
         DecimalField("vat_rate", label="VAT", min=0, max=100, step="0.01", exclude_from_list=True),
         DecimalField("tom_rate", label="TOM", min=0, max=100, step="0.01", exclude_from_list=True),
@@ -161,7 +152,6 @@ class PropertyView(AdminModelView):
         DecimalField("commission_rate", label="Commission", min=0, max=100, step="0.01", exclude_from_list=True),
         DecimalField("deposit_rate", label="Deposit", min=0, max=100, step="0.01", exclude_from_list=True),
 
-        # ── Flags ──
         SectionField("_sec_flags", label="Options", exclude_from_list=True),
         BooleanField("is_hidden", label="Hidden"),
         BooleanField("is_exposed", label="Exposed"),
@@ -170,7 +160,6 @@ class PropertyView(AdminModelView):
         BooleanField("archived", label="Archived"),
         BooleanField("is_featured", label="Featured", exclude_from_list=True),
 
-        # ── Audit ──
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
         StringField("created_by", read_only=True, exclude_from_list=True),
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
@@ -223,73 +212,59 @@ class PropertyView(AdminModelView):
         return await super().validate(request, data)
 
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        try:
-            data = await self._arrange_data(request, data)
-            raw_gallery = data.get("gallery_images")
-            self._prepare_file_fields_for_populate(data)
-            await self.validate(request, data)
+        data = await self._arrange_data(request, data)
+        raw_gallery = data.get("gallery_images")
+        self._prepare_file_fields_for_populate(data)
+        await self.validate(request, data)
 
-            session = request.state.session
-            obj = await self._populate_obj(request, self.model(), data)
-            session.add(obj)
-            await self.before_create(request, data, obj)
-            await session.flush()
+        session = request.state.session
+        obj = await self._populate_obj(request, self.model(), data)
+        session.add(obj)
+        await self.before_create(request, data, obj)
+        await session.flush()
 
-            agency_name = obj.agency.name if obj.agency else None
-            gallery_files, _ = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
-            if gallery_files:
-                session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
+        agency_name = obj.agency.name if obj.agency else None
+        gallery_files, _ = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+        if gallery_files:
+            session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
 
-            await session.commit()
-            await session.refresh(obj)
-            await self.after_create(request, obj)
-            return obj
-        except Exception as e:
-            raise e
+        await session.commit()
+        await session.refresh(obj)
+        await self.after_create(request, obj)
+        return obj
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-        try:
-            data = await self._arrange_data(request, data, True)
-            raw_gallery = data.get("gallery_images")
-            self._prepare_file_fields_for_populate(data)
-            await self.validate(request, data)
+        data = await self._arrange_data(request, data, True)
+        raw_gallery = data.get("gallery_images")
+        self._prepare_file_fields_for_populate(data)
+        await self.validate(request, data)
 
-            session = request.state.session
-            obj = await self.find_by_pk(request, pk)
-            await self._populate_obj(request, obj, data, True)
-            session.add(obj)
-            await self.before_edit(request, data, obj)
+        session = request.state.session
+        obj = await self.find_by_pk(request, pk)
+        await self._populate_obj(request, obj, data, True)
+        session.add(obj)
+        await self.before_edit(request, data, obj)
 
-            agency_name = obj.agency.name if obj.agency else None
-            gallery_files, delete_gallery = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
-            if gallery_files or delete_gallery:
-                from sqlalchemy import select
-                result = await session.execute(
-                    select(PropertyGallery).where(PropertyGallery.property_id == obj.id)
-                )
-                gallery = result.scalar_one_or_none()
-                if delete_gallery:
-                    if gallery:
-                        gallery.images = None
-                elif gallery:
-                    gallery.images = gallery_files
-                else:
-                    session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
+        agency_name = obj.agency.name if obj.agency else None
+        gallery_files, delete_gallery = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+        if gallery_files or delete_gallery:
+            from sqlalchemy import select
+            result = await session.execute(
+                select(PropertyGallery).where(PropertyGallery.property_id == obj.id)
+            )
+            gallery = result.scalar_one_or_none()
+            if delete_gallery:
+                if gallery:
+                    gallery.images = None
+            elif gallery:
+                gallery.images = gallery_files
+            else:
+                session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
 
-            await session.commit()
-            await session.refresh(obj)
-            await self.after_edit(request, obj)
-            return obj
-        except Exception as e:
-            raise e
-
-    async def after_create(self, request: Request, obj: Any) -> None:
-        from admin.choices import warm_choices_cache
-        await warm_choices_cache(request.state.session)
-
-    async def after_edit(self, request: Request, obj: Any) -> None:
-        from admin.choices import warm_choices_cache
-        await warm_choices_cache(request.state.session)
+        await session.commit()
+        await session.refresh(obj)
+        await self.after_edit(request, obj)
+        return obj
 
     @staticmethod
     def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None):

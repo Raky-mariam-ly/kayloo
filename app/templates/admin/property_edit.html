@@ -98,7 +98,7 @@
     <div class="row">
       {{ rf("description", full_width=True) }}
       {{ rf("image_url", full_width=True) }}
-      {{ rf("images", full_width=True) }}
+      {{ rf("gallery_images", full_width=True) }}
     </div>
   </div>
 
@@ -159,33 +159,158 @@
 {% block head_css %}
 {{ super() }}
 <style>
-  .nav-tabs .nav-link {
-    color: #6c757d;
-    border-color: transparent;
-    font-size: 0.85rem;
+  /* ── Dropzone galerie ── */
+  .gallery-dropzone {
+    border: 2px dashed #d0d0d0;
+    border-radius: 8px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    background: #fafafa;
+    transition: border-color .2s, background .2s;
+    user-select: none;
   }
-  .nav-tabs .nav-link.active {
-    color: #a80000;
-    border-bottom: 2px solid #a80000;
-    font-weight: 600;
+  .gallery-dropzone:hover,
+  .gallery-dropzone.dragover {
+    border-color: #a80000;
+    background: #fff5f5;
   }
-  .nav-tabs .nav-link:hover:not(.active) {
-    color: #a80000;
-    border-color: transparent;
-    background: rgba(168,0,0,.05);
+  .gallery-dropzone .dz-icon { color: #a80000; margin-bottom: 6px; }
+  .gallery-dropzone p { margin: 0; font-size: .8rem; color: #888; }
+  .gallery-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
   }
-  .tab-section-label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: #a80000;
-    border-bottom: 1px solid #f0e0e0;
-    padding-bottom: 6px;
-    margin-bottom: 12px;
+  .gallery-thumb {
+    position: relative;
+    width: 82px;
+    height: 82px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    background: #f0f0f0;
   }
-  .tab-content {
-    background: #fff;
+  .gallery-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gallery-thumb-remove {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    border: none;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .gallery-thumb-remove:hover { background: #a80000; }
+  .gallery-count {
+    font-size: .75rem;
+    color: #666;
+    margin-top: 4px;
   }
 </style>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+(function () {
+  var input = document.getElementById('gallery_images');
+  if (!input) return;
+
+  var dt = new DataTransfer();
+  var nativeWrap = input.parentElement;
+  input.style.display = 'none';
+
+  var dropzone = document.createElement('div');
+  dropzone.className = 'gallery-dropzone';
+  dropzone.innerHTML =
+    '<div class="dz-icon">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>' +
+    '</svg></div>' +
+    '<p>Cliquer ou glisser des photos ici</p>' +
+    '<p style="font-size:.72rem">Vous pouvez ouvrir le sélecteur plusieurs fois — les photos s\'accumulent</p>';
+
+  var previews = document.createElement('div');
+  previews.className = 'gallery-previews';
+
+  var count = document.createElement('div');
+  count.className = 'gallery-count';
+
+  nativeWrap.appendChild(dropzone);
+  nativeWrap.appendChild(previews);
+  nativeWrap.appendChild(count);
+
+  dropzone.addEventListener('click', function () { input.click(); });
+
+  dropzone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  });
+  dropzone.addEventListener('dragleave', function () {
+    dropzone.classList.remove('dragover');
+  });
+  dropzone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    Array.from(e.dataTransfer.files).forEach(function (f) {
+      if (f.type.startsWith('image/')) dt.items.add(f);
+    });
+    input.files = dt.files;
+    render();
+  });
+
+  input.addEventListener('change', function () {
+    Array.from(this.files).forEach(function (f) { dt.items.add(f); });
+    input.files = dt.files;
+    render();
+  });
+
+  function removeAt(idx) {
+    dt.items.remove(idx);
+    input.files = dt.files;
+    render();
+  }
+
+  function render() {
+    previews.innerHTML = '';
+    var files = Array.from(dt.files);
+    files.forEach(function (file, i) {
+      var url = URL.createObjectURL(file);
+      var thumb = document.createElement('div');
+      thumb.className = 'gallery-thumb';
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = file.name;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'gallery-thumb-remove';
+      btn.title = 'Retirer';
+      btn.textContent = '×';
+      btn.dataset.idx = i;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        URL.revokeObjectURL(url);
+        removeAt(parseInt(this.dataset.idx));
+      });
+      thumb.appendChild(img);
+      thumb.appendChild(btn);
+      previews.appendChild(thumb);
+    });
+    count.textContent = files.length ? files.length + ' photo(s) sélectionnée(s)' : '';
+  }
+})();
+</script>
 {% endblock %}

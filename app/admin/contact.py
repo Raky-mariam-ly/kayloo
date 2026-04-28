@@ -11,11 +11,11 @@ from services.contact import ContactService
 
 
 CONTACT_TYPE_CHOICES = [
-    ("buyer", "Acheteur"),
-    ("seller", "Vendeur"),
-    ("tenant", "Locataire"),
-    ("landlord", "Propriétaire"),
-    ("investor", "Investisseur"),
+    ("buyer", "Buyer"),
+    ("seller", "Seller"),
+    ("tenant", "Tenant"),
+    ("landlord", "Landlord"),
+    ("investor", "Investor"),
 ]
 
 
@@ -25,15 +25,15 @@ class ContactView(AdminModelView):
     agency_scoped = True
 
     fields = [
-        StringField("first_name", label="Prénom", required=True),
-        StringField("last_name", label="Nom", required=True),
+        StringField("first_name", label="First Name", required=True),
+        StringField("last_name", label="Last Name", required=True),
         StringField("email", label="Email"),
-        StringField("phone_number", label="Téléphone"),
+        StringField("phone_number", label="Phone"),
         EnumField("contact_type", choices=CONTACT_TYPE_CHOICES, label="Type"),
-        StringField("country", label="Pays", exclude_from_list=True),
-        StringField("city", label="Ville", exclude_from_list=True),
-        StringField("address", label="Adresse", exclude_from_list=True),
-        BooleanField("is_active", label="Actif"),
+        StringField("country", label="Country", exclude_from_list=True),
+        StringField("city", label="City", exclude_from_list=True),
+        StringField("address", label="Address", exclude_from_list=True),
+        BooleanField("is_active", label="Active"),
         TextAreaField("notes", label="Notes", exclude_from_list=True),
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
         StringField("created_by", read_only=True, exclude_from_list=True),
@@ -41,5 +41,3 @@ class ContactView(AdminModelView):
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]

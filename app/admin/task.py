@@ -8,26 +8,26 @@ from services.task import TaskService
 
 
 TASK_TYPE_CHOICES = [
-    ("call", "Appel"),
+    ("call", "Call"),
     ("email", "Email"),
-    ("visit", "Visite"),
-    ("follow_up", "Relance"),
+    ("visit", "Visit"),
+    ("follow_up", "Follow-up"),
     ("document", "Document"),
-    ("other", "Autre"),
+    ("other", "Other"),
 ]
 
 TASK_STATUS_CHOICES = [
-    ("pending", "En attente"),
-    ("in_progress", "En cours"),
-    ("completed", "Terminé"),
-    ("cancelled", "Annulé"),
+    ("pending", "Pending"),
+    ("in_progress", "In Progress"),
+    ("completed", "Completed"),
+    ("cancelled", "Cancelled"),
 ]
 
 PRIORITY_CHOICES = [
-    ("low", "Basse"),
-    ("medium", "Moyenne"),
-    ("high", "Haute"),
-    ("urgent", "Urgente"),
+    ("low", "Low"),
+    ("medium", "Medium"),
+    ("high", "High"),
+    ("urgent", "Urgent"),
 ]
 
 
@@ -36,17 +36,17 @@ class TaskView(AdminModelView):
     repository_class = TaskRepository
     agency_scoped = True
     fields = [
-        StringField("title", label="Titre", required=True),
+        StringField("title", label="Title", required=True),
         TextAreaField("description", label="Description", exclude_from_list=True),
         EnumField("task_type", choices=TASK_TYPE_CHOICES, label="Type"),
-        EnumField("status", choices=TASK_STATUS_CHOICES, label="Statut"),
-        EnumField("priority", choices=PRIORITY_CHOICES, label="Priorité"),
-        DateTimeField("due_date", label="Échéance"),
-        DateTimeField("completed_at", label="Terminé le", read_only=True, exclude_from_list=True),
+        EnumField("status", choices=TASK_STATUS_CHOICES, label="Status"),
+        EnumField("priority", choices=PRIORITY_CHOICES, label="Priority"),
+        DateTimeField("due_date", label="Due Date"),
+        DateTimeField("completed_at", label="Completed On", read_only=True, exclude_from_list=True),
         StringField("lead_id", label="Lead ID", exclude_from_list=True),
         StringField("contact_id", label="Contact ID", exclude_from_list=True),
-        StringField("assigned_to", label="Assigné à", exclude_from_list=True),
-        StringField("assigned_by", label="Assigné par", read_only=True, exclude_from_list=True),
+        StringField("assigned_to", label="Assigned To", exclude_from_list=True),
+        StringField("assigned_by", label="Assigned By", read_only=True, exclude_from_list=True),
         DateTimeField("created_at", read_only=True, exclude_from_list=True),
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
     ]

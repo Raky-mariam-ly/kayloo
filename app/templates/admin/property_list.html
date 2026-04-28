@@ -1,0 +1,203 @@
+{% extends "list.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+@media (max-width: 767.98px) {
+
+  /* Ligne en stretch pour que la colonne droite occupe toute la hauteur */
+  table#dt tbody tr { align-items: stretch; margin-bottom: .45rem; }
+  table#dt tbody tr td:nth-child(1) { align-self: flex-start; padding-top: .15rem !important; }
+
+  /* Corps principal (gauche) */
+  table#dt tbody tr td.p-td-body {
+    display: flex !important;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    gap: .22rem;
+  }
+
+  /* Colonne droite : prix en haut + boutons en bas, sans espace superflu */
+  table#dt tbody tr td.p-td-actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-self: stretch;
+    padding: 0 !important;
+  }
+  .p-actions-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .p-price-col {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #a80000;
+    white-space: nowrap;
+    text-align: right;
+    padding-top: .05rem;
+  }
+  .p-btns-col {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+  table#dt tbody tr td.p-td-actions .btn {
+    padding: .28rem .38rem !important;
+    font-size: .78rem !important;
+  }
+  table#dt tbody tr td.p-td-actions .btn span { display: none !important; }
+
+  /* ── Contenu du corps ── */
+  .p-top   { display: flex; align-items: center; gap: .35rem; flex-wrap: nowrap; overflow: hidden; }
+  .p-mid   { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; font-size: .76rem; color: #495057; }
+  .p-flags { display: flex; gap: .25rem; flex-wrap: wrap; }
+
+  .p-label-group { display: flex; align-items: baseline; gap: .3rem; flex: 1 1 0; min-width: 0; overflow: hidden; }
+  .p-label { font-weight: 600; font-size: .86rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .p-code  { font-size: .7rem; color: #868e96; flex-shrink: 0; font-family: monospace; white-space: nowrap; }
+
+  /* Type pill */
+  .p-type { background: #f1f3f5; color: #495057; padding: .1rem .32rem; border-radius: 4px; font-size: .72rem; }
+
+  /* Dot separator */
+  .p-dot { color: #dee2e6; }
+
+  /* Tous les badges (statuts + flags) — même style uniforme */
+  .p-flag { display: inline-block; padding: .08rem .3rem; border-radius: 4px; font-size: .63rem; font-weight: 600; }
+  .p-f-free               { background: #d4edda; color: #155724; }
+  .p-f-for-sale           { background: #cce5ff; color: #004085; }
+  .p-f-for-rent           { background: #fff3cd; color: #856404; }
+  .p-f-reserved           { background: #ffeeba; color: #856404; }
+  .p-f-rented             { background: #e2e3e5; color: #383d41; }
+  .p-f-sold               { background: #f8d7da; color: #721c24; }
+  .p-f-under-construction { background: #d1ecf1; color: #0c5460; }
+  .p-f-archived           { background: #e2e3e5; color: #383d41; }
+  .p-f-hidden             { background: #f8d7da; color: #721c24; }
+  .p-f-exposed            { background: #d4edda; color: #155724; }
+  .p-f-saleable           { background: #cce5ff; color: #004085; }
+  .p-f-managed            { background: #d1ecf1; color: #0c5460; }
+}
+</style>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+(function () {
+  var STATUS_LABELS = {
+    'free':               'Libre',
+    'for_sale':           'À vendre',
+    'for_rent':           'À louer',
+    'reserved':           'Réservé',
+    'rented':             'Loué',
+    'sold':               'Vendu',
+    'under_construction': 'En construction',
+  };
+
+  function buildCards() {
+    if (window.innerWidth >= 768) return;
+    var dt = $('#dt').DataTable();
+
+    $('#dt tbody tr').each(function () {
+      var $tr = $(this);
+      $tr.find('.p-td-body, .p-td-actions').remove();
+
+      var data = dt.row(this).data();
+      if (!data) return;
+
+      /* ── Status → tous avec style p-flag uniforme ── */
+      var rawStatus   = String(data.status || '').toLowerCase();
+      var statusLabel = STATUS_LABELS[rawStatus] || rawStatus;
+      var statusCls   = 'p-f-' + rawStatus.replace(/_/g, '-');
+      var statusBadge = '<span class="p-flag ' + statusCls + '">' + esc(statusLabel) + '</span>';
+
+      /* ── Top : label suivi immédiatement du code ── */
+      var $top = $('<div class="p-top"></div>').html(
+        '<div class="p-label-group">' +
+          '<span class="p-label">' + esc(data.label || data.code || '—') + '</span>' +
+          (data.code ? '<span class="p-code">' + esc(data.code) + '</span>' : '') +
+        '</div>'
+      );
+
+      /* ── Type (ligne seule) ── */
+      var $typeRow = data.type
+        ? $('<div style="margin-bottom:.1rem;"></div>').html('<span class="p-type">' + esc(data.type) + '</span>')
+        : null;
+
+      /* ── Mid : icônes + caractéristiques ── */
+      var parts = [];
+      if (data.surface) {
+        var surfaceNum = parseFloat(data.surface);
+        var surfaceStr = surfaceNum % 1 === 0
+          ? surfaceNum.toFixed(0)
+          : surfaceNum.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+        parts.push('<i class="fa-solid fa-vector-square" style="color:#868e96;font-size:.68rem;"></i> ' + surfaceStr + ' <span style="font-size:.66rem;color:#868e96;">m²</span>');
+      }
+      if (data.bed_room_count)    parts.push('<i class="fa-solid fa-bed"    style="color:#868e96;font-size:.68rem;"></i> ' + esc(data.bed_room_count));
+      if (data.bath_room_count)   parts.push('<i class="fa-solid fa-bath"   style="color:#868e96;font-size:.68rem;"></i> ' + esc(data.bath_room_count));
+      if (data.living_room_count) parts.push('<i class="fa-solid fa-couch"  style="color:#868e96;font-size:.68rem;"></i> ' + esc(data.living_room_count));
+      if (data.kitchen_count)     parts.push('<i class="fa-solid fa-utensils" style="color:#868e96;font-size:.68rem;"></i> ' + esc(data.kitchen_count));
+      var $mid = $('<div class="p-mid"></div>').html(
+        parts.join('<span class="p-dot"> · </span>')
+      );
+
+      /* ── Flags : statut + drapeaux booléens ── */
+      var flags = statusBadge;
+      if (data.archived)    flags += '<span class="p-flag p-f-archived">Archivé</span>';
+      if (data.is_hidden)   flags += '<span class="p-flag p-f-hidden">Caché</span>';
+      if (data.is_exposed)  flags += '<span class="p-flag p-f-exposed">Exposé</span>';
+      if (data.is_saleable) flags += '<span class="p-flag p-f-saleable">En vente</span>';
+      if (data.is_managed)  flags += '<span class="p-flag p-f-managed">Géré</span>';
+
+      /* ── Assemble corps gauche ── */
+      var $body = $('<td class="p-td-body"></td>').append($top);
+      if ($typeRow) $body.append($typeRow);
+      $body.append($mid);
+      $body.append($('<div class="p-flags" style="margin-top:.15rem;"></div>').html(flags));
+
+      /* ── Colonne droite : prix en haut, boutons en bas ── */
+      var $inner = $('<div class="p-actions-inner"></div>');
+      if (data.price) {
+        $inner.append(
+          $('<div class="p-price-col"></div>').text(Number(data.price).toLocaleString('fr-FR'))
+        );
+      }
+      var $btns = $('<div class="p-btns-col"></div>');
+      $tr.find('.row-actions-container a, .row-actions-container button').each(function () {
+        var $btn = $(this).clone();
+        $btn[0].style.setProperty('display',    'block',  'important');
+        $btn[0].style.setProperty('width',      '100%',   'important');
+        $btn[0].style.setProperty('text-align', 'center', 'important');
+        $btns.append($btn);
+      });
+      $inner.append($btns);
+      var $actions = $('<td class="p-td-actions"></td>').append($inner);
+
+      var $chk = $tr.find('td:nth-child(1)');
+      $chk.after($actions);
+      $chk.after($body);
+    });
+  }
+
+  function destroyCards() {
+    $('#dt tbody tr').find('.p-td-body, .p-td-actions').remove();
+  }
+
+  $(document).on('draw.dt', '#dt', buildCards);
+  $(window).on('load', function () { setTimeout(buildCards, 300); });
+
+  var _rt;
+  $(window).on('resize', function () {
+    clearTimeout(_rt);
+    _rt = setTimeout(function () {
+      if (window.innerWidth >= 768) destroyCards();
+      else buildCards();
+    }, 120);
+  });
+})();
+</script>
+{% endblock %}

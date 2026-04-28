@@ -1,5 +1,8 @@
+import logging
 import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 from core.auth import create_user, get_async_session_context
 
@@ -57,7 +60,10 @@ async def populate_users() -> None:
         }
     ]
     for user in users:
-        await create_user(**user)
+        try:
+            await create_user(**user)
+        except Exception as e:
+            logger.warning("populate_users: skipped %s — %s", user["email"], e)
 
 
 async def polulate_property_types() -> None:
@@ -124,6 +130,9 @@ async def seed_database() -> None:
     # Agencies, agents, properties, images
     from seed_properties import seed_properties_data
     await seed_properties_data()
-    # CRM test data
-    from seed_crm import seed_crm_data
-    await seed_crm_data()
+    try:
+        from seed_crm import seed_crm_data
+        await seed_crm_data()
+    except Exception:
+        import logging
+        logging.getLogger(__name__).warning("seed_crm ignoré : tables CRM absentes ou erreur", exc_info=True)

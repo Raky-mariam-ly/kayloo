@@ -30,14 +30,16 @@
                         </div>
                         <div class="card-body border-bottom py-3">
                             {% block edit_form %}
+                            <div class="row">
                                 {% for field in model.get_fields_list(request, 'EDIT' | ra) %}
-                                    <div class="mb-3">
-                                        {% with action=('EDIT' | ra),data=obj[field.name], error=errors.get(field.name, None) if errors else None %}
-                                            {% include field.label_template %}
-                                            {% include field.form_template %}
-                                        {% endwith %}
-                                    </div>
+                                <div class="col-md-6 mb-3">
+                                    {% with action=('EDIT' | ra), data=obj[field.name], error=errors.get(field.name, None) if errors else None %}
+                                        {% include field.label_template %}
+                                        {% include field.form_template %}
+                                    {% endwith %}
+                                </div>
                                 {% endfor %}
+                            </div>
                             {% endblock %}
                         </div>
                         <div class="card-footer text-black">

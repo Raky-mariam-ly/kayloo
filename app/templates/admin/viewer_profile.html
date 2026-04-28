@@ -1,0 +1,313 @@
+{% extends "layout.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  .vp-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 1.25rem;
+  }
+  .form-label-sm {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: .3rem;
+  }
+  .btn-kayloo {
+    background: #a80000;
+    color: #fff;
+    border: none;
+    padding: .45rem 1.4rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+  }
+  .btn-kayloo:hover { background: #8b0000; color: #fff; }
+  .alert-success-custom {
+    background: #d4edda; color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px; padding: .65rem 1rem;
+    margin-bottom: 1rem; font-size: .9rem;
+  }
+  .alert-error-custom {
+    background: #f8d7da; color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px; padding: .65rem 1rem;
+    margin-bottom: 1rem; font-size: .9rem;
+  }
+  .bio-tabs { display:flex; justify-content:flex-end; gap:.25rem; margin-bottom:.4rem; }
+  .bio-tab-btn {
+    background:none; border:1px solid #dee2e6; border-radius:4px;
+    padding:.2rem .65rem; font-size:.75rem; color:#6c757d; cursor:pointer;
+  }
+  .bio-tab-btn.active { background:#a80000; color:#fff; border-color:#a80000; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-xl py-4">
+
+  {# ── Header ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold mb-0" style="color:#1a1a2e;">My Profile</h3>
+    <a href="#" class="btn btn-sm btn-danger">
+      <i class="fa fa-external-link me-1"></i> Voir le profil public
+    </a>
+  </div>
+
+  {# ── Alerts ── #}
+  {% if success == '1' %}
+  <div class="alert-success-custom">
+    <i class="fa fa-check-circle me-2"></i>Modifications enregistrées avec succès.
+  </div>
+  {% endif %}
+  {% if success == 'password' %}
+  <div class="alert-success-custom">
+    <i class="fa fa-check-circle me-2"></i>Mot de passe mis à jour avec succès.
+  </div>
+  {% endif %}
+  {% if error == 'invalid_format' %}
+  <div class="alert-error-custom">
+    <i class="fa fa-exclamation-circle me-2"></i>Format non supporté. Utilisez JPG, PNG, WEBP ou GIF.
+  </div>
+  {% elif error == 'password_mismatch' %}
+  <div class="alert-error-custom">
+    <i class="fa fa-exclamation-circle me-2"></i>Les mots de passe ne correspondent pas.
+  </div>
+  {% elif error == 'password_empty' %}
+  <div class="alert-error-custom">
+    <i class="fa fa-exclamation-circle me-2"></i>Veuillez saisir un mot de passe.
+  </div>
+  {% elif error == 'password_short' %}
+  <div class="alert-error-custom">
+    <i class="fa fa-exclamation-circle me-2"></i>Le mot de passe doit contenir au moins 8 caractères.
+  </div>
+  {% elif error %}
+  <div class="alert-error-custom">
+    <i class="fa fa-exclamation-circle me-2"></i>Une erreur est survenue, veuillez réessayer.
+  </div>
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════
+     Section Information
+  ══════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <p class="vp-section-title">Information</p>
+
+      <form method="POST" action="{{ url_for(__name__, path='/profile') }}">
+        <input type="hidden" name="_tab" value="profil">
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm">Nom d'utilisateur</label>
+            <input type="text" class="form-control" value="{{ user.email.split('@')[0] }}"
+                   readonly disabled style="background:#f8f9fa;color:#6c757d;">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm">Email</label>
+            <input type="text" class="form-control" value="{{ user.email }}"
+                   readonly disabled style="background:#f8f9fa;color:#6c757d;">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="first_name">Prénom</label>
+            <input type="text" class="form-control" id="first_name" name="first_name"
+                   placeholder="Enter your first name"
+                   value="{{ user.first_name or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="last_name">Nom de famille</label>
+            <input type="text" class="form-control" id="last_name" name="last_name"
+                   placeholder="Enter your last name"
+                   value="{{ user.last_name or '' }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="phone_number">Numéro de portable</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number"
+                   placeholder="Enter your phone number"
+                   value="{{ user.phone_number or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="office_phone">Numéro de bureau</label>
+            <input type="text" class="form-control" id="office_phone" name="office_phone"
+                   placeholder="Enter your phone number"
+                   value="{{ user.office_phone or '' }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="whatsapp_number">WhatsApp</label>
+            <input type="text" class="form-control" id="whatsapp_number" name="whatsapp_number"
+                   placeholder="Enter your whatsapp number"
+                   value="{{ user.whatsapp_number or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="company_name">Nom de la compagnie</label>
+            <input type="text" class="form-control" id="company_name" name="company_name"
+                   placeholder="Enter your company name"
+                   value="{{ user.company_name or '' }}">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-sm" for="address">Adresse</label>
+          <input type="text" class="form-control" id="address" name="address"
+                 placeholder="Enter your address"
+                 value="{{ user.address or '' }}">
+        </div>
+
+        <div class="mb-4">
+          <div class="bio-tabs">
+            <button type="button" class="bio-tab-btn active" id="bio-visual-btn"
+                    onclick="document.getElementById('bio-visual-btn').classList.add('active');document.getElementById('bio-code-btn').classList.remove('active');">
+              Visual
+            </button>
+            <button type="button" class="bio-tab-btn" id="bio-code-btn"
+                    onclick="document.getElementById('bio-code-btn').classList.add('active');document.getElementById('bio-visual-btn').classList.remove('active');">
+              Code
+            </button>
+          </div>
+          <label class="form-label-sm" for="bio">À propos de moi</label>
+          <textarea class="form-control" id="bio" name="bio" rows="6"
+                    placeholder="Décrivez-vous en quelques mots...">{{ user.bio or '' }}</textarea>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-kayloo">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     Section Des médias sociaux
+  ══════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <p class="vp-section-title">Des médias sociaux</p>
+
+      <form method="POST" action="{{ url_for(__name__, path='/profile') }}">
+        <input type="hidden" name="_tab" value="profil">
+        {# Passe les champs personnels sans les écraser #}
+        <input type="hidden" name="first_name" value="{{ user.first_name or '' }}">
+        <input type="hidden" name="last_name" value="{{ user.last_name or '' }}">
+        <input type="hidden" name="phone_number" value="{{ user.phone_number or '' }}">
+        <input type="hidden" name="office_phone" value="{{ user.office_phone or '' }}">
+        <input type="hidden" name="whatsapp_number" value="{{ user.whatsapp_number or '' }}">
+        <input type="hidden" name="company_name" value="{{ user.company_name or '' }}">
+        <input type="hidden" name="address" value="{{ user.address or '' }}">
+        <input type="hidden" name="bio" value="{{ user.bio or '' }}">
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="fb_url">Facebook</label>
+            <input type="url" class="form-control" id="fb_url" name="facebook_url"
+                   placeholder="Enter your Facebook profile URL"
+                   value="{{ user.facebook_url or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="x_url">X (Twitter)</label>
+            <input type="url" class="form-control" id="x_url" name="x_url"
+                   placeholder="Enter your X (Twitter) profile URL"
+                   value="{{ user.x_url or '' }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="li_url">LinkedIn</label>
+            <input type="url" class="form-control" id="li_url" name="linkedin_url"
+                   placeholder="Enter your LinkedIn profile URL"
+                   value="{{ user.linkedin_url or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="ig_url">Instagram</label>
+            <input type="url" class="form-control" id="ig_url" name="instagram_url"
+                   placeholder="Enter your Instagram profile URL"
+                   value="{{ user.instagram_url or '' }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="yt_url">YouTube</label>
+            <input type="url" class="form-control" id="yt_url" name="youtube_url"
+                   placeholder="Enter your YouTube channel URL"
+                   value="{{ user.youtube_url or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="tt_url">TikTok</label>
+            <input type="url" class="form-control" id="tt_url" name="tiktok_url"
+                   placeholder="Enter your TikTok profile URL"
+                   value="{{ user.tiktok_url or '' }}">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label-sm" for="sw_url">Site Internet</label>
+          <input type="url" class="form-control" id="sw_url" name="siteweb_url"
+                 placeholder="Enter your website URL"
+                 value="{{ user.siteweb_url or '' }}">
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-kayloo">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     Change Password
+  ══════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <p class="vp-section-title">Change Password</p>
+
+      <form method="POST" action="{{ url_for(__name__, path='/profile/change-password') }}">
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label-sm" for="new_password">nouveau mot de passe</label>
+            <input type="password" class="form-control" id="new_password" name="new_password"
+                   placeholder="Enter your new password">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-sm" for="confirm_password">Confirmer le nouveau mot de passe</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                   placeholder="Enter your new password again">
+          </div>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-kayloo">Mettre à jour le mot de passe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     Delete Account
+  ══════════════════════════════════════════════════════ #}
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <p class="vp-section-title">Delete Account</p>
+      <form method="POST" action="{{ url_for(__name__, path='/profile/delete') }}"
+            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');">
+        <div>
+          <button type="submit" class="btn btn-danger">Delete Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

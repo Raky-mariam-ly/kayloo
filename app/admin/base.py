@@ -1,33 +1,48 @@
 import os
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type, Union
 from uuid import UUID
 
 from starlette.datastructures import FormData, UploadFile
 from starlette.requests import Request
-from starlette_admin import BaseField, ExportType, ImageField
+from starlette_admin import BaseField, ExportType
 from starlette_admin.contrib.sqla import ModelView
-from starlette_admin.fields import EnumField
+from starlette_admin.fields import EnumField, ImageField
 from starlette_admin.helpers import RequestAction
+
+
+
+class SafeEnumField(EnumField):
+    """EnumField that returns the raw value when not found in choices instead of raising ValueError."""
+
+    async def serialize_value(self, request: Request, value: Any, action: RequestAction) -> Any:
+        try:
+            return await super().serialize_value(request, value, action)
+        except ValueError:
+            return value
 
 from core.agency_scope import get_user_agency_id
 
 UPLOAD_DIR = "static/uploads"
 
 
-class UUIDEnumField(EnumField):
-    """EnumField qui convertit les UUID en string avant la comparaison avec les choices."""
 
-    async def serialize_value(self, request: Request, value: any, action: RequestAction) -> any:
+class UUIDEnumField(EnumField):
+    """EnumField that converts UUIDs to string before comparing with choices."""
+
+    async def serialize_value(self, request: Request, value: Any, action: RequestAction) -> Any:
         if value is not None:
             value = str(value)
-        return await super().serialize_value(request, value, action)
+        try:
+            return await super().serialize_value(request, value, action)
+        except ValueError:
+            return value
 
 
 @dataclass
 class SectionField(BaseField):
-    """Affiche un titre de section dans le formulaire create/edit."""
+    """Renders a section heading inside create/edit forms."""
 
     form_template: str = "forms/section.html"
     display_template: str = "forms/section.html"
@@ -47,8 +62,9 @@ class SectionField(BaseField):
         return None
 
 
+
 async def _save_upload_file(file: UploadFile) -> str:
-    """Sauvegarde un UploadFile sur disque et retourne l'URL."""
+    """Save an UploadFile to disk and return its URL."""
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
     if not ext:
@@ -62,7 +78,7 @@ async def _save_upload_file(file: UploadFile) -> str:
 
 @dataclass
 class ImageUploadField(ImageField):
-    """ImageField qui sauvegarde le fichier(s) uploadé(s) sur disque et stocke l'URL."""
+    """ImageField that saves uploaded file(s) to disk and stores the URL."""
 
     async def parse_form_data(
         self, request: Request, form_data: FormData, action: RequestAction
@@ -75,12 +91,10 @@ class ImageUploadField(ImageField):
         if file_value is None:
             return None, False
 
-        # Cas multiple : liste de fichiers
         if isinstance(file_value, list):
             urls = [await _save_upload_file(f) for f in file_value if isinstance(f, UploadFile)]
             return (urls if urls else None), False
 
-        # Cas simple : un seul fichier
         if isinstance(file_value, UploadFile):
             return await _save_upload_file(file_value), False
 
@@ -91,7 +105,7 @@ class ImageUploadField(ImageField):
     ) -> Any:
         if not isinstance(value, str) or not value:
             return None
-        # Le JS de starlette-admin utilise new URL(d.url) → URL absolue requise
+        # starlette-admin JS uses new URL(d.url) — absolute URL required
         base = str(request.base_url).rstrip("/")
         absolute_url = base + value if value.startswith("/") else value
         img = {
@@ -99,13 +113,13 @@ class ImageUploadField(ImageField):
             "filename": value.split("/")[-1],
             "content-type": "image/jpeg",
         }
-        # multiple=True : le template itère sur data → retourner une liste
+        # multiple=True: template iterates over data — return a list
         return [img] if self.multiple else img
 
 
 @dataclass
 class PropertyImagesField(ImageUploadField):
-    """Champ multi-upload lié à la relation Property.images (liste de PropertyImage)."""
+    """Multi-upload field linked to the Property.images relation (list of PropertyImage)."""
 
     multiple: bool = True
 
@@ -136,15 +150,34 @@ AVAILABLE_USER_ROLES = [
 ]
 
 GENDER_TYPES = [
-    ("M", "Male"),
-    ("F", "Female"),
+    ("M", "M"),
+    ("F", "F"),
 ]
+
+AUDIT_FIELDS_EXCLUDE = ["created_at", "updated_at", "created_by", "updated_by"]
+
+
+def _is_full_admin(request) -> bool:
+    """Superadmin or admin — full access."""
+    user = getattr(request.state, "user", None)
+    if user is None:
+        return False
+    return user.is_superuser or user.role in ("superadmin", "admin")
+
+
+def _is_agent(request) -> bool:
+    """Manager (= agent) — access limited to their own agency."""
+    user = getattr(request.state, "user", None)
+    return user is not None and user.role == "manager"
 
 
 class AdminModelView(ModelView):
     page_size = 10
     page_size_options = [10, 25, 50, 100]
     export_types = [ExportType.EXCEL, ExportType.CSV]
+
+    exclude_fields_from_create = AUDIT_FIELDS_EXCLUDE
+    exclude_fields_from_edit = AUDIT_FIELDS_EXCLUDE
 
     service_class: Optional[Type] = None
     repository_class: Optional[Type] = None
@@ -178,11 +211,10 @@ class AdminModelView(ModelView):
             return query.filter(self.model.agency_id == agency_id)
         return query
 
-    async def is_accessible(self, request: Request) -> bool:
-        if not self.agency_scoped:
-            return await super().is_accessible(request)
-        agency_id = await self._get_agency_id(request)
-        return agency_id is not None
+    def is_accessible(self, request: Request) -> bool:
+        if self.agency_scoped:
+            return getattr(request.state, "agent_agency_id", None) is not None
+        return _is_full_admin(request)
 
     async def count(
         self,
@@ -258,3 +290,13 @@ class AdminModelView(ModelView):
             await svc.delete(pk)
             count += 1
         return count
+
+    async def _refresh_choices(self, request: Request) -> None:
+        from admin.choices import warm_choices_cache
+        await warm_choices_cache(request.state.session)
+
+    async def after_create(self, request: Request, obj: Any) -> None:
+        await self._refresh_choices(request)
+
+    async def after_edit(self, request: Request, obj: Any) -> None:
+        await self._refresh_choices(request)

@@ -37,6 +37,18 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     phone_number = Column(Text, nullable=True)
     role = Column(Text, nullable=False, default="viewer")
     avatar_url = Column(Text, nullable=True)
+    bio = Column(Text, nullable=True)
+    office_phone = Column(Text, nullable=True)
+    whatsapp_number = Column(Text, nullable=True)
+    company_name = Column(Text, nullable=True)
+    address = Column(Text, nullable=True)
+    facebook_url = Column(Text, nullable=True)
+    x_url = Column(Text, nullable=True)
+    linkedin_url = Column(Text, nullable=True)
+    instagram_url = Column(Text, nullable=True)
+    youtube_url = Column(Text, nullable=True)
+    tiktok_url = Column(Text, nullable=True)
+    siteweb_url = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
@@ -78,7 +90,34 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        from core.config import get_settings
+        from core.email import send_reset_password_email
+
+        settings = get_settings()
+        reset_url = f"{settings.app_url}/reset-password?token={token}"
+        full_name = f"{user.first_name} {user.last_name}".strip() or user.email
+
+        import asyncio
+        asyncio.create_task(
+            send_reset_password_email(to=user.email, full_name=full_name, reset_url=reset_url)
+        )
+
+    async def generate_reset_url(self, user: User) -> str:
+        from fastapi_users.jwt import generate_jwt
+        from core.config import get_settings
+
+        token_data = {
+            "sub": str(user.id),
+            "password_fgpt": self.password_helper.hash(user.hashed_password),
+            "aud": self.reset_password_token_audience,
+        }
+        token = generate_jwt(
+            token_data,
+            self.reset_password_token_secret,
+            self.reset_password_token_lifetime_seconds,
+        )
+        app_url = get_settings().app_url
+        return f"{app_url}/reset-password?token={token}"
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
@@ -98,7 +137,8 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
 # 1. Cookie-based JWT — used by the web admin panel
 cookie_transport = CookieTransport(
     cookie_max_age=3600,
-    cookie_secure=settings.environment != "dev",
+
+    cookie_secure=settings.environment == "prod",
 )
 
 
@@ -115,8 +155,8 @@ auth_backend = AuthenticationBackend(
 # 2. Bearer JWT — used by the mobile / REST API
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
-JWT_ACCESS_LIFETIME = 60 * 15              # 15 minutes
-JWT_REFRESH_LIFETIME = 60 * 60 * 24 * 30   # 30 days
+JWT_ACCESS_LIFETIME = 60 * 15             # 15 minutes
+JWT_REFRESH_LIFETIME = 60 * 60 * 24 * 7  # 7 days
 
 
 def get_bearer_jwt_strategy() -> JWTStrategy[models.UP, models.ID]:
@@ -181,6 +221,9 @@ async def create_user(email: str, password: str, first_name: str, last_name: str
         return None
 
 
+ADMIN_ROLES = {"superadmin", "admin", "manager", "viewer"}
+
+
 class FastapiUsersAuthProvider(AuthProvider):
     async def login(
         self,
@@ -195,21 +238,21 @@ class FastapiUsersAuthProvider(AuthProvider):
         token_manager = DatabaseStrategy(SQLAlchemyAccessTokenDatabase(
             session, AccessToken), lifetime_seconds=3600)
 
-        # validation logic
-
-        user = await user_manager.authenticate(OAuth2PasswordRequestForm(username=username, password=password))
+        user = await user_manager.authenticate(
+            OAuth2PasswordRequestForm(username=username, password=password)
+        )
 
         if user is None or not user.is_active:
-            raise LoginFailed("Email ou mot de passe incorrect")
+            raise LoginFailed("Incorrect email or password")
 
-        if not user.is_superuser:
-            raise LoginFailed("Accès refusé : compte non autorisé")
+        if not user.is_superuser and user.role not in ADMIN_ROLES:
+            raise LoginFailed("Unauthorized")
 
         request.session.update({"session": await token_manager.write_token(user)})
-
         return response
 
     async def is_authenticated(self, request) -> bool:
+        from sqlalchemy import select as sa_select
         session: AsyncSession = request.state.session
         user_manager = UserManager(SQLAlchemyUserDatabase(session, User))
         token_manager = DatabaseStrategy(SQLAlchemyAccessTokenDatabase(
@@ -220,14 +263,26 @@ class FastapiUsersAuthProvider(AuthProvider):
 
         if user and user.is_active:
             request.state.user = user
+            if user.role == "manager":
+                from models.agent import Agent
+                result = await session.execute(
+                    sa_select(Agent.agency_id).where(Agent.user_id == user.id)
+                )
+                row = result.first()
+                request.state.agent_agency_id = row[0] if row else None
+            else:
+                request.state.agent_agency_id = None
             return True
         return False
 
     def get_admin_user(self, request: Request) -> AdminUser | None:
-        user: User = request.state.user  # Retrieve current user
+        user: User = request.state.user
         photo_url = None
-        if user.avatar_url is not None:
-            photo_url = request.url_for("static", path=user.avatar_url)
+        if user.avatar_url:
+            if user.avatar_url.startswith("http"):
+                photo_url = user.avatar_url
+            else:
+                photo_url = str(request.url_for("static", path=user.avatar_url))
         return AdminUser(username=user.email, photo_url=photo_url)
 
     async def logout(self, request: Request, response: Response) -> Response:

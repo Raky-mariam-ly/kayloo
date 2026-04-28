@@ -20,7 +20,6 @@
     {% include "modals/error.html" %}
     {% include "modals/delete.html" %}
     {% include "modals/actions.html" %}
-
 {% endblock %}
 {% block content %}
     <div class="container-fluid">
@@ -31,7 +30,17 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             {% block detail_card_title %}
-                            <strong>#{{ obj[pk] }}</strong>
+                            {% if obj["label"] %}
+                                <strong>{{ obj["label"] }}</strong>
+                                {% if obj["code"] %}<span class="text-muted ms-2" style="font-size:0.8rem;font-weight:400;">{{ obj["code"] }}</span>{% endif %}
+                            {% elif obj["name"] %}
+                                <strong>{{ obj["name"] }}</strong>
+                                {% if obj["code"] %}<span class="text-muted ms-2" style="font-size:0.8rem;font-weight:400;">{{ obj["code"] }}</span>{% endif %}
+                            {% elif obj["code"] %}
+                                <strong>{{ obj["code"] }}</strong>
+                            {% else %}
+                                <strong>#{{ obj[pk] }}</strong>
+                            {% endif %}
                             {% endblock %}
                         </h3>
                         <div class="card-actions">
@@ -41,56 +50,25 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="ms-auto text-muted">
-                            <div class="ms-2 d-inline-block">
-                                <div class="input-icon">
-                                    <span class="input-icon-addon">
-                                        <!-- Download SVG icon from http://tabler-icons.io/i/search -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <circle cx="10" cy="10" r="7"></circle>
-                                            <line x1="21" y1="21" x2="15" y2="15"></line>
-                                        </svg>
-                                    </span>
-                                    <input type="search" id="searchInput" value="" class="form-control" placeholder="{{ _('Search') }}..." aria-label="Search in table">
+                        {% block details_table %}
+                        <div class="datagrid">
+                            {% for field in model.get_fields_list(request, 'DETAIL' | ra) %}
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">{{ field.label }}</div>
+                                <div class="datagrid-content">
+                                    {% with data=obj[field.name] %}
+                                        {% if data == None %}
+                                            <span class="text-muted">—</span>
+                                        {% elif (data | is_iter) and (data | length) == 0 %}
+                                            <span class="text-muted">—</span>
+                                        {% else %}
+                                            {% include field.display_template %}
+                                        {% endif %}
+                                    {% endwith %}
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
-                    </div>
-                    <div class="card-body">
-                        {% block details_table %}
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-vcenter table-mobile-md">
-                                    <thead>
-                                    <tr>
-                                        <th>{{ _("Attribute") }}</th>
-                                        <th>{{ _("Value") }}</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="tableContent">
-                                    {% for field in model.get_fields_list(request, 'DETAIL' | ra) %}
-                                        <tr>
-                                            <td data-label="Attribute">
-                                                <div>
-                                                    <strong>{{ field.label }}</strong>
-                                                </div>
-                                            </td>
-                                            <td data-label="Value">
-                                                {% with data=obj[field.name] %}
-                                                    {% if data == None %}
-                                                        {% include "displays/_null.html" %}
-                                                    {% elif (data | is_iter) and (data |length) ==0 %}
-                                                        {% include "displays/_empty.html" %}
-                                                    {% else %}
-                                                        {% include field.display_template %}
-                                                    {% endif %}
-                                                {% endwith %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
                         {% endblock %}
                     </div>
                 </div>
@@ -117,38 +95,23 @@
     {% endfor %}
     <script>
         var actionManager = new ActionManager(
-            "", // not necessary
+            "",
             "{{ url_for(__name__ ~ ':row-action', identity=model.identity)  | safe }}",
             function (query, element) {
-                // appendQueryParams
-                query.append(
-                    "pk",
-                    "{{ obj[pk] }}"
-                );
+                query.append("pk", "{{ obj[pk] }}");
             },
             function (actionName, element, msg) {
-                // onSuccess
                 localStorage.successAlert = msg;
-                if (actionName === 'delete') // special case for delete row action
+                if (actionName === 'delete')
                     window.location.replace("{{ url_for(__name__ ~ ':list', identity=model.identity)  | safe }}")
                 else
                     window.location.reload()
             },
             function (actionName, element, error) {
-                //onError
                 dangerAlert(error);
             }
         );
-
         actionManager.initNoConfirmationActions();
         actionManager.initActionModal();
-        $(document).ready(function(){
-            $("#searchInput").on("keyup", function() {
-              var value = $(this).val().toLowerCase();
-              $("#tableContent tr").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-              });
-            });
-          });
     </script>
 {% endblock %}

@@ -1,0 +1,207 @@
+{% extends "layout.html" %}
+
+{% set admin_route = request.app.state.ROUTE_NAME %}
+{% set user = raw_obj.user %}
+{% set agency = raw_obj.agency %}
+
+{% block content %}
+<div class="container-xl">
+  <div class="page-header mb-3">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <a href="{{ request.url_for(admin_route ~ ':list', identity='agent') }}"
+           class="btn btn-ghost-secondary btn-sm">
+          <i class="fa fa-arrow-left me-1"></i> Agents
+        </a>
+      </div>
+      <div class="col">
+        <h2 class="page-title">{{ user.first_name }} {{ user.last_name }}</h2>
+        <div class="text-muted mt-1">{{ user.email }}</div>
+      </div>
+      <div class="col-auto">
+        <a href="{{ request.url_for(admin_route ~ ':edit', identity='agent', pk=raw_obj.id|string) }}"
+           class="btn btn-primary btn-sm">
+          <i class="fa fa-pencil me-1"></i> Modifier
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    {# ── Colonne gauche — Profil ── #}
+    <div class="col-lg-4">
+
+      {# Avatar + identité #}
+      <div class="card mb-3">
+        <div class="card-body text-center py-4">
+          {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="{{ user.first_name }}"
+                 class="rounded-circle mb-3" style="width:100px;height:100px;object-fit:cover;">
+          {% else %}
+            <div class="mb-3" style="width:100px;height:100px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;margin:auto;">
+              <i class="fa fa-user text-muted" style="font-size:2.5rem;"></i>
+            </div>
+          {% endif %}
+          <h3 class="mb-0">{{ user.first_name }} {{ user.last_name }}</h3>
+          {% if raw_obj.slug %}
+            <div class="text-muted mt-1"><code>{{ raw_obj.slug }}</code></div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Contact utilisateur #}
+      <div class="card mb-3">
+        <div class="card-header"><h4 class="card-title mb-0"><i class="fa fa-phone me-2 text-muted"></i>Contact</h4></div>
+        <div class="card-body">
+          <div class="datagrid">
+            <div class="datagrid-item">
+              <div class="datagrid-title">Email</div>
+              <div class="datagrid-content"><a href="mailto:{{ user.email }}">{{ user.email }}</a></div>
+            </div>
+            {% if user.phone_number %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Téléphone</div>
+              <div class="datagrid-content">{{ user.phone_number }}</div>
+            </div>
+            {% endif %}
+            {% if user.gender %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Genre</div>
+              <div class="datagrid-content">{{ 'Homme' if user.gender == 'M' else 'Femme' }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {# Agence #}
+      {% if agency %}
+      <div class="card mb-3">
+        <div class="card-header"><h4 class="card-title mb-0"><i class="fa fa-building me-2 text-muted"></i>Agence</h4></div>
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3">
+            {% if agency.logo_url %}
+              <img src="{{ agency.logo_url }}" alt="{{ agency.name }}"
+                   class="rounded-2" style="width:48px;height:48px;object-fit:contain;background:#f8f8f8;">
+            {% else %}
+              <div style="width:48px;height:48px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <i class="fa fa-building text-muted"></i>
+              </div>
+            {% endif %}
+            <div>
+              <div class="fw-semibold">{{ agency.name }}</div>
+              <div class="text-muted small">{{ agency.country }}</div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <a href="{{ request.url_for(admin_route ~ ':detail', identity='agency', pk=agency.id|string) }}"
+               class="btn btn-sm btn-ghost-secondary w-100">
+              <i class="fa fa-eye me-1"></i> Voir le profil de l'agence
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {# Audit #}
+      <div class="card">
+        <div class="card-header"><h4 class="card-title mb-0"><i class="fa fa-clock-o me-2 text-muted"></i>Audit</h4></div>
+        <div class="card-body">
+          <div class="datagrid">
+            <div class="datagrid-item">
+              <div class="datagrid-title">Créé le</div>
+              <div class="datagrid-content">{{ raw_obj.created_at.strftime('%d/%m/%Y %H:%M') if raw_obj.created_at else '—' }}</div>
+            </div>
+            {% if raw_obj.updated_at %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Modifié le</div>
+              <div class="datagrid-content">{{ raw_obj.updated_at.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ── Colonne droite — Biens de l'agence ── #}
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <h4 class="card-title mb-0">
+            <i class="fa fa-home me-2 text-muted"></i>Biens de l'agence
+            {% if agency %}
+              <span class="badge bg-secondary ms-1">{{ agency.properties | length }}</span>
+            {% endif %}
+          </h4>
+          {% if agency %}
+          <a href="{{ request.url_for(admin_route ~ ':detail', identity='agency', pk=agency.id|string) }}"
+             class="btn btn-sm btn-ghost-secondary">
+            Voir l'agence <i class="fa fa-arrow-right ms-1"></i>
+          </a>
+          {% endif %}
+        </div>
+        <div class="card-body p-0">
+          {% if agency and agency.properties %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-3">Code</th>
+                  <th>Label</th>
+                  <th>Type</th>
+                  <th>Statut</th>
+                  <th>Prix</th>
+                  <th class="pe-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prop in agency.properties %}
+                <tr>
+                  <td class="ps-3"><code>{{ prop.code or '—' }}</code></td>
+                  <td>{{ prop.label or '—' }}</td>
+                  <td class="text-muted">{{ prop.type or '—' }}</td>
+                  <td>
+                    {% set status_colors = {
+                      'for_sale': 'blue', 'for_rent': 'cyan', 'rented': 'green',
+                      'sold': 'red', 'reserved': 'orange', 'free': 'teal',
+                      'under_construction': 'yellow'
+                    } %}
+                    <span class="badge bg-{{ status_colors.get(prop.status, 'secondary') }}-lt">
+                      {{ prop.status or '—' }}
+                    </span>
+                  </td>
+                  <td class="text-muted">
+                    {% if prop.price %}{{ '{:,.0f}'.format(prop.price) }} {{ prop.currency or '' }}{% else %}—{% endif %}
+                  </td>
+                  <td class="text-end pe-3">
+                    <a href="{{ request.url_for(admin_route ~ ':detail', identity='property', pk=prop.id|string) }}"
+                       class="btn btn-sm btn-ghost-secondary">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center text-muted py-5">
+            <i class="fa fa-home fa-2x mb-2"></i>
+            <p class="mb-0">Aucun bien rattaché à cette agence</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  .datagrid { --tblr-datagrid-item-width: 11rem; }
+</style>
+{% endblock %}

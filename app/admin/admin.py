@@ -1,4 +1,3 @@
-from sqlalchemy import engine
 from starlette_admin import I18nConfig, DropDown
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -19,9 +18,9 @@ from models.agent import Agent
 from models.partner import Partner
 from models.property import Property
 from models.building import Building
-from models.property_image import PropertyImage  # noqa: F401 — requis pour les relations SQLAlchemy
+from models.property_image import PropertyImage  # noqa: F401
+from models.property_gallery import PropertyGallery  # noqa: F401
 
-# CRM models
 from models.contact import Contact
 from models.lead import Lead
 from models.activity import Activity
@@ -40,9 +39,13 @@ from admin.agent import AgentView
 from admin.partner import PartnerView
 from admin.property import PropertyView
 from admin.building import BuildingView
-# PropertyImageView retiré du sidebar mais le modèle doit être importé pour les relations SQLAlchemy
+from admin.profile import ProfileView, ProfileUploadView, ProfileChangePasswordView, ProfileDeleteView, ProfileAgencyView
+from admin.viewer import ViewerFavoritesView, ViewerMessagesView
+from admin.manager_views import (
+    ManagerDashboardView, ManagerActivitiesView, ManagerStatisticsView,
+    ManagerOffersView, ManagerProspectsView, ManagerRequestsView,
+)
 
-# CRM admin views
 from admin.contact import ContactView
 from admin.lead import LeadView
 from admin.activity import ActivityView
@@ -55,11 +58,10 @@ from admin.lead_kanban import LeadKanbanView
 
 settings = get_settings()
 
-# Create admin
 admin = Admin(engine,
               title="Kayloo Admin",
               i18n_config=I18nConfig(
-                  default_locale="fr", language_switcher=SUPPORTED_LOCALES),
+                  default_locale="en", language_switcher=SUPPORTED_LOCALES),
               base_url="/admin",
               statics_dir="static",
               templates_dir="templates/admin",
@@ -72,48 +74,54 @@ admin = Admin(engine,
                   SessionMiddleware, secret_key=settings.secret)],
               )
 
-# ── Utilisateurs ──
-admin.add_view(UserView(User, icon="fa fa-users", label="Utilisateurs"))
+admin.add_view(UserView(User, icon="fa fa-users", label="Users"))
 
-# ── Localisation ──
 admin.add_view(DropDown(
-    label="Localisation",
+    label="Location",
     icon="fa fa-globe",
     views=[
-        CountryView(Country, icon="fa fa-flag", label="Pays"),
-        CityView(City, icon="fa fa-city", label="Villes"),
-        AreaView(Area, icon="fa fa-map-marker", label="Zones"),
+        CountryView(Country, icon="fa fa-flag", label="Countries"),
+        CityView(City, icon="fa fa-city", label="Cities"),
+        AreaView(Area, icon="fa fa-map-marker", label="Areas"),
     ]
 ))
 
-# ── Professionnels ──
 admin.add_view(DropDown(
-    label="Professionnels",
+    label="Professionals",
     icon="fa fa-briefcase",
     views=[
-        AgencyView(Agency, icon="fa fa-building", label="Agences"),
-        AgentView(Agent, icon="fa fa-user-tie", label="Agents"),
-        PartnerView(Partner, icon="fa fa-handshake", label="Partenaires"),
+        AgencyView(Agency, icon="fa fa-building", label="Agencies"),
+        AgentView(Agent, icon="fa fa-id-badge", label="Agents"),
+        PartnerView(Partner, icon="fa fa-handshake", label="Partners"),
     ]
 ))
 
-# ── Propriétés ──
 admin.add_view(DropDown(
-    label="Biens",
+    label="Properties",
     icon="fa fa-home",
     views=[
-        PropertyTypeView(PropertyType, icon="fa fa-cogs",
-                         label="Types de bien"),
-        PropertyRentTypeView(
-            PropertyRentType, icon="fa fa-cogs", label="Types de location"),
-        BuildingView(Building, icon="fa fa-building-o", label="Immeubles"),
-        PropertyView(Property, icon="fa fa-home", label="Biens"),
+        PropertyTypeView(PropertyType, icon="fa fa-cogs", label="Property Types"),
+        PropertyRentTypeView(PropertyRentType, icon="fa fa-cogs", label="Rental Types"),
+        BuildingView(Building, icon="fa fa-building-o", label="Buildings"),
+        PropertyView(Property, icon="fa fa-home", label="Properties"),
     ]
 ))
 
-# ── CRM ──
-# admin.add_view(CrmDashboardView())
-# admin.add_view(LeadKanbanView())
+admin.add_view(ProfileView())
+admin.add_view(ProfileUploadView())
+admin.add_view(ProfileChangePasswordView())
+admin.add_view(ProfileDeleteView())
+admin.add_view(ProfileAgencyView())
+admin.add_view(ViewerFavoritesView())
+admin.add_view(ViewerMessagesView())
+
+admin.add_view(ManagerDashboardView())
+admin.add_view(ManagerActivitiesView())
+admin.add_view(ManagerStatisticsView())
+admin.add_view(ManagerOffersView())
+admin.add_view(ManagerProspectsView())
+admin.add_view(ManagerRequestsView())
+
 admin.add_view(DropDown(
     label="CRM",
     icon="fa fa-handshake",
@@ -122,11 +130,9 @@ admin.add_view(DropDown(
         LeadKanbanView(),
         ContactView(Contact, icon="fa fa-address-book", label="Contacts"),
         LeadView(Lead, icon="fa fa-funnel-dollar", label="Leads"),
-        ActivityView(Activity, icon="fa fa-history", label="Activités"),
-        TaskView(Task, icon="fa fa-tasks", label="Tâches"),
-        ConversationView(Conversation, icon="fa fa-comments",
-                         label="Conversations"),
-        NotificationView(Notification, icon="fa fa-bell",
-                         label="Notifications"),
+        ActivityView(Activity, icon="fa fa-history", label="Activities"),
+        TaskView(Task, icon="fa fa-tasks", label="Tasks"),
+        ConversationView(Conversation, icon="fa fa-comments", label="Conversations"),
+        NotificationView(Notification, icon="fa fa-bell", label="Notifications"),
     ]
 ))

@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin.fields import BooleanField, CountryField, StringField, DateTimeField
+from starlette_admin.fields import BooleanField, StringField, DateTimeField
 from admin.base import AdminModelView
 from models.country import Country
 from repositories.country import CountryRepository
@@ -10,11 +10,13 @@ from services.country import CountryService
 
 
 class CountryView(AdminModelView):
+    list_template = "generic_list.html"
+
     service_class = CountryService
     repository_class = CountryRepository
 
     fields = [
-        CountryField("code", required=True, label="Country"),
+        StringField("code", required=True, label="Country Code (ISO-2)"),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True),
         StringField("created_by", read_only=True),
@@ -22,14 +24,15 @@ class CountryView(AdminModelView):
         DateTimeField("updated_at", read_only=True),
     ]
 
-    exclude_fields_from_create = ["created_at", "updated_at", "created_by", "updated_by"]
-    exclude_fields_from_edit = ["created_at", "updated_at", "created_by", "updated_by"]
-
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
-        """Raise FormValidationError to display error in forms"""
         errors: Dict[str, str] = dict()
-        if data["code"] is None or len(data["code"]) != 2:
+        code = (data.get("code") or "").strip().upper()
+        data["code"] = code
+
+        if not code or len(code) != 2:
             errors["code"] = "Ensure code has exactly 02 characters"
+
         if len(errors) > 0:
             raise FormValidationError(errors)
+
         return await super().validate(request, data)

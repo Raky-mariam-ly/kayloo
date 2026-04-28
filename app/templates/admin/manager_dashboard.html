@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-xl py-4">
+
+  {# ── Greeting ── #}
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1" style="color:#1a1a2e;">
+      Bonjour, {{ (user.first_name ~ ' ' ~ user.last_name).strip() or user.email.split('@')[0] }}!
+    </h2>
+    <p class="text-muted mb-0" style="font-size:.9rem;" id="dashboard-datetime"></p>
+  </div>
+
+  {# ── Stat cards — row 1 ── #}
+  <div class="row g-3 mb-3">
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Mes annonces</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.mes_annonces }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>
+                {% if stats.mes_annonces == 0 %}-100%{% else %}—{% endif %}
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-building" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Annonces Publiées</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.annonces_publiees }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>
+                {% if stats.annonces_publiees == 0 %}-100%{% else %}—{% endif %}
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-check-circle" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Annonces en attente</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.annonces_en_attente }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>
+                {% if stats.annonces_en_attente == 0 %}-100%{% else %}—{% endif %}
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-clock-o" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Annonces Expirées</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.annonces_expirees }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>
+                {% if stats.annonces_expirees == 0 %}-100%{% else %}—{% endif %}
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-exclamation-triangle" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── Stat cards — row 2 ── #}
+  <div class="row g-3">
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Mes prospects</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.mes_prospects }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>-100%
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-user-plus" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body p-4" style="min-height:130px;">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <p class="text-muted mb-1" style="font-size:.82rem;font-weight:600;">Mes demandes</p>
+              <h3 class="fw-bold mb-1" style="color:#1a1a2e;">{{ stats.mes_demandes }}</h3>
+              <span class="text-danger" style="font-size:.8rem;">
+                <i class="fa fa-sort-desc me-1"></i>-100%
+              </span>
+            </div>
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid #a80000;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa fa-comments" style="color:#a80000;font-size:1.1rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const months = ['janvier','février','mars','avril','mai','juin',
+                  'juillet','août','septembre','octobre','novembre','décembre'];
+  function pad(n) { return n < 10 ? '0' + n : n; }
+  function updateClock() {
+    const d = new Date();
+    const str = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear()
+              + ' | ' + pad(d.getHours()) + 'h' + pad(d.getMinutes());
+    document.getElementById('dashboard-datetime').textContent = str;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+})();
+</script>
+{% endblock %}

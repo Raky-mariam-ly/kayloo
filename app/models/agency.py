@@ -1,5 +1,6 @@
 import uuid
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Text, func, UUID
+from sqlalchemy.orm import relationship
 
 from core.auth import Base
 
@@ -26,3 +27,7 @@ class Agency(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
+
+    agents = relationship("Agent", back_populates="agency", lazy="selectin")
+    properties = relationship("Property", back_populates="agency",
+                              foreign_keys="Property.agency_id", lazy="selectin")

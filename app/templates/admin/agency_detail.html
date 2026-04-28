@@ -1,0 +1,264 @@
+{% extends "layout.html" %}
+
+{% set admin_route = request.app.state.ROUTE_NAME %}
+
+{% block content %}
+<div class="container-xl">
+  <div class="page-header mb-3">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <a href="{{ request.url_for(admin_route ~ ':list', identity='agency') }}"
+           class="btn btn-ghost-secondary btn-sm">
+          <i class="fa fa-arrow-left me-1"></i> Agences
+        </a>
+      </div>
+      <div class="col">
+        <h2 class="page-title">{{ raw_obj.name or '—' }}</h2>
+        <div class="text-muted mt-1">
+          <i class="fa fa-flag me-1"></i>{{ raw_obj.country }}
+          {% if raw_obj.is_active %}
+            <span class="badge bg-success ms-2">Active</span>
+          {% else %}
+            <span class="badge bg-secondary ms-2">Inactive</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-auto">
+        <a href="{{ request.url_for(admin_route ~ ':edit', identity='agency', pk=raw_obj.id|string) }}"
+           class="btn btn-primary btn-sm">
+          <i class="fa fa-pencil me-1"></i> Modifier
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    {# ── Colonne gauche — Identité ── #}
+    <div class="col-lg-4">
+
+      {# Logo #}
+      <div class="card mb-3">
+        <div class="card-body text-center py-4">
+          {% if raw_obj.logo_url %}
+            <img src="{{ raw_obj.logo_url }}" alt="{{ raw_obj.name }}"
+                 class="rounded-3 mb-3" style="max-width:140px;max-height:140px;object-fit:contain;">
+          {% else %}
+            <div class="avatar avatar-xl mb-3" style="background:#f0f0f0;width:100px;height:100px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:auto;">
+              <i class="fa fa-building text-muted" style="font-size:2.5rem;"></i>
+            </div>
+          {% endif %}
+          <h3 class="mb-1">{{ raw_obj.name or '—' }}</h3>
+          <div class="text-muted">{{ raw_obj.country }}</div>
+        </div>
+      </div>
+
+      {# Contacts #}
+      <div class="card mb-3">
+        <div class="card-header"><h4 class="card-title mb-0"><i class="fa fa-phone me-2 text-muted"></i>Contact</h4></div>
+        <div class="card-body">
+          <div class="datagrid">
+            {% if raw_obj.email %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Email</div>
+              <div class="datagrid-content"><a href="mailto:{{ raw_obj.email }}">{{ raw_obj.email }}</a></div>
+            </div>
+            {% endif %}
+            {% if raw_obj.phone_number %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Téléphone</div>
+              <div class="datagrid-content">{{ raw_obj.phone_number }}</div>
+            </div>
+            {% endif %}
+            {% if raw_obj.siteweb_url %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Site web</div>
+              <div class="datagrid-content"><a href="{{ raw_obj.siteweb_url }}" target="_blank">{{ raw_obj.siteweb_url }}</a></div>
+            </div>
+            {% endif %}
+          </div>
+
+          {# Réseaux sociaux #}
+          {% set socials = [
+            (raw_obj.whatsapp_url, 'fa-whatsapp', 'WhatsApp'),
+            (raw_obj.facebook_url, 'fa-facebook', 'Facebook'),
+            (raw_obj.instagram_url, 'fa-instagram', 'Instagram'),
+            (raw_obj.x_url, 'fa-twitter', 'X / Twitter'),
+            (raw_obj.tiktok_url, 'fa-tiktok', 'TikTok'),
+            (raw_obj.youtube_url, 'fa-youtube', 'YouTube'),
+          ] %}
+          {% set has_social = raw_obj.whatsapp_url or raw_obj.facebook_url or raw_obj.instagram_url or raw_obj.x_url or raw_obj.tiktok_url or raw_obj.youtube_url %}
+          {% if has_social %}
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            {% for url, icon, label in socials %}
+              {% if url %}
+              <a href="{{ url }}" target="_blank" class="btn btn-sm btn-ghost-secondary" title="{{ label }}">
+                <i class="fab {{ icon }}"></i>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Audit #}
+      <div class="card">
+        <div class="card-header"><h4 class="card-title mb-0"><i class="fa fa-clock-o me-2 text-muted"></i>Audit</h4></div>
+        <div class="card-body">
+          <div class="datagrid">
+            <div class="datagrid-item">
+              <div class="datagrid-title">Créé le</div>
+              <div class="datagrid-content">{{ raw_obj.created_at.strftime('%d/%m/%Y %H:%M') if raw_obj.created_at else '—' }}</div>
+            </div>
+            <div class="datagrid-item">
+              <div class="datagrid-title">Par</div>
+              <div class="datagrid-content">{{ raw_obj.created_by or '—' }}</div>
+            </div>
+            {% if raw_obj.updated_at %}
+            <div class="datagrid-item">
+              <div class="datagrid-title">Modifié le</div>
+              <div class="datagrid-content">{{ raw_obj.updated_at.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ── Colonne droite — Agents & Biens ── #}
+    <div class="col-lg-8">
+
+      {# Onglets #}
+      <ul class="nav nav-tabs mb-0 border-bottom-0" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active fw-semibold" data-bs-toggle="tab" href="#tab-agents" role="tab">
+            <i class="fa fa-user-tie me-1"></i> Agents
+            <span class="badge bg-secondary ms-1">{{ raw_obj.agents | length }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-semibold" data-bs-toggle="tab" href="#tab-properties" role="tab">
+            <i class="fa fa-home me-1"></i> Biens
+            <span class="badge bg-secondary ms-1">{{ raw_obj.properties | length }}</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="tab-content border border-top-0 rounded-bottom">
+
+        {# ── Onglet Agents ── #}
+        <div class="tab-pane fade show active p-3" id="tab-agents" role="tabpanel">
+          {% if raw_obj.agents %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Email</th>
+                  <th>Téléphone</th>
+                  <th>Slug</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for agent in raw_obj.agents %}
+                <tr>
+                  <td>
+                    {% if agent.user.avatar_url %}
+                      <img src="{{ agent.user.avatar_url }}" class="avatar avatar-sm me-2 rounded-circle"
+                           style="width:32px;height:32px;object-fit:cover;" alt="">
+                    {% else %}
+                      <span class="avatar avatar-sm me-2" style="width:32px;height:32px;background:#f0f0f0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">
+                        <i class="fa fa-user text-muted" style="font-size:14px;"></i>
+                      </span>
+                    {% endif %}
+                    <strong>{{ agent.user.first_name }} {{ agent.user.last_name }}</strong>
+                  </td>
+                  <td class="text-muted">{{ agent.user.email }}</td>
+                  <td class="text-muted">{{ agent.user.phone_number or '—' }}</td>
+                  <td><code class="text-muted">{{ agent.slug or '—' }}</code></td>
+                  <td class="text-end">
+                    <a href="{{ request.url_for(admin_route ~ ':detail', identity='agent', pk=agent.id|string) }}"
+                       class="btn btn-sm btn-ghost-secondary">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center text-muted py-5">
+            <i class="fa fa-user-tie fa-2x mb-2"></i>
+            <p class="mb-0">Aucun agent rattaché à cette agence</p>
+          </div>
+          {% endif %}
+        </div>
+
+        {# ── Onglet Biens ── #}
+        <div class="tab-pane fade p-3" id="tab-properties" role="tabpanel">
+          {% if raw_obj.properties %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Label</th>
+                  <th>Type</th>
+                  <th>Statut</th>
+                  <th>Prix</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prop in raw_obj.properties %}
+                <tr>
+                  <td><code>{{ prop.code or '—' }}</code></td>
+                  <td>{{ prop.label or '—' }}</td>
+                  <td class="text-muted">{{ prop.type or '—' }}</td>
+                  <td>
+                    {% set status_colors = {
+                      'for_sale': 'blue', 'for_rent': 'cyan', 'rented': 'green',
+                      'sold': 'red', 'reserved': 'orange', 'free': 'teal',
+                      'under_construction': 'yellow'
+                    } %}
+                    <span class="badge bg-{{ status_colors.get(prop.status, 'secondary') }}-lt">
+                      {{ prop.status or '—' }}
+                    </span>
+                  </td>
+                  <td class="text-muted">
+                    {% if prop.price %}{{ '{:,.0f}'.format(prop.price) }} {{ prop.currency or '' }}{% else %}—{% endif %}
+                  </td>
+                  <td class="text-end">
+                    <a href="{{ request.url_for(admin_route ~ ':detail', identity='property', pk=prop.id|string) }}"
+                       class="btn btn-sm btn-ghost-secondary">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center text-muted py-5">
+            <i class="fa fa-home fa-2x mb-2"></i>
+            <p class="mb-0">Aucun bien rattaché à cette agence</p>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+  .datagrid { --tblr-datagrid-item-width: 12rem; }
+</style>
+{% endblock %}

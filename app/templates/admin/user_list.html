@@ -1,0 +1,266 @@
+{% extends "list.html" %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+@media (max-width: 767.98px) {
+
+  .card-actions .btn span.d-none.d-sm-block { display: none !important; }
+
+  /* Avatar injecté par JS */
+  table#dt tbody tr td.u-td-avatar {
+    display: flex !important;
+    flex: 0 0 auto;
+  }
+
+  /* Info injectée par JS */
+  table#dt tbody tr td.u-td-info {
+    display: flex !important;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Actions : ciblé par JS via classe .u-td-actions — vertical */
+  table#dt tbody tr td.u-td-actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    margin-left: auto;
+    gap: .22rem;
+  }
+  table#dt tbody tr td.u-td-actions .row-actions-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: .22rem !important;
+  }
+  table#dt tbody tr td.u-td-actions .btn {
+    padding: .28rem .55rem !important;
+    font-size: .77rem !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .3rem;
+    width: 100% !important;
+    white-space: nowrap;
+  }
+  table#dt tbody tr td.u-td-actions .btn span { display: inline !important; }
+
+  /* ── Avatar ── */
+  .u-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    color: #1a1a2e;
+    border: 1px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .82rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Texte de la carte ── */
+  .u-card-name  { font-weight: 600; font-size: .86rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .u-card-email { font-size: .74rem; color: #868e96; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .u-card-role  {
+    display: inline-flex; align-items: center;
+    font-size: .66rem; font-weight: 600;
+    padding: .1rem .38rem; border-radius: 4px;
+    background: #f1f3f5; color: #495057;
+    margin-top: .12rem;
+    width: fit-content;
+  }
+  .u-card-role.r-superadmin { background: #fff3cd; color: #856404; }
+  .u-card-role.r-admin      { background: #d4edda; color: #155724; }
+  .u-card-role.r-manager    { background: #d1ecf1; color: #0c5460; }
+  .u-card-role.r-viewer     { background: #e2e3e5; color: #383d41; }
+
+  /* ── Pagination compacte ── */
+  .dataTables_paginate .paginate_button { padding: .25rem .45rem !important; font-size: .8rem; }
+  .dataTables_info { font-size: .78rem; }
+
+  /* ── Barre sélection multiple mobile ── */
+  #u-mobile-select-bar {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .45rem .85rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-size: .82rem;
+    color: #495057;
+  }
+  #u-mobile-select-bar .u-chk-all {
+    width: 17px; height: 17px; cursor: pointer; flex-shrink: 0;
+  }
+  #u-mobile-select-bar .u-sel-count {
+    margin-left: auto;
+    font-size: .76rem;
+    color: #a80000;
+    font-weight: 600;
+  }
+
+}
+</style>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+(function () {
+  function isMobile() { return window.innerWidth < 768; }
+
+  /* Cacher la colonne "Avatar URL" (présente dans les données mais pas à afficher) */
+  $(document).on('init.dt', '#dt', function () {
+    var dt = $(this).DataTable();
+    dt.columns().every(function () {
+      if ($(this.header()).text().trim() === 'Avatar URL') {
+        this.visible(false);
+      }
+    });
+  });
+
+  /* ── Cards mobile ── */
+  function buildCards() {
+    if (!isMobile()) return;
+
+    var dtTable = $('#dt').DataTable();
+
+    $('#dt tbody tr').each(function () {
+      var $tr = $(this);
+
+      // Supprimer cellules injectées précédentes
+      $tr.find('.u-td-avatar, .u-td-info, .u-td-actions').remove();
+
+      var data = dtTable.row(this).data();
+      if (!data) return;
+
+      var firstName   = data.first_name   || '';
+      var lastName    = data.last_name    || '';
+      var email       = data.email        || '';
+      var role        = (data.role || '').toLowerCase();
+      var isActive    = data.is_active;
+      var isVerified  = data.is_verified;
+      var isSuperuser = data.is_superuser;
+      var phone       = data.phone_number || '';
+
+      var initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()
+                     || email.charAt(0).toUpperCase();
+      var fullName  = (firstName + ' ' + lastName).trim() || email;
+
+      var dot = isActive
+        ? '<span style="width:7px;height:7px;border-radius:50%;background:#28a745;display:inline-block;margin-right:.3rem;flex-shrink:0;"></span>'
+        : '<span style="width:7px;height:7px;border-radius:50%;background:#dc3545;display:inline-block;margin-right:.3rem;flex-shrink:0;"></span>';
+
+      /* Badges vérifié / super admin — même ligne que le rôle */
+      var verifiedHtml = isVerified
+        ? '<span style="display:inline-flex;align-items:center;gap:.15rem;padding:.06rem .28rem;border-radius:4px;font-size:.63rem;font-weight:600;background:#d1ecf1;color:#0c5460;">&#10003; Vérifié</span>'
+        : '';
+      var superHtml = isSuperuser
+        ? '<span style="display:inline-flex;align-items:center;gap:.15rem;padding:.06rem .28rem;border-radius:4px;font-size:.63rem;font-weight:600;background:#fff3cd;color:#856404;">&#9733; Super</span>'
+        : '';
+
+      var phoneHtml = phone
+        ? '<div class="u-card-email">' + esc(phone) + '</div>'
+        : '';
+
+      /* Ligne rôle + badges sur la même rangée */
+      var roleLine = '<div style="display:flex;align-items:center;gap:.22rem;flex-wrap:wrap;margin-top:.12rem;">' +
+        '<span class="u-card-role r-' + role + '">' + dot + role + '</span>' +
+        verifiedHtml + superHtml +
+        '</div>';
+
+      /* Avatar : image réelle si disponible, sinon initiales */
+      var avatarUrl = data.avatar_url || '';
+      var $avatarInner;
+      if (avatarUrl) {
+        var imgSrc = avatarUrl.match(/^https?:\/\//) ? avatarUrl : '/static/' + avatarUrl.replace(/^\//, '');
+        $avatarInner = $('<img>').attr({
+          src: imgSrc,
+          style: 'width:38px;height:38px;border-radius:10px;border:1px solid #dee2e6;object-fit:cover;flex-shrink:0;'
+        }).on('error', function () {
+          $(this).replaceWith($('<div class="u-avatar"></div>').text(initials));
+        });
+      } else {
+        $avatarInner = $('<div class="u-avatar"></div>').text(initials);
+      }
+      var $avatar = $('<td class="u-td-avatar"></td>').append($avatarInner);
+
+      var $info = $('<td class="u-td-info"></td>').html(
+        '<div class="u-card-name">'  + esc(fullName) + '</div>' +
+        '<div class="u-card-email">' + esc(email)    + '</div>' +
+        phoneHtml +
+        roleLine
+      );
+
+      var $actions = buildVerticalActions($tr, 'u-td-actions');
+
+      // Insérer : checkbox | avatar | info | actions
+      var $chk = $tr.find('td:nth-child(1)');
+      $chk.after($actions);   // → checkbox, actions
+      $chk.after($info);      // → checkbox, info, actions
+      $chk.after($avatar);    // → checkbox, avatar, info, actions
+    });
+  }
+
+  /* ── Barre "Tout sélectionner" (mobile uniquement) ── */
+  function initSelectBar() {
+    if (!isMobile() || $('#u-mobile-select-bar').length) return;
+
+    var $bar = $(
+      '<div id="u-mobile-select-bar">' +
+        '<input type="checkbox" class="u-chk-all form-check-input" id="u-chk-all-inp">' +
+        '<label for="u-chk-all-inp" style="margin:0;cursor:pointer;">Tout sélectionner</label>' +
+        '<span class="u-sel-count" style="display:none;"></span>' +
+      '</div>'
+    );
+    $('#dt').before($bar);
+
+    /* Tout sélectionner / désélectionner */
+    $bar.find('#u-chk-all-inp').on('change', function () {
+      var dt = $('#dt').DataTable();
+      if ($(this).prop('checked')) dt.rows().select();
+      else dt.rows().deselect();
+    });
+
+    /* Mettre à jour la barre quand des lignes sont (dé)sélectionnées */
+    $(document).on('select.dt deselect.dt', '#dt', updateSelectBar);
+  }
+
+  function updateSelectBar() {
+    if (!isMobile()) return;
+    var dt    = $('#dt').DataTable();
+    var total = dt.rows({ page: 'current' }).count();
+    var sel   = dt.rows({ selected: true, page: 'current' }).count();
+    var $inp  = $('#u-chk-all-inp');
+    var $cnt  = $('#u-mobile-select-bar .u-sel-count');
+
+    $inp.prop('checked',       sel === total && total > 0);
+    $inp.prop('indeterminate', sel > 0 && sel < total);
+
+    if (sel > 0) { $cnt.text(sel + ' sélectionné' + (sel > 1 ? 's' : '')).show(); }
+    else         { $cnt.hide(); }
+  }
+
+  $(document).on('draw.dt', '#dt', function () {
+    buildCards();
+    updateSelectBar();
+  });
+
+  $(window).on('load', function () {
+    setTimeout(function () { buildCards(); initSelectBar(); }, 300);
+  });
+
+  $(window).on('resize', function () {
+    if (isMobile()) { buildCards(); initSelectBar(); }
+    else {
+      $('#dt tbody tr').find('.u-td-avatar,.u-td-info,.u-td-actions').remove();
+      $('#u-mobile-select-bar').remove();
+      $(document).off('select.dt deselect.dt', '#dt', updateSelectBar);
+    }
+  });
+})();
+</script>
+{% endblock %}

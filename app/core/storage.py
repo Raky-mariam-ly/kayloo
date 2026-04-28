@@ -7,6 +7,17 @@ from libcloud.storage.types import ContainerDoesNotExistError
 from sqlalchemy_file.storage import StorageManager
 from core.config import get_settings
 
+# sqlalchemy_file's delete_file does path.split("/") which breaks on nested
+# paths like "images/agency/property/uuid/file.ext". Patch to split on first
+# "/" only so file_id can contain sub-directories.
+@classmethod  # type: ignore[misc]
+def _delete_file_fixed(cls, path: str) -> None:
+    upload_storage, file_id = path.split("/", 1)
+    storage = cls.get(upload_storage)
+    storage.delete(file_id)
+
+StorageManager.delete_file = _delete_file_fixed
+
 logger = logging.getLogger(__name__)
 
 UPLOAD_DIR = "static/uploads"

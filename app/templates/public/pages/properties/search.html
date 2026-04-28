@@ -2,39 +2,91 @@
 {% from "public/components/property-search.html" import display_card %}
 {% block title %}Résultats de recherche - Kayloo{% endblock %}
 {% block content %}
-<!-- MAP BANNER (static placeholder) -->
-<section class="relative bg-gray-200 overflow-hidden" style="height: 340px">
-    <img src="https://picsum.photos/seed/hero1/1920/400" alt="Carte des propriétés"
-        class="w-full h-full object-cover opacity-60" />
-    <div class="absolute inset-0 flex items-center justify-center">
-        <div class="bg-white/90 backdrop-blur-sm rounded-xl px-8 py-5 shadow-lg text-center">
-            <p class="font-jakarta font-bold text-dark text-lg mb-1">
-                <i class="fa-solid fa-map-location-dot text-primary mr-2"></i>
-                Carte interactive des propriétés
-            </p>
-            <p class="text-sm text-gray-500">Visualisez les biens sur la carte</p>
-        </div>
-    </div>
-    <!-- Map control buttons (decorative) -->
-    <div class="absolute top-4 left-4 flex flex-col gap-2">
-        <button
-            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md w-8 h-8 flex items-center justify-center shadow-sm text-dark text-sm transition-colors"
-            aria-label="Zoom avant">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-        <button
-            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md w-8 h-8 flex items-center justify-center shadow-sm text-dark text-sm transition-colors"
-            aria-label="Zoom arrière">
-            <i class="fa-solid fa-minus"></i>
-        </button>
-    </div>
-    <div class="absolute top-4 right-4">
-        <button
-            class="bg-white hover:bg-gray-50 border border-gray-200 rounded-md px-3 h-8 flex items-center gap-2 shadow-sm text-dark text-xs font-medium transition-colors">
-            <i class="fa-solid fa-expand"></i>
-            <span>Plein écran</span>
-        </button>
-    </div>
+<!-- MAP INTERACTIVE — Google Maps -->
+<section class="relative overflow-hidden" style="height: 340px">
+    <div id="properties-map" style="height: 340px; width: 100%;"></div>
+
+    <script>
+    const _mapListings = [
+        {% for l in listings %}{% if l.lat and l.lng %}{
+            lat: {{ l.lat }},
+            lng: {{ l.lng }},
+            title: {{ l.title | tojson }},
+            price: {{ l.price | tojson }},
+            currency: {{ l.currency | tojson }},
+            location: {{ l.location | tojson }},
+            link: {{ l.link | tojson }},
+            image: {{ l.bg_image | tojson }},
+            type: {{ l.type | tojson }},
+        },{% endif %}{% endfor %}
+    ];
+
+    function initMap() {
+        const withCoords = _mapListings.filter(l => l.lat && l.lng);
+
+        const center = withCoords.length > 0
+            ? {
+                lat: withCoords.reduce((s, l) => s + l.lat, 0) / withCoords.length,
+                lng: withCoords.reduce((s, l) => s + l.lng, 0) / withCoords.length,
+              }
+            : { lat: 14.6928, lng: -17.4467 }; // Dakar par défaut
+
+        const map = new google.maps.Map(document.getElementById('properties-map'), {
+            center,
+            zoom: withCoords.length > 1 ? 12 : 14,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: true,
+            styles: [
+                { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }
+            ],
+        });
+
+        const infoWindow = new google.maps.InfoWindow();
+
+        withCoords.forEach(function (l) {
+            const typeLabel = l.type === 'sale' ? 'À Vendre' : 'À Louer';
+            const marker = new google.maps.Marker({
+                position: { lat: l.lat, lng: l.lng },
+                map,
+                title: l.title,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: '#FF5A1F',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2,
+                },
+            });
+
+            marker.addListener('click', function () {
+                infoWindow.setContent(`
+                    <div style="min-width:190px;font-family:sans-serif;padding:4px;">
+                        <img src="${l.image}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:block;" />
+                        <p style="font-weight:700;font-size:13px;margin:0 0 3px;color:#111;">${l.title}</p>
+                        <p style="font-size:11px;color:#666;margin:0 0 4px;">📍 ${l.location}</p>
+                        <p style="font-size:13px;font-weight:700;color:#FF5A1F;margin:0 0 8px;">${l.price} ${l.currency}</p>
+                        <a href="${l.link}" style="display:block;background:#FF5A1F;color:#fff;text-align:center;padding:6px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
+                            Voir l'annonce
+                        </a>
+                    </div>`);
+                infoWindow.open(map, marker);
+            });
+        });
+
+        if (withCoords.length > 1) {
+            const bounds = new google.maps.LatLngBounds();
+            withCoords.forEach(l => bounds.extend({ lat: l.lat, lng: l.lng }));
+            map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+        }
+    }
+    </script>
+    {% if google_maps_api_key %}
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+    {% else %}
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
+    {% endif %}
 </section>
 
 <!-- ADVANCED SEARCH BAR -->
@@ -67,35 +119,37 @@
                         <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                     </div>
                 </div>
-                <!-- Type de bien -->
+                <!-- Type de bien — dynamique depuis property_type -->
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-semibold text-dark uppercase tracking-wide">Type de bien</label>
                     <div class="relative">
                         <select name="property_type"
                             class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
                             <option value="">Tous les types</option>
-                            <option value="VILLA"     {% if request.query_params.get('property_type') == 'VILLA' %}selected{% endif %}>Villa</option>
-                            <option value="DUPLEX"    {% if request.query_params.get('property_type') == 'DUPLEX' %}selected{% endif %}>Duplex</option>
-                            <option value="F2"        {% if request.query_params.get('property_type') == 'F2' %}selected{% endif %}>Studio / F2</option>
-                            <option value="F3"        {% if request.query_params.get('property_type') == 'F3' %}selected{% endif %}>Appartement F3</option>
-                            <option value="F4"        {% if request.query_params.get('property_type') == 'F4' %}selected{% endif %}>Appartement F4</option>
-                            <option value="F5"        {% if request.query_params.get('property_type') == 'F5' %}selected{% endif %}>Appartement F5</option>
-                            <option value="OFFICE"    {% if request.query_params.get('property_type') == 'OFFICE' %}selected{% endif %}>Bureau</option>
-                            <option value="MAGASIN"   {% if request.query_params.get('property_type') == 'MAGASIN' %}selected{% endif %}>Local Commercial</option>
-                            <option value="LAND"      {% if request.query_params.get('property_type') == 'LAND' %}selected{% endif %}>Terrain</option>
-                            <option value="PARKING"   {% if request.query_params.get('property_type') == 'PARKING' %}selected{% endif %}>Parking</option>
+                            {% for code, label in property_types %}
+                            <option value="{{ code }}" {% if request.query_params.get('property_type') == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
                         </select>
                         <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                     </div>
                 </div>
-                <!-- Localisation -->
+                <!-- Localisation — dropdown des villes ayant des annonces -->
                 <div class="flex flex-col gap-1">
                     <label class="text-xs font-semibold text-dark uppercase tracking-wide">Localisation</label>
                     <div class="relative">
-                        <input type="text" name="city" placeholder="Ville, quartier..."
-                            value="{{ request.query_params.get('city', '') }}"
-                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body focus:outline-none focus:border-primary pl-9" />
-                        <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <select name="city"
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8 pl-9">
+                            <option value="">Toutes les villes</option>
+                            {% for city in cities %}
+                            <option value="{{ city }}" {% if request.query_params.get('city') == city %}selected{% endif %}>
+                                {{ city }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
                     </div>
                 </div>
                 <!-- Budget max -->

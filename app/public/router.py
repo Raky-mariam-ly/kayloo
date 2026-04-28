@@ -10,14 +10,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 from core.db import get_db
+from core.config import get_settings
 from models.property_view import PropertyView
 from repositories.property import PropertyRepository
 from repositories.property_view import PropertyViewRepository
 from services.property_view import PropertyViewService
 from static.text_content import *
+import admin.choices as _choices
 
 
 templates = Jinja2Templates(directory="templates")
+templates.env.globals["site_logo_url"] = lambda: _choices._site_logo_url
 router = APIRouter()
 
 PLACEHOLDER_IMAGE = "https://picsum.photos/seed/kayloo/800/600"
@@ -148,6 +151,8 @@ def _property_to_listing(prop) -> dict:
         "bedroom_nbr": prop.bed_room_count,
         "bthroom_nbr": prop.bath_room_count,
         "land_size": int(prop.surface) if prop.surface else None,
+        "lat": float(prop.lat) if prop.lat else None,
+        "lng": float(prop.lng) if prop.lng else None,
     }
 
 
@@ -316,16 +321,9 @@ async def get_search_result(
         rent_cat = "sale"
 
     repo = PropertyRepository(session)
-    props = await repo.search(
-        city=city_val,
-        type=type_val,
-        price_max=price_max,
-        rent_category=rent_cat,
-        limit=24,
-    )
-    total = await repo.count_search(
-        city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat
-    )
+    props = await repo.search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat, limit=24)
+    total = await repo.count_search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat)
+    cities = await repo.get_distinct_cities()
     listings = [_property_to_listing(p) for p in props]
     return templates.TemplateResponse(
         request=request,
@@ -333,6 +331,9 @@ async def get_search_result(
         context={
             "listings": listings,
             "total": total,
+            "cities": cities,
+            "property_types": _choices._property_type_choices,
+            "google_maps_api_key": get_settings().google_maps_api_key,
         },
     )
 

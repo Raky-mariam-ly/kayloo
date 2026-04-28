@@ -46,11 +46,14 @@ _DO_REGIONS = {
 
 
 class _DOSpacesDriver(S3StorageDriver):
-    VALID_REGIONS = list(_DO_REGIONS.keys())
-
     def __init__(self, key: str, secret: str, region: str = "fra1", **kwargs):
         host = _DO_REGIONS.get(region, f"{region}.digitaloceanspaces.com")
-        super().__init__(key, secret, host=host, region=region, **kwargs)
+        # Do NOT pass region to the parent — it validates against AWS regions
+        # only and raises ValueError for DO names like "fra1".
+        # Set region_name after construction; the connection reads it
+        # dynamically at signing time via self.driver.region_name.
+        super().__init__(key, secret, host=host, **kwargs)
+        self.region_name = region
 
 
 def _get_or_create_container(driver, name: str):

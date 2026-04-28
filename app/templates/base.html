@@ -23,7 +23,7 @@
                     <div class="flex items-center h-[90px] gap-10">
                         <div class="flex-shrink-0">
                             <a href="/">
-                                <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
+                                <img src="{{ site_logo_url() or url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
                                     class="h-full w-[180px]" />
                             </a>
                         </div>
@@ -164,7 +164,7 @@
         </nav>
         <div class="lg:hidden sticky top-0 z-30 bg-white flex items-center justify-between h-[60px] px-4 shadow-sm">
             <a href="{{ url_for('home')}}">
-                <img src="{{ url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
+                <img src="{{ site_logo_url() or url_for('static', path='images/logos/kayloo-main.svg') }}" alt="Kayloo"
                     class="h-7 w-auto" />
             </a>
             <button id="mobile-toggle" class="text-[#0E0F21] text-2xl p-2" aria-label="Menu">

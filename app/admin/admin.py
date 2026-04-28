@@ -8,6 +8,7 @@ from core.config import get_settings
 from core.auth import FastapiUsersAuthProvider, User
 from core.db import engine
 
+from models.site_settings import SiteSettings
 from models.country import Country
 from models.property_rent_type import PropertyRentType
 from models.property_type import PropertyType
@@ -28,6 +29,7 @@ from models.task import Task
 from models.notification import Notification
 from models.conversation import Conversation
 
+from admin.site_settings_view import SiteSettingsView
 from admin.country import CountryView
 from admin.property_rent_type import PropertyRentTypeView
 from admin.property_type import PropertyTypeView
@@ -74,6 +76,7 @@ admin = Admin(engine,
                   SessionMiddleware, secret_key=settings.secret)],
               )
 
+admin.add_view(SiteSettingsView(SiteSettings, icon="fa fa-cog", label="Site Settings"))
 admin.add_view(UserView(User, icon="fa fa-users", label="Users"))
 
 admin.add_view(DropDown(

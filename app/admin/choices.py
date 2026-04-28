@@ -14,6 +14,26 @@ _property_rent_type_choices: list[tuple[str, str]] = []
 _city_id_choices:            list[tuple[str, str]] = []
 _building_choices:           list[tuple[str, str]] = []
 _property_choices:           list[tuple[str, str]] = []
+_site_logo_url:              str = ""
+
+
+async def load_site_logo(session: AsyncSession) -> None:
+    global _site_logo_url
+    try:
+        from sqlalchemy import select
+        from models.site_settings import SiteSettings
+        result = await session.execute(select(SiteSettings))
+        row = result.scalar_one_or_none()
+        if row and row.logo_url:
+            logo = row.logo_url
+            if isinstance(logo, dict):
+                _site_logo_url = logo.get("url") or ""
+            elif isinstance(logo, str) and logo.startswith("http"):
+                _site_logo_url = logo
+            else:
+                _site_logo_url = ""
+    except Exception:
+        _site_logo_url = ""
 
 
 async def warm_choices_cache(session: AsyncSession) -> None:
@@ -97,6 +117,8 @@ async def warm_choices_cache(session: AsyncSession) -> None:
             " FROM property_property ORDER BY label"
         )
     ]
+
+    await load_site_logo(session)
 
 
 def load_country_choices(request: Request) -> list[tuple[str, str]]:

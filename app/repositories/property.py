@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.property import Property
@@ -80,6 +80,19 @@ class PropertyRepository(BaseRepository[Property]):
         query = query.order_by(self.model.created_at.desc()).offset(skip).limit(limit)
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def get_distinct_cities(self) -> List[str]:
+        result = await self.db.execute(
+            select(distinct(self.model.city))
+            .where(
+                self.model.city.isnot(None),
+                self.model.city != "",
+                self.model.is_hidden.is_(False),
+                self.model.archived.is_(False),
+            )
+            .order_by(self.model.city)
+        )
+        return [row[0] for row in result.fetchall()]
 
     async def count_search(
         self,

@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = "noreply@kayloo.immo"
 
+    # ── Google Maps ──
+    google_maps_api_key: str = ""
+
     # ── S3 / DigitalOcean Spaces ──
     s3_access_key: str = ""
     s3_secret_key: str = ""

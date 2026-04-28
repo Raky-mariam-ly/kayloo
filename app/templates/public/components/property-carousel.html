@@ -112,7 +112,7 @@
 
 {% endmacro %}
 
-{% macro carousel_js() %}
+{% macro carousel_js(params='') %}
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 <script>
     window.addEventListener('load', function () {
@@ -141,9 +141,11 @@
                         this.isLoading = true;
 
                         const offset = totalSlides;
+                        const extraParams = "{{ params }}";
+                        const sep = extraParams ? "&" : "";
 
                         try {
-                            const response = await fetch(`/carousel/loadmore?offset=${offset}&limit=3`);
+                            const response = await fetch(`/carousel/loadmore?offset=${offset}&limit=3${sep}${extraParams}`);
                             const html = await response.text();
 
                             if (html.trim() !== "") {

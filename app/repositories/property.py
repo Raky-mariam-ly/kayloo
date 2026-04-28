@@ -7,6 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models.property import Property
 from repositories.base import BaseRepository
 
+RENT_TYPES = ("RENT_EMPTY", "RENT_FURNISHED")
+SALE_TYPES = ("SALE",)
+
 
 class PropertyRepository(BaseRepository[Property]):
     def __init__(self, session: AsyncSession):
@@ -51,6 +54,8 @@ class PropertyRepository(BaseRepository[Property]):
         type: Optional[str] = None,
         price_min: Optional[float] = None,
         price_max: Optional[float] = None,
+        is_featured: Optional[bool] = None,
+        rent_category: Optional[str] = None,
         skip: int = 0,
         limit: int = 12,
     ) -> List[Property]:
@@ -61,11 +66,17 @@ class PropertyRepository(BaseRepository[Property]):
         if city:
             query = query.where(self.model.city.ilike(f"%{city}%"))
         if type:
-            query = query.where(self.model.type == type)
+            query = query.where(func.lower(self.model.type) == type.lower())
         if price_min is not None:
             query = query.where(self.model.price >= price_min)
         if price_max is not None:
             query = query.where(self.model.price <= price_max)
+        if is_featured is not None:
+            query = query.where(self.model.is_featured.is_(is_featured))
+        if rent_category == "rent":
+            query = query.where(self.model.rent_type.in_(RENT_TYPES))
+        elif rent_category == "sale":
+            query = query.where(self.model.rent_type.in_(SALE_TYPES))
         query = query.order_by(self.model.created_at.desc()).offset(skip).limit(limit)
         result = await self.db.execute(query)
         return result.scalars().all()
@@ -76,6 +87,8 @@ class PropertyRepository(BaseRepository[Property]):
         type: Optional[str] = None,
         price_min: Optional[float] = None,
         price_max: Optional[float] = None,
+        is_featured: Optional[bool] = None,
+        rent_category: Optional[str] = None,
     ) -> int:
         query = select(func.count(self.model.id)).where(
             self.model.is_hidden.is_(False),
@@ -84,10 +97,16 @@ class PropertyRepository(BaseRepository[Property]):
         if city:
             query = query.where(self.model.city.ilike(f"%{city}%"))
         if type:
-            query = query.where(self.model.type == type)
+            query = query.where(func.lower(self.model.type) == type.lower())
         if price_min is not None:
             query = query.where(self.model.price >= price_min)
         if price_max is not None:
             query = query.where(self.model.price <= price_max)
+        if is_featured is not None:
+            query = query.where(self.model.is_featured.is_(is_featured))
+        if rent_category == "rent":
+            query = query.where(self.model.rent_type.in_(RENT_TYPES))
+        elif rent_category == "sale":
+            query = query.where(self.model.rent_type.in_(SALE_TYPES))
         result = await self.db.execute(query)
         return result.scalar_one()

@@ -20,7 +20,6 @@ import admin.choices as _choices
 
 
 templates = Jinja2Templates(directory="templates")
-templates.env.globals["site_logo_url"] = lambda: _choices._site_logo_url
 router = APIRouter()
 
 PLACEHOLDER_IMAGE = "https://picsum.photos/seed/kayloo/800/600"

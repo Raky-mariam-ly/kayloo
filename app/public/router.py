@@ -81,19 +81,22 @@ def _get_image_url(prop) -> str:
     return f"https://picsum.photos/seed/{seed}/800/600"
 
 
-def _all_image_urls(prop) -> list:
-    """Collect all image URLs for a property."""
+def _cover_image_url(prop) -> str:
+    """Return the cover image URL (image_url field), with deterministic fallback."""
+    url = _extract_url(getattr(prop, "image_url", None))
+    if url:
+        return url
+    seed = str(prop.id).split("-")[0] if prop.id else "kayloo"
+    return f"https://picsum.photos/seed/{seed}/800/600"
+
+
+def _gallery_image_urls(prop) -> list:
+    """Return gallery images (images relation only, not the cover)."""
     urls = []
     for img_obj in (prop.images or []):
         url = _extract_url(img_obj.url)
         if url:
             urls.append(url)
-    cover = _extract_url(getattr(prop, "image_url", None))
-    if cover and cover not in urls:
-        urls.insert(0, cover)
-    if not urls:
-        seed = str(prop.id).split("-")[0] if prop.id else "kayloo"
-        urls.append(f"https://picsum.photos/seed/{seed}/800/600")
     return urls
 
 
@@ -339,7 +342,8 @@ async def get_listing_details(
 ):
     prop = None
     listing = None
-    image_urls = [PLACEHOLDER_IMAGE]
+    cover_image = PLACEHOLDER_IMAGE
+    gallery_images = []
     similar_listings = []
 
     if id:
@@ -348,7 +352,8 @@ async def get_listing_details(
         prop = await repo.get(id)
         if prop:
             listing = _property_to_listing(prop)
-            image_urls = _all_image_urls(prop)
+            cover_image = _cover_image_url(prop)
+            gallery_images = _gallery_image_urls(prop)
             similar_props = await repo.search(city=prop.city, limit=7)
             similar_listings = [
                 _property_to_listing(p) for p in similar_props
@@ -361,7 +366,8 @@ async def get_listing_details(
         {
             "property": prop,
             "listing": listing,
-            "image_urls": image_urls,
+            "cover_image": cover_image,
+            "gallery_images": gallery_images,
             "similar_listings": similar_listings,
         },
     )

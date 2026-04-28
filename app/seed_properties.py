@@ -274,8 +274,7 @@ async def seed_properties(session: AsyncSession, agencies: list[Agency]) -> list
             surface=Decimal(str(tmpl.get("surface", 0))),
             lat=Decimal(str(coords[0])) if coords[0] else None,
             lng=Decimal(str(coords[1])) if coords[1] else None,
-            build_year=str(random.randint(2005, 2024)
-                           ) if tmpl["type"] != "LAND" else None,
+            build_year=random.randint(2005, 2024) if tmpl["type"] != "LAND" else None,
             currency=currency,
             price=Decimal(str(tmpl.get("price", 0))
                           ) if tmpl.get("price") else None,

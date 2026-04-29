@@ -13,6 +13,22 @@ from starlette_admin.helpers import RequestAction
 
 
 
+def _extract_file_url(v) -> str | None:
+    """Extract a displayable URL from a sqlalchemy_file File dict (S3 or local)."""
+    if not v or not isinstance(v, dict):
+        return None
+    url = v.get("url")
+    if url:
+        return url
+    files = v.get("files") or []
+    if files:
+        return f"/static/uploads/{files[0]}"
+    path = v.get("path")
+    if path:
+        return f"/static/uploads/{path}"
+    return None
+
+
 class SafeEnumField(EnumField):
     """EnumField that returns the raw value when not found in choices instead of raising ValueError."""
 

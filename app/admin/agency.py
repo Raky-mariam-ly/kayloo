@@ -3,7 +3,7 @@ from typing import Any, Dict
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import BooleanField, ImageField, StringField, URLField, DateTimeField
-from admin.base import AdminModelView, SafeEnumField, _is_full_admin, _is_agent
+from admin.base import AdminModelView, SafeEnumField, _is_full_admin, _is_agent, _extract_file_url
 from admin.choices import load_country_choices
 
 
@@ -60,6 +60,11 @@ class AgencyView(AdminModelView):
             from models.agency import Agency
             query = query.where(Agency.id == agency_id)
         return query
+
+    async def serialize(self, obj, request, action, **kwargs):
+        result = await super().serialize(obj, request, action, **kwargs)
+        result["logo_src"] = _extract_file_url(getattr(obj, "logo_url", None))
+        return result
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = dict()

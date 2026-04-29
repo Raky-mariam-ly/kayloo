@@ -3,7 +3,7 @@ from typing import Any, Dict
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
 from starlette_admin.fields import BooleanField, ImageField, StringField, URLField, DateTimeField
-from admin.base import AdminModelView, SafeEnumField
+from admin.base import AdminModelView, SafeEnumField, _extract_file_url
 from admin.choices import load_country_choices
 
 
@@ -25,6 +25,11 @@ class PartnerView(AdminModelView):
         StringField("updated_by", read_only=True, exclude_from_list=True),
         DateTimeField("updated_at", read_only=True, exclude_from_list=True),
     ]
+
+    async def serialize(self, obj, request, action, **kwargs):
+        result = await super().serialize(obj, request, action, **kwargs)
+        result["logo_src"] = _extract_file_url(getattr(obj, "logo_url", None))
+        return result
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
         errors: Dict[str, str] = dict()

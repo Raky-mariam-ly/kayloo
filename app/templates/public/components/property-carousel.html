@@ -82,41 +82,19 @@
         <p class="section-paragraph text-center">
             {{ section_data.subtitle | safe }}
         <div class="w-[100%] mx-auto">
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <!-- Filter buttons -->
-                <div class="flex flex-wrap gap-2" id="carousel-filters">
-                    <button data-filter=""
-                        class="carousel-filter active bg-primary text-white border-2 border-primary text-xs font-semibold px-4 py-1.5 rounded-full transition-colors cursor-pointer">
-                        Tous
-                    </button>
-                    <button data-filter="rent_category=rent"
-                        class="carousel-filter bg-white text-primary border-2 border-primary text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                        Location
-                    </button>
-                    <button data-filter="rent_category=furnished"
-                        class="carousel-filter bg-white text-primary border-2 border-primary text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                        Location Meublée
-                    </button>
-                    <button data-filter="rent_category=sale"
-                        class="carousel-filter bg-white text-primary border-2 border-primary text-xs font-semibold px-4 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                        Vente
-                    </button>
-                </div>
-                <!-- Navigation arrows -->
-                <div class="flex gap-2">
-                    <button
-                        class="swiper-prev-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button
-                        class="swiper-next-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+            <div class="flex justify-end gap-2 mb-4">
+                <button
+                    class="swiper-prev-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button
+                    class="swiper-next-custom w-10 h-10 border-2 border-primary text-primary rounded flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
 
             <div class="swiper myPropertySwiper !px-1">
@@ -138,8 +116,6 @@
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
 <script>
     window.addEventListener('load', function () {
-        let currentFilterParams = "{{ params }}";
-
         const swiper = new Swiper('.myPropertySwiper', {
             slidesPerView: 1.075,
             spaceBetween: 8,
@@ -165,10 +141,11 @@
                         this.isLoading = true;
 
                         const offset = totalSlides;
-                        const sep = currentFilterParams ? "&" : "";
+                        const extraParams = "{{ params }}";
+                        const sep = extraParams ? "&" : "";
 
                         try {
-                            const response = await fetch(`/carousel/loadmore?offset=${offset}&limit=3${sep}${currentFilterParams}`);
+                            const response = await fetch(`/carousel/loadmore?offset=${offset}&limit=3${sep}${extraParams}`);
                             const html = await response.text();
 
                             if (html.trim() !== "") {
@@ -177,12 +154,15 @@
                                 const newSlides = tempDiv.querySelectorAll('.swiper-slide');
 
                                 if (newSlides.length > 0) {
-                                    newSlides.forEach(slide => this.appendSlide(slide.outerHTML));
+                                    newSlides.forEach(slide => {
+                                        this.appendSlide(slide.outerHTML);
+                                    });
                                 } else {
                                     this.allLoaded = true;
                                 }
                             }
-                        } catch (e) {
+                        }
+                        catch (e) {
                             console.error(e);
                         } finally {
                             this.isLoading = false;
@@ -190,47 +170,7 @@
                     }
                 }
             }
-        });
-
-        // Filter buttons
-        document.querySelectorAll('.carousel-filter').forEach(function (btn) {
-            btn.addEventListener('click', async function () {
-                if (this.classList.contains('active')) return;
-
-                // Update active state
-                document.querySelectorAll('.carousel-filter').forEach(function (b) {
-                    b.classList.remove('active', 'bg-primary', 'text-white');
-                    b.classList.add('bg-white', 'text-primary');
-                });
-                this.classList.add('active', 'bg-primary', 'text-white');
-                this.classList.remove('bg-white', 'text-primary');
-
-                currentFilterParams = this.dataset.filter;
-                swiper.allLoaded = false;
-
-                try {
-                    const sep = currentFilterParams ? "&" : "";
-                    const response = await fetch(`/carousel/loadmore?offset=0&limit=10${sep}${currentFilterParams}`);
-                    const html = await response.text();
-
-                    swiper.removeAllSlides();
-
-                    if (html.trim() !== "") {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        const newSlides = tempDiv.querySelectorAll('.swiper-slide');
-                        newSlides.forEach(function (slide) {
-                            swiper.appendSlide(slide.outerHTML);
-                        });
-                    }
-
-                    swiper.slideTo(0, 0);
-                    swiper.update();
-                } catch (e) {
-                    console.error(e);
-                }
-            });
-        });
-    });
+        }); // Close Swiper
+    }); // Close Window Listener
 </script>
 {% endmacro %}

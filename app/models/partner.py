@@ -21,3 +21,12 @@ class Partner(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
+
+    @property
+    def logo_src(self) -> str | None:
+        v = self.logo_url
+        if not v:
+            return None
+        if isinstance(v, dict):
+            return v.get("url")
+        return None

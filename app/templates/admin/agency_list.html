@@ -85,18 +85,8 @@
       var dotColor  = isActive ? '#28a745' : '#dc3545';
       var dotLabel  = isActive ? 'Actif' : 'Inactif';
 
-      /* Extract logo src from ImageField HTML rendered by starlette-admin */
-      function extractLogoSrc(raw) {
-        if (!raw) return null;
-        if (typeof raw === 'string') {
-          var m = raw.match(/src="([^"]+)"/);
-          if (m) return m[1];
-        }
-        return null;
-      }
-
       /* Avatar — logo if available, initials otherwise */
-      var logoSrc = extractLogoSrc(data.logo_url);
+      var logoSrc = (data.logo_src && data.logo_src.trim()) ? data.logo_src.trim() : null;
       var $avatar;
       if (logoSrc) {
         $avatar = $('<td class="a-td-avatar"></td>').html(
@@ -134,6 +124,16 @@
   function destroyCards() {
     $('#dt tbody tr').find('.a-td-avatar, .a-td-info, .a-td-actions').remove();
   }
+
+  /* Hide the logo_src text column — data stays available for mobile cards */
+  $(document).on('init.dt', '#dt', function () {
+    var api = $(this).DataTable();
+    var idx = -1;
+    $('#dt thead th').each(function (i) {
+      if ($.trim($(this).text()) === 'Logo') { idx = i; }
+    });
+    if (idx >= 0) api.column(idx).visible(false);
+  });
 
   $(document).on('draw.dt', '#dt', buildCards);
   $(window).on('load', function () { setTimeout(buildCards, 300); });

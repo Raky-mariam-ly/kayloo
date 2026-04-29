@@ -29,6 +29,15 @@ class Agency(Base):
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
 
+    @property
+    def logo_src(self) -> str | None:
+        v = self.logo_url
+        if not v:
+            return None
+        if isinstance(v, dict):
+            return v.get("url")
+        return None
+
     agents = relationship("Agent", back_populates="agency", lazy="selectin")
     properties = relationship("Property", back_populates="agency",
                               foreign_keys="Property.agency_id", lazy="selectin")

@@ -46,6 +46,8 @@
     font-weight: 700; font-size: .85rem;
     flex-shrink: 0;
   }
+  .a-avatar--logo { padding: 0; overflow: hidden; background: #fff; }
+  .a-avatar--logo img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 
   /* ── Card text ── */
   .a-card-name    { font-weight: 600; font-size: .86rem; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -83,10 +85,28 @@
       var dotColor  = isActive ? '#28a745' : '#dc3545';
       var dotLabel  = isActive ? 'Actif' : 'Inactif';
 
-      /* Avatar */
-      var $avatar = $('<td class="a-td-avatar"></td>').append(
-        $('<div class="a-avatar"></div>').text(initial)
-      );
+      /* Extract logo src from ImageField HTML rendered by starlette-admin */
+      function extractLogoSrc(raw) {
+        if (!raw) return null;
+        if (typeof raw === 'string') {
+          var m = raw.match(/src="([^"]+)"/);
+          if (m) return m[1];
+        }
+        return null;
+      }
+
+      /* Avatar — logo if available, initials otherwise */
+      var logoSrc = extractLogoSrc(data.logo_url);
+      var $avatar;
+      if (logoSrc) {
+        $avatar = $('<td class="a-td-avatar"></td>').html(
+          '<div class="a-avatar a-avatar--logo"><img src="' + logoSrc + '" alt="' + esc(name) + '"></div>'
+        );
+      } else {
+        $avatar = $('<td class="a-td-avatar"></td>').append(
+          $('<div class="a-avatar"></div>').text(initial)
+        );
+      }
 
       /* Info */
       var $info = $('<td class="a-td-info"></td>').html(

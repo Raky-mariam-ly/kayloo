@@ -15,7 +15,7 @@ class PartnerView(AdminModelView):
         StringField("name", required=True),
         StringField("email", required=True),
         StringField("phone_number", required=True, label="Phone Number"),
-        ImageField("logo_url", label="Logo", exclude_from_list=True),
+        ImageField("logo_url", label="Logo"),
         URLField("siteweb_url", label="Website URL", exclude_from_list=True),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True, exclude_from_list=True),

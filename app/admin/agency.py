@@ -28,7 +28,7 @@ class AgencyView(AdminModelView):
         StringField("name"),
         StringField("email"),
         StringField("phone_number", label="Phone Number"),
-        ImageField("logo_url", label="Logo", exclude_from_list=True),
+        ImageField("logo_url", label="Logo"),
         URLField("siteweb_url", label="Website URL", exclude_from_list=True),
         URLField("whatsapp_url", label="WhatsApp URL", exclude_from_list=True),
         URLField("x_url", label="X (Twitter) URL", exclude_from_list=True),

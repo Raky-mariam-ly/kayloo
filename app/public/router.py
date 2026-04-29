@@ -357,7 +357,7 @@ async def get_listing_details(
             listing = _property_to_listing(prop)
             cover_image = _cover_image_url(prop)
             gallery_images = _gallery_image_urls(prop)
-            similar_props = await repo.search(city=prop.city, limit=7)
+            similar_props = await repo.search(city=prop.city, type=prop.type, limit=7)
             similar_listings = [
                 _property_to_listing(p) for p in similar_props
                 if str(p.id) != str(id)

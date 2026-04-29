@@ -8,6 +8,7 @@ from models.property import Property
 from repositories.base import BaseRepository
 
 RENT_TYPES = ("RENT_EMPTY", "RENT_FURNISHED")
+FURNISHED_TYPES = ("RENT_FURNISHED",)
 SALE_TYPES = ("SALE",)
 
 
@@ -61,6 +62,8 @@ class PropertyRepository(BaseRepository[Property]):
             query = query.where(self.model.is_featured.is_(is_featured))
         if rent_category == "rent":
             query = query.where(self.model.rent_type.in_(RENT_TYPES))
+        elif rent_category == "furnished":
+            query = query.where(self.model.rent_type.in_(FURNISHED_TYPES))
         elif rent_category == "sale":
             query = query.where(self.model.rent_type.in_(SALE_TYPES))
         return query

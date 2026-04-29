@@ -1,5 +1,6 @@
 import uuid
 from sqlalchemy import Column, DateTime, ForeignKey, Numeric, Text, func, UUID
+from sqlalchemy_file import FileField as FileStorageField
 
 from core.auth import Base
 
@@ -15,7 +16,7 @@ class Building(Base):
     lat = Column(Numeric(21, 6), nullable=True)
     lng = Column(Numeric(21, 6), nullable=True)
     slug = Column(Text, nullable=True)
-    image_url = Column(Text, nullable=True)
+    image_url = Column(FileStorageField(upload_storage="images"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)

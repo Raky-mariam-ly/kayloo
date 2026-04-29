@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Text, func, UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy_file import FileField as FileStorageField
 
 from core.auth import Base
 
@@ -14,7 +15,7 @@ class Agency(Base):
     name = Column(Text, nullable=True)
     email = Column(Text, nullable=True)
     phone_number = Column(Text, nullable=True)
-    logo_url = Column(Text, nullable=True)
+    logo_url = Column(FileStorageField(upload_storage="images"), nullable=True)
     siteweb_url = Column(Text, nullable=True)
     whatsapp_url = Column(Text, nullable=True)
     x_url = Column(Text, nullable=True)

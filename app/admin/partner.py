@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from fastapi import Request
 from starlette_admin.exceptions import FormValidationError
-from starlette_admin.fields import BooleanField, StringField, URLField, DateTimeField
+from starlette_admin.fields import BooleanField, ImageField, StringField, URLField, DateTimeField
 from admin.base import AdminModelView, SafeEnumField
 from admin.choices import load_country_choices
 
@@ -15,7 +15,7 @@ class PartnerView(AdminModelView):
         StringField("name", required=True),
         StringField("email", required=True),
         StringField("phone_number", required=True, label="Phone Number"),
-        URLField("logo_url", label="Logo URL", exclude_from_list=True),
+        ImageField("logo_url", label="Logo", exclude_from_list=True),
         URLField("siteweb_url", label="Website URL", exclude_from_list=True),
         BooleanField("is_active"),
         DateTimeField("created_at", read_only=True, exclude_from_list=True),

@@ -128,11 +128,13 @@
   /* Hide the logo_src text column — data stays available for mobile cards */
   $(document).on('init.dt', '#dt', function () {
     var api = $(this).DataTable();
-    var idx = -1;
-    $('#dt thead th').each(function (i) {
-      if ($.trim($(this).text()) === 'Logo') { idx = i; }
-    });
-    if (idx >= 0) api.column(idx).visible(false);
+    var cols = api.settings()[0].aoColumns;
+    for (var i = 0; i < cols.length; i++) {
+      if (cols[i].data === 'logo_src') {
+        api.column(i).visible(false);
+        break;
+      }
+    }
   });
 
   $(document).on('draw.dt', '#dt', buildCards);

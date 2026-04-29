@@ -29,22 +29,6 @@ class Agency(Base):
     created_by = Column(Text, ForeignKey("user.email"), nullable=True)
     updated_by = Column(Text, ForeignKey("user.email"), nullable=True)
 
-    @property
-    def logo_src(self) -> str | None:
-        v = self.logo_url
-        if not v or not isinstance(v, dict):
-            return None
-        url = v.get("url")
-        if url:
-            return url
-        files = v.get("files") or []
-        if files:
-            return f"/static/uploads/{files[0]}"
-        path = v.get("path")
-        if path:
-            return f"/static/uploads/{path}"
-        return None
-
     agents = relationship("Agent", back_populates="agency", lazy="selectin")
     properties = relationship("Property", back_populates="agency",
                               foreign_keys="Property.agency_id", lazy="selectin")

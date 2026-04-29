@@ -1,5 +1,5 @@
 import logging
-from typing import Generic, Optional, Optional, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from repositories.base import AbstractRepository, BaseRepository
 

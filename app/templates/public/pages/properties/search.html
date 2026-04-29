@@ -103,7 +103,7 @@
             <i class="fa-solid fa-chevron-down text-primary transition-transform" id="search-chevron"></i>
         </button>
         <!-- Search panel -->
-        <div id="search-panel" class="pb-5">
+        <div id="search-panel" class="pb-5 hidden">
             <form method="get" action="/resultats"
                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 items-end">
                 <!-- Statut -->
@@ -114,6 +114,7 @@
                             class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
                             <option value="">Tous</option>
                             <option value="location" {% if request.query_params.get('listing_type') == 'location' %}selected{% endif %}>Location</option>
+                            <option value="meublee" {% if request.query_params.get('listing_type') == 'meublee' %}selected{% endif %}>Location meublée</option>
                             <option value="vente" {% if request.query_params.get('listing_type') == 'vente' %}selected{% endif %}>Vente</option>
                         </select>
                         <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
@@ -179,10 +180,10 @@
 <section class="py-8 bg-neutral-100">
     <div class="max-w-site mx-auto px-4">
         <!-- Breadcrumb -->
-        <nav class="mb-4" aria-label="Fil d'Ariane">
+        <nav class="hidden md:block mb-4" aria-label="Fil d'Ariane">
             <ol class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
                 <li>
-                    <a href="../index.html" class="hover:text-primary transition-colors flex items-center gap-1">
+                    <a href="{{ url_for('home') }}" class="hover:text-primary transition-colors flex items-center gap-1">
                         <i class="fa-solid fa-house text-xs"></i>
                         Accueil
                     </a>
@@ -192,45 +193,103 @@
             </ol>
         </nav>
 
-        <!-- Title row + View toggle + Sort -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <!-- Title row + Sort -->
+        <div class="flex flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-                <h1 class="font-jakarta font-bold text-2xl text-dark">Résultats de recherche</h1>
-                <p class="text-sm text-gray-500 mt-0.5"><strong class="text-dark">{{ total or listings|length }} résultat(s)</strong> trouvé(s)</p>
+                <h1 class="font-jakarta font-bold text-lg md:text-2xl text-dark">Résultats de recherche</h1>
+                <p class="text-sm text-gray-500 mt-0.5"><strong class="text-dark">{{ total or listings|length }}</strong> résultat(s) trouvé(s)</p>
             </div>
-            <div class="flex items-center gap-4">
-                <!-- Sort -->
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-500 whitespace-nowrap">Trier par :</span>
-                    <div class="relative">
-                        <select
-                            class="appearance-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
-                            <option value="">Ordre par défaut</option>
-                            <option value="a_price">Prix (croissant)</option>
-                            <option value="d_price">Prix (décroissant)</option>
-                            <option value="featured_first">Annonces en avant d'abord</option>
-                            <option value="d_date">Date (récente à ancienne)</option>
-                            <option value="a_date">Date (ancienne à récente)</option>
-                            <option value="a_title">Titre A-Z</option>
-                            <option value="d_title">Titre Z-A</option>
-                        </select>
-                        <i
-                            class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-                    </div>
+            <div class="relative" id="sort-wrapper">
+                <button type="button" id="sort-trigger"
+                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:border-[#d60000] hover:text-[#d60000] focus:outline-none focus:ring-2 focus:ring-[#d60000]/20 transition-colors">
+                    <i class="fa-solid fa-arrow-down-wide-short text-gray-400"></i>
+                    <span class="hidden sm:inline">Trier :</span>
+                    <span id="sort-label" class="font-semibold">Défaut</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" id="sort-icon"></i>
+                </button>
+                <div id="sort-menu"
+                     class="hidden absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20">
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="">
+                        <i class="fa-solid fa-arrow-up-arrow-down w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Ordre par défaut
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="a_price">
+                        <i class="fa-solid fa-arrow-up-wide-short w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Prix (croissant)
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="d_price">
+                        <i class="fa-solid fa-arrow-down-wide-short w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Prix (décroissant)
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="featured_first">
+                        <i class="fa-solid fa-star w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Annonces en avant
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="d_date">
+                        <i class="fa-solid fa-clock w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Date (récente à ancienne)
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="a_date">
+                        <i class="fa-solid fa-clock-rotate-left w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Date (ancienne à récente)
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="a_title">
+                        <i class="fa-solid fa-arrow-up-a-z w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Titre A-Z
+                    </a>
+                    <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="d_title">
+                        <i class="fa-solid fa-arrow-down-z-a w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Titre Z-A
+                    </a>
                 </div>
-                <!-- View toggle -->
-                <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                    <button
-                        class="px-3 py-2 text-gray-400 hover:text-dark hover:bg-gray-50 transition-colors border-r border-gray-200"
-                        aria-label="Vue liste" title="Vue liste">
-                        <i class="fa-solid fa-list text-sm"></i>
-                    </button>
-                    <button class="px-3 py-2 text-white bg-primary" aria-label="Vue grille" title="Vue grille">
-                        <i class="fa-solid fa-grip text-sm"></i>
-                    </button>
-                </div>
+                <select id="sort-native" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer md:hidden z-10">
+                    <option value="">Ordre par défaut</option>
+                    <option value="a_price">Prix (croissant)</option>
+                    <option value="d_price">Prix (décroissant)</option>
+                    <option value="featured_first">Annonces en avant</option>
+                    <option value="d_date">Date (récente à ancienne)</option>
+                    <option value="a_date">Date (ancienne à récente)</option>
+                    <option value="a_title">Titre A-Z</option>
+                    <option value="d_title">Titre Z-A</option>
+                </select>
             </div>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const trigger = document.getElementById('sort-trigger');
+            const menu = document.getElementById('sort-menu');
+            const icon = document.getElementById('sort-icon');
+            const label = document.getElementById('sort-label');
+            const native = document.getElementById('sort-native');
+            const links = document.querySelectorAll('.sort-link');
+            function applySort(val) {
+                const url = new URL(window.location);
+                val ? url.searchParams.set('sort', val) : url.searchParams.delete('sort');
+                window.location.href = url.toString();
+            }
+            function syncUI() {
+                const current = new URLSearchParams(window.location.search).get('sort') || '';
+                const map = { '': 'Défaut', 'a_price': 'Prix: ↑', 'd_price': 'Prix: ↓', 'featured_first': 'En avant', 'd_date': 'Récent', 'a_date': 'Ancien', 'a_title': 'A-Z', 'd_title': 'Z-A' };
+                label.textContent = map[current] || 'Défaut';
+                if (native) native.value = current;
+                links.forEach(l => {
+                    const isActive = l.dataset.sort === current;
+                    l.classList.toggle('bg-[#d60000]/5', isActive);
+                    l.classList.toggle('text-[#d60000]', isActive);
+                    l.classList.toggle('font-semibold', isActive);
+                    l.querySelector('i')?.classList.toggle('text-[#d60000]', isActive);
+                });
+            }
+            trigger.addEventListener('click', (e) => {
+                if (window.innerWidth < 768) return;
+                e.stopPropagation();
+                const isOpen = !menu.classList.contains('hidden');
+                menu.classList.toggle('hidden', isOpen);
+                icon.classList.toggle('rotate-180', !isOpen);
+            });
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth >= 768 && !trigger.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                    icon.classList.remove('rotate-180');
+                }
+            });
+            links.forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); applySort(l.dataset.sort); }));
+            if (native) native.addEventListener('change', () => applySort(native.value));
+            syncUI();
+        });
+        </script>
 
         <!-- Property Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">

@@ -10,6 +10,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +21,7 @@ from core.auth import (
     RefreshToken,
     User,
     UserManager,
+    current_optional_user,
     get_bearer_jwt_strategy,
     get_user_db,
     get_user_manager,
@@ -132,6 +134,14 @@ async def jwt_refresh(
 
     access_token = await _create_access_token(user)
     return RefreshResponse(access_token=access_token)
+
+
+@router.get("/auth/me")
+async def auth_me(user: User = Depends(current_optional_user)):
+    """Retourne les infos de base si l'utilisateur est connecté (cookie), sinon 401."""
+    if user is None:
+        return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
+    return {"id": str(user.id), "email": user.email, "first_name": user.first_name}
 
 
 @router.post("/auth/jwt/logout", status_code=status.HTTP_204_NO_CONTENT)

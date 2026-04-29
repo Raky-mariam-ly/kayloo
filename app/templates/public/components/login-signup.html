@@ -39,22 +39,23 @@
                 Créer un compte
             </button>
         </div>
+
         <!-- ── LOGIN FORM ─────────────────────────────────────────────── -->
         <div id="panel-login" class="px-8 pt-3 pb-8">
             <h2 class="font-jakarta text-[22px] font-bold text-dark mb-1">Bon retour !</h2>
             <p class="text-sm text-muted mb-6">Connectez-vous à votre espace Kayloo.</p>
 
-            <form class="space-y-3">
+            <form id="login-form" class="space-y-3" novalidate>
                 <div>
                     <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Adresse
                         e-mail</label>
-                    <input type="email" placeholder="exemple@email.com"
+                    <input id="login-email" type="email" placeholder="exemple@email.com" required
                         class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                 </div>
                 <div>
                     <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Mot de passe</label>
                     <div class="relative">
-                        <input type="password" placeholder="••••••••"
+                        <input id="login-password" type="password" placeholder="••••••••" required
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                         <button type="button"
                             class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"
@@ -72,9 +73,11 @@
                         class="text-sm text-primary hover:text-primary-hover font-medium">Mot de passe oublié
                         ?</a>
                 </div>
-                <button type="submit"
-                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">Se
-                    connecter</button>
+                <div id="login-error" class="hidden rounded-[5px] bg-red-50 border border-red-200 text-red-600 text-sm px-3 py-2"></div>
+                <button id="login-btn" type="submit"
+                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4 flex items-center justify-center gap-2">
+                    Se connecter
+                </button>
             </form>
         </div>
 
@@ -83,42 +86,44 @@
             <h2 class="font-jakarta text-[22px] font-bold text-dark mb-1">Créez votre compte</h2>
             <p class="text-sm text-muted mb-6">Rejoignez Kayloo et accédez à toutes nos offres.</p>
 
-            <form class="space-y-3">
+            <div id="signup-error" class="hidden mb-4 px-4 py-2.5 rounded-[5px] bg-red-50 border border-red-200 text-sm text-red-600"></div>
+            <div id="signup-success" class="hidden mb-4 px-4 py-2.5 rounded-[5px] bg-green-50 border border-green-200 text-sm text-green-700"></div>
+
+            <form id="signup-form" class="space-y-3" novalidate>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
                         <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Prénom</label>
-                        <input type="text" placeholder="Mouhammed"
+                        <input id="signup-firstname" type="text" placeholder="Mouhammed" required
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                     </div>
                     <div>
                         <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Nom</label>
-                        <input type="text" placeholder="Dia"
+                        <input id="signup-lastname" type="text" placeholder="Dia" required
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
-                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Adresse
-                            e-mail</label>
-                        <input type="email" placeholder="exemple@email.com"
+                        <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Adresse e-mail</label>
+                        <input id="signup-email" type="email" placeholder="exemple@email.com" required
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                     </div>
                     <div>
                         <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Téléphone <span
                                 class="text-xs font-normal text-muted">(facultatif)</span></label>
-                        <input type="tel" placeholder="+221 77 000 00 00"
+                        <input id="signup-phone" type="tel" placeholder="+221 77 000 00 00"
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
                         <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Je suis…</label>
-                        <select
+                        <select id="signup-profile"
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 text-sm text-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition">
                             <option disabled selected>Choisissez un profil</option>
-                            <option>Particulier</option>
-                            <option>Agence immobilière</option>
-                            <option>Investisseur / Diaspora</option>
+                            <option value="viewer">Particulier</option>
+                            <option value="viewer">Agence immobilière</option>
+                            <option value="viewer">Investisseur / Diaspora</option>
                         </select>
                     </div>
                     <div>
@@ -131,7 +136,7 @@
                 <div>
                     <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Mot de passe</label>
                     <div class="relative">
-                        <input type="password" placeholder="8 caractères minimum"
+                        <input id="signup-password" type="password" placeholder="8 caractères minimum" required minlength="8"
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                         <button type="button"
                             class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"><i
@@ -139,10 +144,9 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Confirmer le mot de
-                        passe</label>
+                    <label class="block font-jakarta text-sm font-medium text-dark mb-0.5">Confirmer le mot de passe</label>
                     <div class="relative">
-                        <input type="password" placeholder="••••••••"
+                        <input id="signup-confirm" type="password" placeholder="••••••••" required
                             class="w-full rounded-[5px] border border-[#dce0e0] bg-white px-4 py-2.5 pr-10 text-sm text-dark placeholder:text-[#a1a7a8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" />
                         <button type="button"
                             class="toggle-pwd absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a7a8] hover:text-dark transition text-sm"><i
@@ -150,15 +154,16 @@
                     </div>
                 </div>
                 <label class="flex items-start gap-2 cursor-pointer select-none">
-                    <input type="checkbox" required class="w-4 h-4 mt-0.5 accent-primary rounded flex-shrink-0" />
+                    <input id="signup-terms" type="checkbox" required class="w-4 h-4 mt-0.5 accent-primary rounded flex-shrink-0" />
                     <span class="text-sm text-text-body">J'accepte les <a href="{{ url_for('get_CGU') }}"
                             class="text-primary hover:text-primary-hover">Conditions d'utilisation</a> et la <a
                             href="{{ url_for('get_CGU') }}" class="text-primary hover:text-primary-hover">Politique de
                             confidentialité</a>.</span>
                 </label>
-                <button type="submit"
-                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4">Créer
-                    mon compte</button>
+                <button id="signup-btn" type="submit"
+                    class="w-full bg-primary text-white font-jakarta text-[15px] font-semibold rounded-[5px] py-3 hover:bg-primary-hover transition mt-4 flex items-center justify-center gap-2">
+                    Créer mon compte
+                </button>
             </form>
         </div>
     </div>
@@ -171,12 +176,7 @@
         const trigger = document.getElementById('auth-trigger');
         const closeBtn = document.getElementById('auth-close');
         const backdrop = document.getElementById('auth-backdrop');
-        const tabLogin = document.getElementById('tab-login');
-        const tabSignup = document.getElementById('tab-signup');
-        const panelLogin = document.getElementById('panel-login');
-        const panelSignup = document.getElementById('panel-signup');
 
-        // Modal Controls
         const openModal = () => modal?.classList.remove('hidden');
         const closeModal = () => modal?.classList.add('hidden');
 
@@ -185,37 +185,151 @@
         backdrop?.addEventListener('click', closeModal);
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-        // Tab Switcher
+        // Tab switcher
         window.authSwitchTab = function (tab) {
             const isLogin = tab === 'login';
-
-            // Toggle panels
             document.getElementById('panel-login').classList.toggle('hidden', !isLogin);
             document.getElementById('panel-signup').classList.toggle('hidden', isLogin);
-
-            // Toggle active class
-            const tLogin = document.getElementById('tab-login');
-            const tSignup = document.getElementById('tab-signup');
-
-            if (isLogin) {
-                tLogin.classList.add('auth-tab-active');
-                tSignup.classList.remove('auth-tab-active');
-            } else {
-                tSignup.classList.add('auth-tab-active');
-                tLogin.classList.remove('auth-tab-active');
-            }
+            document.getElementById('tab-login').classList.toggle('auth-tab-active', isLogin);
+            document.getElementById('tab-signup').classList.toggle('auth-tab-active', !isLogin);
         };
 
-        // Password Visibility Toggle
+        // Password visibility toggle
         document.querySelectorAll('.toggle-pwd').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = btn.previousElementSibling;
                 const icon = btn.querySelector('i');
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                icon.classList.toggle('fa-eye', !isPassword);
-                icon.classList.toggle('fa-eye-slash', isPassword);
+                const isPwd = input.type === 'password';
+                input.type = isPwd ? 'text' : 'password';
+                icon.classList.toggle('fa-eye', !isPwd);
+                icon.classList.toggle('fa-eye-slash', isPwd);
             });
+        });
+
+        // ── Helpers ──────────────────────────────────────────────────────
+        function setLoading(btn, loading) {
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>'
+                : btn.dataset.label;
+        }
+        function showMsg(id, msg, type) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.remove('hidden');
+            if (type === 'error') { el.className = el.className.replace('green', 'red'); }
+            if (type === 'success') { el.className = el.className.replace('red', 'green'); }
+        }
+        function hideMsg(id) { document.getElementById(id)?.classList.add('hidden'); }
+
+        const LOGIN_ERRORS = {
+            'LOGIN_BAD_CREDENTIALS': 'Email ou mot de passe incorrect.',
+            'LOGIN_USER_NOT_VERIFIED': 'Votre compte n\'est pas encore vérifié.',
+        };
+        const REGISTER_ERRORS = {
+            'REGISTER_USER_ALREADY_EXISTS': 'Un compte existe déjà avec cet email.',
+            'REGISTER_INVALID_PASSWORD': 'Le mot de passe doit contenir au moins 8 caractères.',
+        };
+
+        // Save original labels
+        document.getElementById('login-btn').dataset.label = 'Se connecter';
+        document.getElementById('signup-btn').dataset.label = 'Créer mon compte';
+
+        // ── LOGIN ─────────────────────────────────────────────────────────
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMsg('login-error');
+            const btn = document.getElementById('login-btn');
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showMsg('login-error', 'Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+
+            setLoading(btn, true);
+            try {
+                const body = new URLSearchParams({ username: email, password });
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString(),
+                });
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    const detail = typeof data.detail === 'string' ? data.detail : '';
+                    showMsg('login-error', LOGIN_ERRORS[detail] || 'Email ou mot de passe incorrect.', 'error');
+                }
+            } catch {
+                showMsg('login-error', 'Erreur réseau. Veuillez réessayer.', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
+        });
+
+        // ── SIGNUP ────────────────────────────────────────────────────────
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMsg('signup-error');
+            hideMsg('signup-success');
+            const btn = document.getElementById('signup-btn');
+
+            const firstName = document.getElementById('signup-firstname').value.trim();
+            const lastName  = document.getElementById('signup-lastname').value.trim();
+            const email     = document.getElementById('signup-email').value.trim();
+            const phone     = document.getElementById('signup-phone').value.trim();
+            const password  = document.getElementById('signup-password').value;
+            const confirm   = document.getElementById('signup-confirm').value;
+            const terms     = document.getElementById('signup-terms').checked;
+
+            if (!firstName || !lastName || !email || !password) {
+                showMsg('signup-error', 'Veuillez remplir tous les champs obligatoires.', 'error');
+                return;
+            }
+            if (password !== confirm) {
+                showMsg('signup-error', 'Les mots de passe ne correspondent pas.', 'error');
+                return;
+            }
+            if (password.length < 8) {
+                showMsg('signup-error', 'Le mot de passe doit contenir au moins 8 caractères.', 'error');
+                return;
+            }
+            if (!terms) {
+                showMsg('signup-error', 'Vous devez accepter les conditions d\'utilisation.', 'error');
+                return;
+            }
+
+            setLoading(btn, true);
+            try {
+                const res = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        first_name: firstName,
+                        last_name: lastName,
+                        phone_number: phone || '',
+                        role: 'viewer',
+                    }),
+                });
+                if (res.ok || res.status === 201) {
+                    document.getElementById('signup-form').reset();
+                    showMsg('signup-success', 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
+                    setTimeout(() => window.authSwitchTab('login'), 2000);
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    const detail = typeof data.detail === 'string' ? data.detail : '';
+                    showMsg('signup-error', REGISTER_ERRORS[detail] || 'Une erreur est survenue. Veuillez réessayer.', 'error');
+                }
+            } catch {
+                showMsg('signup-error', 'Erreur réseau. Veuillez réessayer.', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
         });
     });
 </script>

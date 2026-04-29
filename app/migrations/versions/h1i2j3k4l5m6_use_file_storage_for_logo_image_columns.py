@@ -1,7 +1,7 @@
 """Use sqlalchemy-file (JSON) for agency.logo_url, partner.logo_url, building.image_url
 
 Revision ID: h1i2j3k4l5m6
-Revises: g2h3i4j5k6l7
+Revises: f0a1b2c3d4e5
 Create Date: 2026-04-29 00:00:00.000000
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 revision: str = 'h1i2j3k4l5m6'
-down_revision: Union[str, Sequence[str], None] = 'g2h3i4j5k6l7'
+down_revision: Union[str, Sequence[str], None] = 'f0a1b2c3d4e5'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

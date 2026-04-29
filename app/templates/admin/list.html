@@ -27,6 +27,7 @@
 
                                 {% include "actions.html" %}
 
+                                {% block create_btn %}
                                 {% if model.can_create(request) %}
                                     <a href="{{ url_for(__name__ ~ ':create', identity=model.identity) }}"
                                        class="btn btn-primary btn-block ms-2">
@@ -34,6 +35,7 @@
                                         <span class="d-none d-sm-block">{{ _("New %(name)s", name=model.name ) }}</span>
                                     </a>
                                 {% endif %}
+                                {% endblock %}
                             </div>
                         </div>
                     </div>

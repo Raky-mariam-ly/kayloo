@@ -1,11 +1,11 @@
-{% extends "base.html" %} {% import "public/components/contact-form.html" as contact %} {% block title %}Nos Agences{%
+{% extends "base.html" %} {% import "public/components/contact-form.html" as contact %} {% block title %}{{ heading }} - Kayloo{%
 endblock %} {% block content %}
 
 <!-- ========== BANNER DIVIDER ========== -->
 <div class="w-full h-[180px] md:h-auto bg-gradient-to-r from-kayloo-red via-red-700 to-kayloo-red-dark">
     <img
         src="https://test.kayloo.immo/wp-content/uploads/2025/02/maite1130_a_photo_of_a_living_room_-ar_163_-style_raw_a25e1c98-e4f2-409a-9a39-57328d41aef4.png"
-        alt="Banner ads"
+        alt="Banner"
         class="h-full object-cover" />
 </div>
 
@@ -16,99 +16,38 @@ endblock %} {% block content %}
             {{ heading }}
         </h2>
 
+        {% if items %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- SABLUX Construction -->
-            <article
-                class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                <a href="https://test.kayloo.immo/agent/sablux/" class="block p-6 pb-0 no-underline">
+            {% for item in items %}
+            <article class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ item.site_url }}" target="_blank" rel="noopener" class="block p-6 pb-0 no-underline">
                     <img
                         loading="lazy"
-                        decoding="async"
-                        width="320"
-                        height="320"
-                        src="https://test.kayloo.immo/wp-content/uploads/2025/02/308061163_454622853359522_609906544370464672_n.png"
-                        alt="SABLUX Construction"
+                        src="{{ item.logo }}"
+                        alt="{{ item.name }}"
                         class="w-full aspect-square object-cover rounded-lg" />
-                    <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Dakar Propriétés</h3>
+                    <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">{{ item.name }}</h3>
+                    {% if item.phone %}
+                    <p class="text-sm text-gray-500 mb-0.5"><i class="fa-solid fa-phone text-xs mr-1"></i>{{ item.phone }}</p>
+                    {% endif %}
+                    {% if item.email %}
+                    <p class="text-sm text-gray-500"><i class="fa-solid fa-envelope text-xs mr-1"></i>{{ item.email }}</p>
+                    {% endif %}
                 </a>
                 <div class="px-6 pb-6 pt-3">
                     <a
-                        href="https://test.kayloo.immo/agent/sablux/"
+                        href="{{ item.site_url }}"
+                        target="_blank" rel="noopener"
                         class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
                         Voir le profil
                     </a>
                 </div>
             </article>
-
-            <!-- Pierre & Projet -->
-            <article
-                class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                <a href="https://test.kayloo.immo/agent/pierre-projet/" class="block p-6 pb-0 no-underline">
-                    <img
-                        loading="lazy"
-                        decoding="async"
-                        width="600"
-                        height="600"
-                        src="https://test.kayloo.immo/wp-content/uploads/2025/07/REAL-ESTATE-professional-logo-design-template-Made-with-PosterMyWall.jpg"
-                        alt="Pierre &amp; Projet"
-                        class="w-full aspect-square object-cover rounded-lg" />
-                    <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Teranga Immobilier</h3>
-                </a>
-                <div class="px-6 pb-6 pt-3">
-                    <a
-                        href="https://test.kayloo.immo/agent/pierre-projet/"
-                        class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                        Voir le profil
-                    </a>
-                </div>
-            </article>
-
-            <!-- SPACE CO -->
-            <article
-                class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                <a href="https://test.kayloo.immo/agent/space-co/" class="block p-6 pb-0 no-underline">
-                    <img
-                        loading="lazy"
-                        decoding="async"
-                        width="600"
-                        height="600"
-                        src="https://test.kayloo.immo/wp-content/uploads/2025/07/Professional-Real-Estate-realtor-logo-design-template-Made-with-PosterMyWall.jpg"
-                        alt="SPACE CO"
-                        class="w-full aspect-square object-cover rounded-lg" />
-                    <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Sénégal Habitat Plus</h3>
-                </a>
-                <div class="px-6 pb-6 pt-3">
-                    <a
-                        href="https://test.kayloo.immo/agent/space-co/"
-                        class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                        Voir le profil
-                    </a>
-                </div>
-            </article>
-
-            <!-- GALLE IMMO -->
-            <article
-                class="text-center rounded-xl overflow-hidden border border-border-input bg-white hover:shadow-lg transition-shadow duration-300">
-                <a href="https://test.kayloo.immo/agent/galle-immo/" class="block p-6 pb-0 no-underline">
-                    <img
-                        loading="lazy"
-                        decoding="async"
-                        width="600"
-                        height="600"
-                        src="https://test.kayloo.immo/wp-content/uploads/2025/07/Real-estate-logo-Made-with-PosterMyWall.jpg"
-                        alt="GALLE IMMO"
-                        class="w-full aspect-square object-cover rounded-lg" />
-                    <h3 class="font-poppins text-lg font-medium text-dark mt-4 mb-1">Kolda Properties</h3>
-                </a>
-                <div class="px-6 pb-6 pt-3">
-                    <a
-                        href="https://test.kayloo.immo/agent/galle-immo/"
-                        class="block w-full py-2.5 border border-brand-red text-brand-red font-roboto text-sm font-medium rounded-[5px] text-center no-underline hover:bg-primary hover:text-white transition-colors duration-200">
-                        Voir le profil
-                    </a>
-                </div>
-            </article>
+            {% endfor %}
         </div>
+        {% else %}
+        <p class="text-center text-gray-500 py-16">Aucun partenaire disponible pour le moment.</p>
+        {% endif %}
     </div>
 </section>
 

@@ -3,6 +3,8 @@
 {% set tag_label = "À Vendre" %}
 {% elif listing.type == "rent" %}
 {% set tag_label = "À Louer" %}
+{% elif listing.type == "furnished" %}
+{% set tag_label = "Location Meublée" %}
 {% endif %}
 <article class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col relative">
     <div class="relative h-[220px] overflow-hidden">

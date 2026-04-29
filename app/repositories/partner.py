@@ -18,3 +18,11 @@ class PartnerRepository(BaseRepository[Partner]):
     async def get_by_email(self, email: str) -> Optional[Partner]:
         result = await self.db.execute(select(self.model).filter_by(email=email))
         return result.scalar_one_or_none()
+
+    async def get_active(self):
+        result = await self.db.execute(
+            select(self.model)
+            .where(self.model.is_active.is_(True))
+            .order_by(self.model.name)
+        )
+        return result.scalars().all()

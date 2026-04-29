@@ -34,7 +34,7 @@ async def warm_choices_cache(session: AsyncSession) -> None:
     _city_choices = [
         (r[0], f"{r[1]} ({r[0]})" if r[1] else r[0])
         for r in await fetch(
-            "SELECT code, name FROM city WHERE is_active = true ORDER BY name"
+            "SELECT code, name FROM city ORDER BY name"
         )
     ]
 
@@ -79,7 +79,7 @@ async def warm_choices_cache(session: AsyncSession) -> None:
         (r[0], r[1])
         for r in await fetch(
             "SELECT id::text, name || ' (' || code || ')'"
-            " FROM city WHERE is_active = true ORDER BY name"
+            " FROM city ORDER BY name"
         )
     ]
 

@@ -21,8 +21,9 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "alembic upgrade head &&
-             uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000"
+      sh -c "cd /app &&
+             alembic upgrade head &&
+             uvicorn main:app --reload --reload-dir /app --host 0.0.0.0 --port 8000"
     container_name: web
     depends_on:
       db:

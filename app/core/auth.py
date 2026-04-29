@@ -175,6 +175,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
 )
 
 current_active_user = fastapi_users.current_user(active=True)
+current_optional_user = fastapi_users.current_user(active=True, optional=True)
 
 
 # ---------------------------------------------------------------------------
@@ -201,7 +202,16 @@ get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
 
 
-async def create_user(email: str, password: str, first_name: str, last_name: str, phone_number: str, gender: str, is_superuser: bool = False) -> User | None:
+async def create_user(
+    email: str,
+    password: str,
+    first_name: str,
+    last_name: str,
+    phone_number: str,
+    gender: str,
+    role: str = "viewer",
+    is_superuser: bool = False,
+) -> User | None:
     try:
         async with get_async_session_context() as session:
             async with get_user_db_context(session) as user_db:
@@ -211,13 +221,11 @@ async def create_user(email: str, password: str, first_name: str, last_name: str
                             email=email, password=password, is_superuser=is_superuser,
                             first_name=first_name, last_name=last_name, phone_number=phone_number,
                             gender=gender, is_active=True, is_verified=True,
-                            role="admin" if is_superuser else "viewer",
+                            role="admin" if is_superuser else role,
                         )
                     )
-                    print(f"User created {user}")
                     return user
     except UserAlreadyExists:
-        print(f"User {email} already exists")
         return None
 
 

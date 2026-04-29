@@ -12,6 +12,8 @@ from typing import Optional
 from core.db import get_db
 from core.config import get_settings
 from models.property_view import PropertyView
+from repositories.agency import AgencyRepository
+from repositories.partner import PartnerRepository
 from repositories.property import PropertyRepository
 from repositories.property_view import PropertyViewRepository
 from services.property_view import PropertyViewService
@@ -172,6 +174,18 @@ async def _record_view(session: AsyncSession, property_id: UUID, request: Reques
         logging.warning(f"Failed to record view for property {property_id}", exc_info=True)
 
 
+def _entity_to_card(entity) -> dict:
+    """Converts an Agency or Partner model instance to a card dict for the template."""
+    logo = _extract_url(getattr(entity, "logo_url", None))
+    return {
+        "name": getattr(entity, "name", "") or "",
+        "logo": logo or PLACEHOLDER_IMAGE,
+        "site_url": getattr(entity, "siteweb_url", None) or "#",
+        "phone": getattr(entity, "phone_number", None) or "",
+        "email": getattr(entity, "email", None) or "",
+    }
+
+
 # ── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/", response_class=HTMLResponse)
@@ -278,22 +292,31 @@ async def get_diaspora(request: Request, session: AsyncSession = Depends(get_db)
 
 @router.get("/agences", response_class=HTMLResponse)
 async def get_agencies(request: Request, session: AsyncSession = Depends(get_db)):
+    agencies = await AgencyRepository(session).get_active()
+    items = [_entity_to_card(a) for a in agencies]
     return templates.TemplateResponse(request, "public/pages/partners/listing.html", context={
         "heading": "Nos agences immobilières partenaires",
+        "items": items,
     })
 
 
 @router.get("/agents", response_class=HTMLResponse)
 async def get_agents(request: Request, session: AsyncSession = Depends(get_db)):
+    agencies = await AgencyRepository(session).get_active()
+    items = [_entity_to_card(a) for a in agencies]
     return templates.TemplateResponse(request, "public/pages/partners/listing.html", context={
         "heading": "Nos agents immobiliers partenaires",
+        "items": items,
     })
 
 
 @router.get("/partenaires-construction", response_class=HTMLResponse)
 async def get_partners(request: Request, session: AsyncSession = Depends(get_db)):
+    partners = await PartnerRepository(session).get_active()
+    items = [_entity_to_card(p) for p in partners]
     return templates.TemplateResponse(request, "public/pages/partners/listing.html", context={
         "heading": "Nos partenaires de construction",
+        "items": items,
     })
 
 
@@ -315,7 +338,9 @@ async def get_search_result(
         price_max = None
     rent_cat = None
     if listing_type == "location":
-        rent_cat = "rent"
+        rent_cat = "rent_empty"
+    elif listing_type == "meublee":
+        rent_cat = "furnished"
     elif listing_type in ("vente", "sale"):
         rent_cat = "sale"
 

@@ -1,5 +1,18 @@
 {% extends "list.html" %}
 
+{% block create_btn %}
+{% set _su = request.state.user %}
+{% if _su and _su.role in ('manager', 'agent') %}
+    <a href="{{ url_for(__name__ ~ ':create', identity='user') }}"
+       class="btn btn-primary btn-block ms-2">
+        <i class="fa-solid fa-plus me-2"></i>
+        <span class="d-none d-sm-block">Add Agent</span>
+    </a>
+{% else %}
+    {{ super() }}
+{% endif %}
+{% endblock %}
+
 {% block head_css %}
 {{ super() }}
 <style>

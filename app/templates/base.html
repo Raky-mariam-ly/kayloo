@@ -154,7 +154,7 @@
                         </li>
                     </ul>
                     <div class="flex items-center h-full">
-                        <button onclick="document.getElementById('auth-modal').classList.remove('hidden')"
+                        <button id="nav-auth-btn" onclick="document.getElementById('auth-modal').classList.remove('hidden')"
                             class="bg-primary text-white font-jakarta text-sm font-medium px-[15px] py-2 rounded-[5px] hover:bg-primary-hover transition">
                             Connexion / Inscription
                         </button>
@@ -199,7 +199,7 @@
                         Partenaires</a>
                 </li>
                 <li class="p-4">
-                    <button onclick="document.getElementById('auth-modal').classList.remove('hidden')"
+                    <button id="mobile-auth-btn" onclick="document.getElementById('auth-modal').classList.remove('hidden')"
                         class="bg-primary text-white font-jakarta text-sm font-medium px-[15px] py-2 rounded-[5px] hover:bg-primary-hover transition">
                         Connexion / Inscription
                     </button>
@@ -227,6 +227,26 @@
                     nav.classList.remove("fixed", "top-0", "left-0", "right-0", "z-50", "shadow-lg");
                 }
             });
+
+            // Swap auth buttons based on session
+            (async function () {
+                const BTN_CLASS = "bg-primary text-white font-jakarta text-sm font-medium px-[15px] py-2 rounded-[5px] hover:bg-primary-hover transition";
+                try {
+                    const res = await fetch('/auth/me', { credentials: 'include' });
+                    if (res.ok) {
+                        // Logged in → replace with "Profil" link to backoffice
+                        ['nav-auth-btn', 'mobile-auth-btn'].forEach(function (id) {
+                            const btn = document.getElementById(id);
+                            if (!btn) return;
+                            const link = document.createElement('a');
+                            link.href = '/admin';
+                            link.className = BTN_CLASS + ' no-underline inline-flex items-center gap-1.5';
+                            link.innerHTML = '<i class="fas fa-user-circle"></i> Mon profil';
+                            btn.replaceWith(link);
+                        });
+                    }
+                } catch (_) {}
+            })();
         </script>
     </main>
 

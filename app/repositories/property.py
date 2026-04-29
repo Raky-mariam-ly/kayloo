@@ -2,19 +2,34 @@ from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import func, select, distinct
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.property import Property
 from repositories.base import BaseRepository
 
-RENT_TYPES = ("RENT_EMPTY", "RENT_FURNISHED")
-FURNISHED_TYPES = ("RENT_FURNISHED",)
+RENT_TYPES = ("RENT_EMPTY", "RENT_FURNISHED")   # tous les loyers (pages)
+RENT_EMPTY_TYPES = ("RENT_EMPTY",)              # location non-meublée (recherche)
+FURNISHED_TYPES = ("RENT_FURNISHED",)           # location meublée (recherche)
 SALE_TYPES = ("SALE",)
 
 
 class PropertyRepository(BaseRepository[Property]):
     def __init__(self, session: AsyncSession):
         super().__init__(session, Property)
+
+    async def get(self, id: UUID) -> Optional[Property]:
+        """Récupère une propriété par son ID avec préchargement des relations."""
+        result = await self.db.execute(
+            select(self.model)
+            .where(self.model.id == id)
+            .options(
+                selectinload(self.model.gallery),
+                selectinload(self.model.images),
+                selectinload(self.model.agency),
+            )
+        )
+        return result.unique().scalar_one_or_none()
 
     async def get_by_code(self, code: str) -> Optional[Property]:
         result = await self.db.execute(select(self.model).filter_by(code=code))
@@ -62,6 +77,8 @@ class PropertyRepository(BaseRepository[Property]):
             query = query.where(self.model.is_featured.is_(is_featured))
         if rent_category == "rent":
             query = query.where(self.model.rent_type.in_(RENT_TYPES))
+        elif rent_category == "rent_empty":
+            query = query.where(self.model.rent_type.in_(RENT_EMPTY_TYPES))
         elif rent_category == "furnished":
             query = query.where(self.model.rent_type.in_(FURNISHED_TYPES))
         elif rent_category == "sale":

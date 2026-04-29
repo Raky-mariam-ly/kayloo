@@ -6,7 +6,9 @@ from starlette_admin.fields import (
     BooleanField, DateField, DateTimeField, DecimalField, EnumField,
     FloatField, ImageField, IntegerField, StringField, TextAreaField,
 )
-from admin.base import AdminModelView, SafeEnumField, SectionField, UUIDEnumField, _is_full_admin, _is_agent
+from starlette_admin.exceptions import FormValidationError
+
+from admin.base import AdminModelView, SafeEnumField, SectionField, UUIDEnumField
 from admin.choices import (
     load_agency_choices,
     load_building_choices,
@@ -16,13 +18,16 @@ from admin.choices import (
     load_property_type_choices,
     load_property_rent_type_choices,
 )
-from models.property_gallery import PropertyGallery
 from core.files import PropertyImageFile
+from models.property import Property
+from models.property_gallery import PropertyGallery
+
 
 STATUS_CHOICES = [
     ("free", "Free"),
     ("for_sale", "For Sale"),
     ("for_rent", "For Rent"),
+    ("for_rent_furnished", "Location meublée"),
     ("reserved", "Reserved"),
     ("rented", "Rented"),
     ("sold", "Sold"),
@@ -47,7 +52,7 @@ BASE_PRICE_TYPE_CHOICES = [
 ]
 
 RENTAL_PERIOD_CHOICES = [
-    ("daily", "Daily"),
+    ("daily", "Weekly" if False else "Daily"),
     ("weekly", "Weekly"),
     ("monthly", "Monthly"),
     ("yearly", "Yearly"),
@@ -67,6 +72,107 @@ CURRENCY_CHOICES = [
     ("EUR", "EUR — Euro"),
     ("USD", "USD — US Dollar"),
 ]
+
+RATE_FIELDS = ["vat_rate", "tom_rate", "ir_rate", "mgmt_rate", "commission_rate", "deposit_rate"]
+DECIMAL_FIELDS = ["surface", "lng", "lat", "acquisition_price", "acquisition_fee", "price", "base_price", "extra_price", "sale_price", "rent_price", "syndic_amount", "vat_rate", "tom_rate", "ir_rate", "mgmt_rate", "commission_rate", "deposit_rate"]
+
+
+def get_user_roles(request: Request) -> tuple[bool, bool]:
+    user = getattr(request.state, "user", None)
+    if user is None:
+        return False, False
+    is_full_admin = user.is_superuser or getattr(user, "role", "") in ("superadmin", "admin")
+    is_agent = getattr(user, "role", "") == "manager"
+    return is_full_admin, is_agent
+
+
+def is_full_admin(request: Request) -> bool:
+    is_admin, _ = get_user_roles(request)
+    return is_admin
+
+
+def is_agent(request: Request) -> bool:
+    _, is_agent = get_user_roles(request)
+    return is_agent
+
+
+def validate_rate_fields(data: Dict[str, Any]) -> Dict[str, str]:
+    errors = {}
+    for field in RATE_FIELDS:
+        val = data.get(field)
+        if val is not None and val != "":
+            try:
+                v = float(val)
+                if v < 0 or v > 100:
+                    errors[field] = "Must be between 0 and 100"
+            except (ValueError, TypeError):
+                errors[field] = "Invalid numeric value"
+    return errors
+
+
+def clean_decimal_fields(data: Dict[str, Any]) -> Dict[str, Any]:
+    cleaned = data.copy()
+    for field in DECIMAL_FIELDS:
+        if field in cleaned and cleaned[field] == "":
+            cleaned[field] = None
+    return cleaned
+
+
+def clean_data_for_populate(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Nettoie les données pour _populate_obj en supprimant les valeurs None problématiques."""
+    cleaned = {}
+    for key, value in data.items():
+        # Ignorer les champs images car ils sont traités séparément
+        if key in ["image_url", "gallery_images"]:
+            continue
+        # Convertir les chaînes vides en None
+        if value == "":
+            cleaned[key] = None
+        else:
+            cleaned[key] = value
+    return cleaned
+
+
+def unpack_cover(raw: Any, agency_name: str = None, property_id: Any = None) -> tuple[Any, bool]:
+    if raw is None:
+        return None, False
+    if isinstance(raw, tuple) and len(raw) == 2:
+        val, should_delete = raw
+        if should_delete:
+            return None, True
+        if val is None:
+            return None, False
+        return PropertyImageFile(
+            content=val.file,
+            filename=val.filename,
+            content_type=val.content_type,
+            agency_name=agency_name,
+            property_id=property_id,
+        ), False
+    return None, False
+
+
+def unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None) -> tuple[list, bool]:
+    if raw is None:
+        return [], False
+    if isinstance(raw, tuple) and len(raw) == 2:
+        files, should_delete = raw
+        if should_delete:
+            return [], True
+        if not files:
+            return [], False
+        files = files if isinstance(files, list) else [files]
+        return [
+            PropertyImageFile(
+                content=f.file,
+                filename=f.filename,
+                content_type=f.content_type,
+                agency_name=agency_name,
+                property_id=property_id,
+            )
+            for f in files
+        ], False
+    return [], False
 
 
 class PropertyView(AdminModelView):
@@ -166,65 +272,102 @@ class PropertyView(AdminModelView):
         StringField("updated_by", read_only=True, exclude_from_list=True),
     ]
 
-    def is_accessible(self, request) -> bool:
-        return _is_full_admin(request) or _is_agent(request)
+    def is_accessible(self, request: Request) -> bool:
+        return is_full_admin(request) or is_agent(request)
 
-    def can_create(self, request) -> bool:
-        return _is_full_admin(request) or _is_agent(request)
+    def can_create(self, request: Request) -> bool:
+        return is_full_admin(request) or is_agent(request)
 
-    def can_edit(self, request) -> bool:
-        return _is_full_admin(request) or _is_agent(request)
+    def can_edit(self, request: Request) -> bool:
+        return is_full_admin(request) or is_agent(request)
 
-    def can_delete(self, request) -> bool:
-        return _is_full_admin(request)
+    def can_delete(self, request: Request) -> bool:
+        return is_full_admin(request)
 
-    def get_list_query(self, request):
+    def _apply_agency_filter(self, query, agency_id):
+        if agency_id:
+            return query.where(Property.agency_id == agency_id)
+        return query
+
+    def get_list_query(self, request: Request):
         query = super().get_list_query(request)
         agency_id = getattr(request.state, "agent_agency_id", None)
-        if agency_id:
-            from models.property import Property
-            query = query.where(Property.agency_id == agency_id)
-        return query
+        return self._apply_agency_filter(query, agency_id)
 
-    def get_count_query(self, request):
+    def get_count_query(self, request: Request):
         query = super().get_count_query(request)
         agency_id = getattr(request.state, "agent_agency_id", None)
-        if agency_id:
-            from models.property import Property
-            query = query.where(Property.agency_id == agency_id)
-        return query
+        return self._apply_agency_filter(query, agency_id)
 
     async def validate(self, request: Request, data: Dict[str, Any]) -> None:
-        errors: Dict[str, str] = {}
-        rate_fields = ["vat_rate", "tom_rate", "ir_rate", "mgmt_rate", "commission_rate", "deposit_rate"]
-        for f in rate_fields:
-            val = data.get(f)
-            if val is not None:
-                try:
-                    v = float(val)
-                    if v < 0 or v > 100:
-                        errors[f] = "Must be between 0 and 100"
-                except (ValueError, TypeError):
-                    errors[f] = "Invalid numeric value"
+        cleaned_data = clean_decimal_fields(data)
+        data.update(cleaned_data)
+        
+        errors = validate_rate_fields(data)
         if errors:
-            from starlette_admin.exceptions import FormValidationError
             raise FormValidationError(errors)
+        
         return await super().validate(request, data)
 
+    async def _arrange_data(self, request: Request, data: Dict[str, Any], is_edit: bool = False) -> Dict[str, Any]:
+        return data
+
+    async def _populate_obj(self, request, obj, data, **kwargs):
+        # Injecter des sentinelles no-op pour les ImageFields :
+        # starlette_admin itère sur TOUS les champs de la vue (pas seulement les clés de data)
+        # et appelle not_none(data.get(name)) → crash si None.
+        # (None, False) = "ni upload, ni suppression" → starlette_admin ne touche pas l'attribut.
+        clean = dict(data)
+        clean["image_url"] = (None, False)
+        clean["gallery_images"] = (None, False)
+        return await super()._populate_obj(request, obj, clean, **kwargs)
+
+    async def serialize(self, obj: Any, request: Request, action: Any, **kwargs: Any) -> Dict[str, Any]:
+        result = await super().serialize(obj, request, action, **kwargs)
+        file_data = getattr(obj, "image_url", None)
+        if isinstance(file_data, dict):
+            url = file_data.get("url")
+            if not url or not str(url).startswith("http"):
+                from core.files import _do_spaces_public_url
+                file_id = file_data.get("file_id") or ""
+                url = _do_spaces_public_url(file_id) or url
+            if url:
+                result["image_url"] = {"url": url, "filename": str(url).split("/")[-1]}
+        return result
+
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        data = await self._arrange_data(request, data)
-        raw_gallery = data.get("gallery_images")
-        self._prepare_file_fields_for_populate(data)
-        await self.validate(request, data)
+        # Extraire les images AVANT de nettoyer les données
+        raw_gallery = data.pop("gallery_images", None)
+        raw_cover = data.pop("image_url", None)
+
+        # Nettoyer les données pour _populate_obj
+        clean_data = clean_data_for_populate(data)
+        clean_data = await self._arrange_data(request, clean_data)
+        await self.validate(request, clean_data)
 
         session = request.state.session
-        obj = await self._populate_obj(request, self.model(), data)
+        obj = await self._populate_obj(request, self.model(), clean_data)
         session.add(obj)
-        await self.before_create(request, data, obj)
+        await self.before_create(request, clean_data, obj)
         await session.flush()
 
+        # Forcer le chargement de l'agence
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
+        result = await session.execute(
+            select(Property)
+            .where(Property.id == obj.id)
+            .options(selectinload(Property.agency))
+        )
+        obj = result.unique().scalar_one()
+        
         agency_name = obj.agency.name if obj.agency else None
-        gallery_files, _ = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+
+        cover_file, _ = unpack_cover(raw_cover, agency_name=agency_name, property_id=obj.id)
+        if cover_file is not None:
+            obj.image_url = cover_file
+
+        gallery_files, _ = unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
         if gallery_files:
             session.add(PropertyGallery(property_id=obj.id, images=gallery_files))
 
@@ -234,25 +377,52 @@ class PropertyView(AdminModelView):
         return obj
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-        data = await self._arrange_data(request, data, True)
-        raw_gallery = data.get("gallery_images")
-        self._prepare_file_fields_for_populate(data)
-        await self.validate(request, data)
+        # Extraire les images AVANT de nettoyer les données
+        raw_gallery = data.pop("gallery_images", None)
+        raw_cover = data.pop("image_url", None)
+
+        # Nettoyer les données pour _populate_obj
+        clean_data = clean_data_for_populate(data)
+        clean_data = await self._arrange_data(request, clean_data, is_edit=True)
+        await self.validate(request, clean_data)
 
         session = request.state.session
         obj = await self.find_by_pk(request, pk)
-        await self._populate_obj(request, obj, data, True)
-        session.add(obj)
-        await self.before_edit(request, data, obj)
+        existing_cover = obj.image_url
+        
+        await self._populate_obj(request, obj, clean_data)
+        await self.before_edit(request, clean_data, obj)
 
+        # Forcer le chargement de l'agence si nécessaire
+        if obj.agency is None:
+            from sqlalchemy import select
+            from sqlalchemy.orm import selectinload
+            result = await session.execute(
+                select(Property)
+                .where(Property.id == obj.id)
+                .options(selectinload(Property.agency))
+            )
+            obj = result.unique().scalar_one()
+        
         agency_name = obj.agency.name if obj.agency else None
-        gallery_files, delete_gallery = self._unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+        cover_file, delete_cover = unpack_cover(raw_cover, agency_name=agency_name, property_id=obj.id)
+
+        if delete_cover:
+            obj.image_url = None
+        elif cover_file is not None:
+            obj.image_url = cover_file
+        else:
+            obj.image_url = existing_cover
+
+        gallery_files, delete_gallery = unpack_gallery(raw_gallery, agency_name=agency_name, property_id=obj.id)
+
         if gallery_files or delete_gallery:
             from sqlalchemy import select
             result = await session.execute(
                 select(PropertyGallery).where(PropertyGallery.property_id == obj.id)
             )
             gallery = result.scalar_one_or_none()
+
             if delete_gallery:
                 if gallery:
                     gallery.images = None
@@ -265,32 +435,3 @@ class PropertyView(AdminModelView):
         await session.refresh(obj)
         await self.after_edit(request, obj)
         return obj
-
-    @staticmethod
-    def _unpack_gallery(raw: Any, agency_name: str = None, property_id: Any = None):
-        if raw is None:
-            return [], False
-        if isinstance(raw, tuple) and len(raw) == 2:
-            files, should_delete = raw
-            if should_delete:
-                return [], True
-            if not files:
-                return [], False
-            files = files if isinstance(files, list) else [files]
-            return [
-                PropertyImageFile(
-                    content=f.file,
-                    filename=f.filename,
-                    content_type=f.content_type,
-                    agency_name=agency_name,
-                    property_id=property_id,
-                )
-                for f in files
-            ], False
-        return [], False
-
-    @staticmethod
-    def _prepare_file_fields_for_populate(data: Dict[str, Any]) -> None:
-        if data.get("image_url") is None:
-            data["image_url"] = (None, False)
-        data["gallery_images"] = ([], False)

@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class PropertyImageNested(BaseModel):
@@ -28,6 +28,23 @@ class PropertyRead(BaseModel):
     base_price_type: str | None = None
     description: str | None = None
     image_url: str | None = None
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def _extract_image_url(cls, v: object) -> object:
+        if isinstance(v, dict):
+            url = str(v.get("url") or "")
+            # Pre-signed URLs expire — rebuild a permanent public URL from file_id
+            if not url or "X-Amz-Signature" in url:
+                try:
+                    from core.files import _do_spaces_public_url
+                    file_id = str(v.get("file_id") or "")
+                    if file_id:
+                        return _do_spaces_public_url(file_id)
+                except Exception:
+                    pass
+            return url or None
+        return v
     country: str | None = None
     city: str | None = None
     zone: str | None = None
@@ -87,6 +104,22 @@ class PropertyListRead(BaseModel):
     is_featured: bool | None = None
     is_hidden: bool
     archived: bool
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def _extract_image_url(cls, v: object) -> object:
+        if isinstance(v, dict):
+            url = str(v.get("url") or "")
+            if not url or "X-Amz-Signature" in url:
+                try:
+                    from core.files import _do_spaces_public_url
+                    file_id = str(v.get("file_id") or "")
+                    if file_id:
+                        return _do_spaces_public_url(file_id)
+                except Exception:
+                    pass
+            return url or None
+        return v
 
     model_config = {"from_attributes": True}
 

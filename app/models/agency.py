@@ -32,10 +32,17 @@ class Agency(Base):
     @property
     def logo_src(self) -> str | None:
         v = self.logo_url
-        if not v:
+        if not v or not isinstance(v, dict):
             return None
-        if isinstance(v, dict):
-            return v.get("url")
+        url = v.get("url")
+        if url:
+            return url
+        files = v.get("files") or []
+        if files:
+            return f"/static/uploads/{files[0]}"
+        path = v.get("path")
+        if path:
+            return f"/static/uploads/{path}"
         return None
 
     agents = relationship("Agent", back_populates="agency", lazy="selectin")

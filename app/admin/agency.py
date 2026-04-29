@@ -29,7 +29,7 @@ class AgencyView(AdminModelView):
         StringField("email"),
         StringField("phone_number", label="Phone Number"),
         ImageField("logo_url", label="Logo", exclude_from_list=True),
-        StringField("logo_src", label="Logo", read_only=True, sortable=False, searchable=False,
+        StringField("logo_src", label="Logo", read_only=True,
                     exclude_from_create=True, exclude_from_edit=True, exclude_from_detail=True),
         URLField("siteweb_url", label="Website URL", exclude_from_list=True),
         URLField("whatsapp_url", label="WhatsApp URL", exclude_from_list=True),

@@ -1,10 +1,19 @@
 {% extends "base.html" %}
+{% block body_positioning %}relative{% endblock %}
 {% from "public/components/property-search.html" import display_card %}
 {% block title %}Résultats de recherche - Kayloo{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+{% endblock %}
 {% block content %}
 <!-- MAP INTERACTIVE — Google Maps -->
-<section class="relative overflow-hidden" style="height: 340px">
-    <div id="properties-map" style="height: 340px; width: 100%;"></div>
+<section class="relative overflow-hidden h-[240px] md:h-[340px]">
+    <style>
+        #properties-map { height: 240px; }
+        @media (min-width: 768px) { #properties-map { height: 340px; } }
+    </style>
+    <div id="properties-map" style="width: 100%;"></div>
 
     <script>
     const _mapListings = [
@@ -61,18 +70,102 @@
             });
 
             marker.addListener('click', function () {
-                infoWindow.setContent(`
-                    <div style="min-width:190px;font-family:sans-serif;padding:4px;">
-                        <img src="${l.image}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:block;" />
-                        <p style="font-weight:700;font-size:13px;margin:0 0 3px;color:#111;">${l.title}</p>
-                        <p style="font-size:11px;color:#666;margin:0 0 4px;">📍 ${l.location}</p>
-                        <p style="font-size:13px;font-weight:700;color:#FF5A1F;margin:0 0 8px;">${l.price} ${l.currency}</p>
-                        <a href="${l.link}" style="display:block;background:#FF5A1F;color:#fff;text-align:center;padding:6px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
-                            Voir l'annonce
-                        </a>
-                    </div>`);
-                infoWindow.open(map, marker);
-            });
+  const isSale = l.type === 'sale';
+  const badgeColor = isSale ? '#10B981' : '#3B82F6';
+  const badgeText = isSale ? 'Vente' : 'Location';
+
+  infoWindow.setContent(`
+    <div style="
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 280px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    ">
+      <!-- Compact image + badge -->
+      <div style="position: relative; height: 96px;">
+        <img src="${l.image}" 
+          style="width: 100%; height: 100%; object-fit: cover; display: block;"
+          onerror="this.src='https://via.placeholder.com/280x96?text=No+Image'">
+        <span style="
+          position: absolute;
+          top: 6px; left: 6px;
+          background: ${badgeColor};
+          color: white;
+          font-size: 9px;
+          font-weight: 700;
+          padding: 2px 5px;
+          border-radius: 3px;
+          text-transform: uppercase;
+          letter-spacing: 0.2px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        ">${badgeText}</span>
+      </div>
+
+      <!-- Tight content block -->
+      <div style="padding: 8px 10px 10px;">
+        <!-- Title: single line ellipsis -->
+        <h3 style="
+          font-size: 13px;
+          font-weight: 700;
+          color: #111;
+          margin: 0 0 4px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        ">${l.title}</h3>
+
+        <!-- Location + Price on one line -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            max-width: 55%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">
+            <svg style="width: 12px; height: 12px; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            ${l.location}
+          </span>
+          <span style="
+            font-size: 15px;
+            font-weight: 800;
+            color: #FF5A1F;
+            flex-shrink: 0;
+          ">${l.price}<span style="font-size: 11px; font-weight: 600; color: #888;"> ${l.currency}</span></span>
+        </div>
+
+        <!-- Compact CTA -->
+        <a href="${l.link}" 
+          style="
+            display: block;
+            background: #FF5A1F;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 7px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.15s;
+          "
+          onmouseover="this.style.background='#e54a1a'"
+          onmouseout="this.style.background='#FF5A1F'">
+          Voir l'annonce →
+        </a>
+      </div>
+    </div>
+  `);
+  infoWindow.open(map, marker);
+});
         });
 
         if (withCoords.length > 1) {
@@ -89,7 +182,7 @@
     {% endif %}
 </section>
 
-<!-- ADVANCED SEARCH BAR -->
+{# <!-- ADVANCED SEARCH BAR -->
 <section class="bg-white border-b border-gray-100 shadow-sm">
     <div class="max-w-site mx-auto px-4">
         <!-- Collapsible toggle -->
@@ -174,10 +267,23 @@
             </form>
         </div>
     </div>
-</section>
+</section> #}
+
+
+<div class="fixed sm:hidden bottom-4 inset-x-4 z-50 flex gap-0 justify-center drop-shadow-2xl p-2 bg-white w-fit mx-auto rounded-xl border border-neutral-200">
+    <button command="show-modal" commandfor="drawer" class="rounded-l-md bg-primary px-4 py-2.5 text-sm font-jakarta font-bold text-white flex gap-2 items-center"><i class="fa-solid fa-sliders"></i>Filtrer</button>
+    <button type="button"
+            class="sort-trigger inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-r-md hover:border-[#d60000] hover:text-[#d60000] focus:outline-none focus:ring-2 focus:ring-[#d60000]/20 transition-colors">
+        <i class="fa-solid fa-arrow-down-wide-short text-gray-400"></i>
+        <span class="hidden sm:inline">Trier :</span>
+        <span class="sort-label font-semibold">Défaut</span>
+        <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform sort-icon"></i>
+    </button>
+</div>
+
 
 <!-- RESULTS SECTION -->
-<section class="py-8 bg-neutral-100">
+<section class="pt-4 pb-8 bg-neutral-100">
     <div class="max-w-site mx-auto px-4">
         <!-- Breadcrumb -->
         <nav class="hidden md:block mb-4" aria-label="Fil d'Ariane">
@@ -199,16 +305,19 @@
                 <h1 class="font-jakarta font-bold text-lg md:text-2xl text-dark">Résultats de recherche</h1>
                 <p class="text-sm text-gray-500 mt-0.5"><strong class="text-dark">{{ total or listings|length }}</strong> résultat(s) trouvé(s)</p>
             </div>
-            <div class="relative" id="sort-wrapper">
-                <button type="button" id="sort-trigger"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:border-[#d60000] hover:text-[#d60000] focus:outline-none focus:ring-2 focus:ring-[#d60000]/20 transition-colors">
+            <div class="hidden relative sm:flex gap-0" id="sort-wrapper">
+                <button command="show-modal" commandfor="drawer" class="rounded-l-md bg-primary px-4 py-2.5 text-sm font-jakarta font-bold text-white flex gap-2 items-center">
+                    <i class="fa-solid fa-sliders"></i>Filtrer
+                </button>
+                <button
+                        class="sort-trigger inline-flex rounded-r-md items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:border-[#d60000] hover:text-[#d60000] focus:outline-none focus:ring-2 focus:ring-[#d60000]/20 transition-colors">
                     <i class="fa-solid fa-arrow-down-wide-short text-gray-400"></i>
                     <span class="hidden sm:inline">Trier :</span>
-                    <span id="sort-label" class="font-semibold">Défaut</span>
-                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" id="sort-icon"></i>
+                    <span class="sort-label font-semibold">Défaut</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform sort-icon"></i>
                 </button>
                 <div id="sort-menu"
-                     class="hidden absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20">
+                     class="hidden absolute right-0 top-10 mt-2 w-56 origin-top-right bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20">
                     <a href="#" class="sort-link flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#d60000]/5 hover:text-[#d60000] transition-colors group" data-sort="">
                         <i class="fa-solid fa-arrow-up-arrow-down w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Ordre par défaut
                     </a>
@@ -234,24 +343,24 @@
                         <i class="fa-solid fa-arrow-down-z-a w-4 text-center text-gray-300 group-hover:text-[#d60000]"></i> Titre Z-A
                     </a>
                 </div>
-                <select id="sort-native" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer md:hidden z-10">
-                    <option value="">Ordre par défaut</option>
-                    <option value="a_price">Prix (croissant)</option>
-                    <option value="d_price">Prix (décroissant)</option>
-                    <option value="featured_first">Annonces en avant</option>
-                    <option value="d_date">Date (récente à ancienne)</option>
-                    <option value="a_date">Date (ancienne à récente)</option>
-                    <option value="a_title">Titre A-Z</option>
-                    <option value="d_title">Titre Z-A</option>
-                </select>
             </div>
         </div>
+        <select id="sort-native" class="sr-only" aria-hidden="true">
+            <option value="">Ordre par défaut</option>
+            <option value="a_price">Prix (croissant)</option>
+            <option value="d_price">Prix (décroissant)</option>
+            <option value="featured_first">Annonces en avant</option>
+            <option value="d_date">Date (récente à ancienne)</option>
+            <option value="a_date">Date (ancienne à récente)</option>
+            <option value="a_title">Titre A-Z</option>
+            <option value="d_title">Titre Z-A</option>
+        </select>
         <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const trigger = document.getElementById('sort-trigger');
+            const triggers = document.querySelectorAll('.sort-trigger');
             const menu = document.getElementById('sort-menu');
-            const icon = document.getElementById('sort-icon');
-            const label = document.getElementById('sort-label');
+            const icons = document.querySelectorAll('.sort-icon');
+            const labels = document.querySelectorAll('.sort-label');
             const native = document.getElementById('sort-native');
             const links = document.querySelectorAll('.sort-link');
             function applySort(val) {
@@ -262,7 +371,7 @@
             function syncUI() {
                 const current = new URLSearchParams(window.location.search).get('sort') || '';
                 const map = { '': 'Défaut', 'a_price': 'Prix: ↑', 'd_price': 'Prix: ↓', 'featured_first': 'En avant', 'd_date': 'Récent', 'a_date': 'Ancien', 'a_title': 'A-Z', 'd_title': 'Z-A' };
-                label.textContent = map[current] || 'Défaut';
+                labels.forEach(el => el.textContent = map[current] || 'Défaut');
                 if (native) native.value = current;
                 links.forEach(l => {
                     const isActive = l.dataset.sort === current;
@@ -272,17 +381,20 @@
                     l.querySelector('i')?.classList.toggle('text-[#d60000]', isActive);
                 });
             }
-            trigger.addEventListener('click', (e) => {
-                if (window.innerWidth < 768) return;
+            triggers.forEach(trigger => trigger.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (window.innerWidth < 768) {
+                    native.showPicker?.() || native.click();
+                    return;
+                }
                 const isOpen = !menu.classList.contains('hidden');
                 menu.classList.toggle('hidden', isOpen);
-                icon.classList.toggle('rotate-180', !isOpen);
-            });
+                icons.forEach(ic => ic.classList.toggle('rotate-180', !isOpen));
+            }));
             document.addEventListener('click', (e) => {
-                if (window.innerWidth >= 768 && !trigger.contains(e.target) && !menu.contains(e.target)) {
+                if (!Array.from(triggers).some(t => t.contains(e.target)) && !menu.contains(e.target)) {
                     menu.classList.add('hidden');
-                    icon.classList.remove('rotate-180');
+                    icons.forEach(ic => ic.classList.remove('rotate-180'));
                 }
             });
             links.forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); applySort(l.dataset.sort); }));
@@ -325,4 +437,183 @@
         </div>
     </div>
 </section>
+
+<!-- Slide-over -->
+<el-dialog>
+  <dialog id="drawer" aria-labelledby="drawer-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-hidden bg-transparent not-open:hidden backdrop:bg-transparent">
+    <el-dialog-backdrop class="absolute inset-0 bg-gray-500/75 transition-opacity duration-500 ease-in-out data-closed:opacity-0"></el-dialog-backdrop>
+
+    <div tabindex="0" class="absolute inset-0 pl-10 focus:outline-none sm:pl-16">
+      <el-dialog-panel class="group/dialog-panel relative ml-auto block size-full max-w-md transform transition duration-500 ease-in-out data-closed:translate-x-full sm:duration-700">
+        <!-- Close button, show/hide based on slide-over state. -->
+        <div class="absolute top-0 left-0 -ml-8 flex pt-4 pr-2 duration-500 ease-in-out group-data-closed/dialog-panel:opacity-0 sm:-ml-10 sm:pr-4">
+          
+        </div>
+
+        <div class="relative flex h-full flex-col overflow-y-auto bg-white pt-6 shadow-xl">
+          <div class="px-4 sm:px-6 flex justify-between">
+            <h2 id="drawer-title" class="font-jakarta font-bold text-lg md:text-2xl text-dark ">Recherche avancée</h2>
+            <button type="button" command="close" commandfor="drawer" class="relative rounded-md text-gray-500 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <span class="absolute -inset-2.5"></span>
+                <span class="sr-only">Close panel</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+                <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+          </div>
+          <div class="relative mt-6 flex-1 px-4 sm:px-6">
+            <form method="get" action="/resultats"
+                  class="grid grid-cols-1 gap-3 items-end">
+                <!-- Statut -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Statut</label>
+                    <div class="relative">
+                        <select name="listing_type" id="drawer-listing-type"
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="">Tous</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Type de bien -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Type de bien</label>
+                    <div class="relative">
+                        <select name="property_type" id="drawer-property-type"
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="">Tous les types</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Pays -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Pays</label>
+                    <div class="relative">
+                        <select name="country" id="drawer-country"
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8">
+                            <option value="">Tous les pays</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Ville -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Ville</label>
+                    <div class="relative">
+                        <select name="city" id="drawer-city"
+                            class="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body bg-white focus:outline-none focus:border-primary pr-8 pl-9">
+                            <option value="">Toutes les villes</option>
+                        </select>
+                        <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                    </div>
+                </div>
+                <!-- Budget max -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-dark uppercase tracking-wide">Budget max (FCFA)</label>
+                    <div class="relative">
+                        <input type="number" name="max_price" placeholder="Budget maximum"
+                            value="{{ request.query_params.get('max_price', '') }}"
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-text-body focus:outline-none focus:border-primary" />
+                    </div>
+                </div>
+                <!-- Search button -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-transparent uppercase tracking-wide select-none">.</label>
+                    <button type="submit"
+                        class="bg-primary hover:bg-primary-hover text-white font-semibold px-5 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm transition-colors">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Rechercher
+                    </button>
+                </div>
+            </form>
+          </div>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const listingTypeSelect  = document.getElementById('drawer-listing-type');
+    const propertyTypeSelect = document.getElementById('drawer-property-type');
+    const countrySelect      = document.getElementById('drawer-country');
+    const citySelect         = document.getElementById('drawer-city');
+
+    const updateCities = async (countryCode, selectedCity = null) => {
+        citySelect.innerHTML = '<option value="">Chargement...</option>';
+        citySelect.disabled = true;
+        if (!countryCode) {
+            citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+            citySelect.disabled = false;
+            return;
+        }
+        try {
+            const res = await fetch(`/api/v1/cities/country/${countryCode}`);
+            const cities = await res.json();
+            citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+            cities.filter(c => c.is_active).forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.code;
+                opt.textContent = c.name;
+                citySelect.appendChild(opt);
+            });
+            if (selectedCity) citySelect.value = selectedCity;
+        } catch {
+            citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+        } finally {
+            citySelect.disabled = false;
+        }
+    };
+
+    const HIDDEN_RENT_TYPES = ["LEASE_AGRO"];
+
+    const [rentTypesRes, typesRes, countriesRes] = await Promise.all([
+        fetch('/api/v1/property-rent-types?limit=100'),
+        fetch('/api/v1/property-types?limit=100'),
+        fetch('/api/v1/countries?limit=100'),
+    ]);
+    const [rentTypes, types, countries] = await Promise.all([
+        rentTypesRes.json(), typesRes.json(), countriesRes.json(),
+    ]);
+
+    rentTypes
+        .filter(t => t.is_active && !HIDDEN_RENT_TYPES.includes(t.code))
+        .forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.code;
+            opt.textContent = t.label;
+            listingTypeSelect.appendChild(opt);
+        });
+
+    propertyTypeSelect.innerHTML = '<option value="">Tous les types</option>';
+    types.filter(t => t.is_active).forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.code;
+        opt.textContent = t.label;
+        propertyTypeSelect.appendChild(opt);
+    });
+
+    countrySelect.innerHTML = '<option value="">Tous les pays</option>';
+    countries.filter(c => c.is_active).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.code;
+        opt.textContent = c.name;
+        countrySelect.appendChild(opt);
+    });
+
+    // Restaurer les valeurs depuis les query params
+    if (listingTypeSelect)  listingTypeSelect.value  = params.get('listing_type')  || '';
+    if (propertyTypeSelect) propertyTypeSelect.value = params.get('property_type') || '';
+    if (params.get('country')) countrySelect.value   = params.get('country');
+
+    await updateCities(countrySelect.value, params.get('city'));
+
+    countrySelect.addEventListener('change', (e) => updateCities(e.target.value));
+});
+</script>
 {% endblock %}

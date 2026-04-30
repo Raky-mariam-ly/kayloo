@@ -35,7 +35,7 @@
         <div
             class="self-end w-fit px-3 py-2 bg-neutral-50 backdrop-blur-sm rounded-t-md border-white/15 border-t border-x">
             <p class="font-jakarta font-extrabold text-primary text-xs">
-                {{ listing.price }} {{ listing.currency | default('F CFA') }}
+                {{ listing.price }} {{ listing.currency | default('F CFA') }}{% if listing.has_period %} {{ listing.period }}{% endif %}
             </p>
         </div>
         <div class="bg-neutral-400/5 backdrop-blur-sm p-3 rounded-b-lg rounded-tl-lg border border-white/15">

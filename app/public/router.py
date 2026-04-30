@@ -18,7 +18,6 @@ from repositories.property import PropertyRepository
 from repositories.property_view import PropertyViewRepository
 from services.property_view import PropertyViewService
 from static.text_content import *
-import admin.choices as _choices
 
 
 templates = Jinja2Templates(directory="templates")
@@ -336,18 +335,19 @@ async def get_search_result(
         price_max = float(max_price) if max_price and max_price.strip() else None
     except ValueError:
         price_max = None
-    rent_cat = None
-    if listing_type == "location":
-        rent_cat = "rent_empty"
-    elif listing_type == "meublee":
-        rent_cat = "furnished"
-    elif listing_type in ("vente", "sale"):
-        rent_cat = "sale"
+    _LISTING_TYPE_MAP = {
+        "RENT_EMPTY":     "rent_empty",
+        "RENT_FURNISHED": "furnished",
+        "SALE":           "sale",
+        "location":       "rent_empty",
+        "meublee":        "furnished",
+        "vente":          "sale",
+    }
+    rent_cat = _LISTING_TYPE_MAP.get(listing_type) if listing_type else None
 
     repo = PropertyRepository(session)
     props = await repo.search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat, limit=24)
     total = await repo.count_search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat)
-    cities = await repo.get_distinct_cities()
     listings = [_property_to_listing(p) for p in props]
     return templates.TemplateResponse(
         request=request,
@@ -355,8 +355,6 @@ async def get_search_result(
         context={
             "listings": listings,
             "total": total,
-            "cities": cities,
-            "property_types": _choices._property_type_choices,
             "google_maps_api_key": get_settings().google_maps_api_key,
         },
     )

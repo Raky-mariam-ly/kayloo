@@ -2,31 +2,7 @@
 <div class="max-w-full w-full lg:max-w-[90%] mx-auto mt-6">
   <form id="search-form" action="{{ url_for('get_search_result') }}" method="GET">
     <div class="flex flex-row gap-1 z-2 justify-center" id="contract-button-group">
-
-      <label class="flex text-left">
-        <input type="radio" id="radio-location" name="listing_type" value="location" class="hidden peer" checked>
-        <div
-          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
-          Location
-        </div>
-      </label>
-
-      <label class="flex text-left ">
-        <input type="radio" id="radio-meublee" name="listing_type" value="meublee" class="hidden peer">
-        <div
-          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
-          Location meublée
-        </div>
-      </label>
-
-      <label class="flex text-left">
-        <input type="radio" id="radio-vente" name="listing_type" value="vente" class="hidden peer">
-        <div
-          class="cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3">
-          Vente
-        </div>
-      </label>
-
+      <!-- populated dynamically via JS -->
     </div>
     <div
       class="box-border bg-neutral-200/25 backdrop-blur-md border border-white/20 shadow-xl flex flex-wrap gap-2 p-4 font-jakarta items-end rounded-xl z-3">
@@ -36,13 +12,7 @@
         </label>
         <select id="property-type" name="property_type"
           class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-          <option value="villa">Villas</option>
-          <option value="appartement">Appartements</option>
-          <option value="terrain">Terrains</option>
-          <option value="bureau">bureaux</option>
-          <option value="chambre">Chambres</option>
-          <option value="studio">Studios</option>
-          <option value="terrain-agricole">Terrains Agricoles</option>
+          <option value="">Tous les types</option>
         </select>
       </div>
       <div class="grid grid-cols-2 gap-2 basis-full md:flex-2">
@@ -50,13 +20,7 @@
           <label for="country" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">Pays</label>
           <select id="country" name="country"
             class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-            <option value="sn">Sénégal</option>
-            <option value="ci">Côte d'Ivoire</option>
-            <option value="ma">Maroc</option>
-            <option value="ng">Nigeria</option>
-            <option value="gn">Guinée</option>
-            <option value="ml">Mali</option>
-            <option value="bf">Burkina Faso</option>
+            <option value="">Tous les pays</option>
           </select>
         </div>
         <div class="flex flex-col">
@@ -64,7 +28,7 @@
             Ville</label>
           <select id="city" name="city"
             class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-            <option value="">Chargement...</option>
+            <option value="">Toutes les villes</option>
           </select>
         </div>
       </div>
@@ -83,132 +47,158 @@
   </form>
 </div>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. DATA STRUCTURES
-    const rules = {
-      "vente": {
-        "label": "Prix de vente max",
-        "placeholder": "50 000 000",
-        "allowed": ["villa", "terrain", "appartement", "bureau", "terrain-agricole"]
-      },
-      "location": {
-        "label": "Loyer max",
-        "placeholder": "250 000",
-        "allowed": ["villa", "appartement", "bureau", "chambre", "terrain-agricole"]
-      },
-      "meublee": {
-        "label": "Loyer max (par jour)",
-        "placeholder": "40 000",
-        "allowed": ["villa", "appartement", "studio"]
-      }
-    };
+  document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
 
-    const geo_rules = {
-      "sn": [
-        { "label": "Dakar", "value": "sn-dk" },
-        { "label": "Keur Massar", "value": "sn-km" },
-        { "label": "Diamniadio", "value": "sn-dm" },
-        { "label": "Saly", "value": "sn-sl" },
-        { "label": "Saint-Louis", "value": "sn-st" },
-        { "label": "Thiès", "value": "sn-th" },
-        { "label": "Ziguinchor", "value": "sn-zg" }
-      ],
-      "ci": [
-        { "label": "Abidjan", "value": "ci-ab" },
-        { "label": "Yamoussoukro", "value": "ci-ya" },
-        { "label": "San-Pédro", "value": "ci-sp" },
-        { "label": "Bouaké", "value": "ci-bk" },
-        { "label": "Assinie", "value": "ci-as" },
-        { "label": "Grand-Bassam", "value": "ci-gb" }
-      ],
-      "ma": [
-        { "label": "Casablanca", "value": "ma-cs" },
-        { "label": "Marrakech", "value": "ma-mr" },
-        { "label": "Rabat", "value": "ma-rb" },
-        { "label": "Tanger", "value": "ma-tg" },
-        { "label": "Agadir", "value": "ma-ag" }
-      ],
-      "ng": [
-        { "label": "Lagos", "value": "ng-lg" },
-        { "label": "Abuja", "value": "ng-ab" },
-        { "label": "Port Harcourt", "value": "ng-ph" },
-        { "label": "Ibadan", "value": "ng-ib" }
-      ],
-      "gn": [
-        { "label": "Conakry", "value": "gn-ck" },
-        { "label": "Kindia", "value": "gn-kn" },
-        { "label": "Boké", "value": "gn-bk" },
-        { "label": "Kamsar", "value": "gn-ks" }
-      ],
-      "ml": [
-        { "label": "Bamako", "value": "ml-bm" },
-        { "label": "Sikasso", "value": "ml-sk" },
-        { "label": "Kayes", "value": "ml-ky" }
-      ],
-      "bf": [
-        { "label": "Ouagadougou", "value": "bf-ou" },
-        { "label": "Bobo-Dioulasso", "value": "bf-bd" },
-        { "label": "Koudougou", "value": "bf-kd" }
-      ]
-    };
-
-    // 2. DOM SELECTORS
-    const listing_typeRadios = document.querySelectorAll('input[name="listing_type"]');
+    // 1. DOM SELECTORS
+    const group        = document.getElementById('contract-button-group');
     const propertySelect = document.getElementById('property-type');
-    const countrySelect = document.getElementById('country');
-    const citySelect = document.getElementById('city');
-    const priceLabel = document.getElementById('price-label');
-    const priceInput = document.getElementById('max-price');
+    const countrySelect  = document.getElementById('country');
+    const citySelect     = document.getElementById('city');
+    const priceLabel     = document.getElementById('price-label');
+    const priceInput     = document.getElementById('max-price');
 
-    // 3. LOGIC FUNCTIONS
+    // 2. PRICE RULES PER RENT TYPE CODE
+    const PRICE_RULES = {
+      "RENT_EMPTY":     { label: "Loyer max",             placeholder: "250 000"    },
+      "RENT_FURNISHED": { label: "Loyer max (par jour)",   placeholder: "40 000"     },
+      "SALE":           { label: "Prix de vente max",      placeholder: "50 000 000" },
+    };
+    const DEFAULT_PRICE_RULE = { label: "Prix max", placeholder: "" };
 
-    // Function A: Handle Contract Changes (Property types & Pricing UI)
-    const applyRules = (listing_typeType) => {
-      const config = rules[listing_typeType];
-
-      // Update Label and Placeholder
+    const applyRules = (code) => {
+      const config = PRICE_RULES[code] ?? DEFAULT_PRICE_RULE;
       priceLabel.textContent = config.label;
       priceInput.placeholder = config.placeholder;
+    };
 
-      // Filter Property Types
-      Array.from(propertySelect.options).forEach(opt => {
-        const isAllowed = config.allowed.includes(opt.value);
-        opt.hidden = !isAllowed;
-        opt.disabled = !isAllowed;
+    // 3. LISTING TYPES — dynamic from DB
+    const HIDDEN_RENT_TYPES = ["LEASE_AGRO"]; // hidden from public search until ready
+    const TAB_CLASS = "cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3";
+
+    const renderFallbackTabs = () => {
+      const fallbacks = [
+        { code: "RENT_EMPTY",     label: "Location"         },
+        { code: "RENT_FURNISHED", label: "Location meublée" },
+        { code: "SALE",           label: "Vente"            },
+      ];
+      fallbacks.forEach((f, i) => {
+        const lbl = document.createElement('label');
+        lbl.className = 'flex text-left';
+        lbl.innerHTML = `<input type="radio" name="listing_type" value="${f.code}" class="hidden peer"${i === 0 ? ' checked' : ''}>
+          <div class="${TAB_CLASS}">${f.label}</div>`;
+        group.appendChild(lbl);
       });
+    };
 
-      // Safety reset if current selection becomes hidden
-      if (propertySelect.selectedOptions[0]?.hidden) {
-        propertySelect.value = config.allowed[0];
+    const populateListingTypes = async () => {
+      try {
+        const res = await fetch('/api/v1/property-rent-types?limit=100');
+        const types = await res.json();
+        const active = types.filter(t => t.is_active && !HIDDEN_RENT_TYPES.includes(t.code));
+        if (!active.length) { renderFallbackTabs(); return; }
+
+        const savedCode = params.get('listing_type');
+        let firstCode = null;
+
+        active.forEach((t, i) => {
+          if (i === 0) firstCode = t.code;
+          const checked = savedCode ? savedCode === t.code : i === 0;
+          const lbl = document.createElement('label');
+          lbl.className = 'flex text-left';
+          lbl.innerHTML = `<input type="radio" name="listing_type" value="${t.code}" class="hidden peer"${checked ? ' checked' : ''}>
+            <div class="${TAB_CLASS}">${t.label}</div>`;
+          group.appendChild(lbl);
+        });
+
+        document.querySelectorAll('input[name="listing_type"]').forEach(r =>
+          r.addEventListener('change', (e) => applyRules(e.target.value))
+        );
+        applyRules(savedCode && active.some(t => t.code === savedCode) ? savedCode : firstCode);
+      } catch {
+        renderFallbackTabs();
+        document.querySelectorAll('input[name="listing_type"]').forEach(r =>
+          r.addEventListener('change', (e) => applyRules(e.target.value))
+        );
+        applyRules('RENT_EMPTY');
       }
     };
 
-    // Function B: Handle Country Changes (City injection)
-    const updateCities = (countryCode) => {
-      citySelect.innerHTML = '<option value=""  >Toutes les villes</option>';
-      const cities = geo_rules[countryCode];
-
-      if (cities) {
-        cities.forEach(city => {
+    // 4. PROPERTY TYPES — dynamic from DB
+    const populatePropertyTypes = async () => {
+      try {
+        const res = await fetch('/api/v1/property-types?limit=100');
+        const types = await res.json();
+        propertySelect.innerHTML = '<option value="">Tous les types</option>';
+        types.filter(t => t.is_active).forEach(t => {
           const opt = document.createElement('option');
-          opt.value = city.value;
-          opt.textContent = city.label;
+          opt.value = t.code; opt.textContent = t.label;
+          propertySelect.appendChild(opt);
+        });
+        const savedType = params.get('property_type');
+        if (savedType) propertySelect.value = savedType;
+      } catch {
+        propertySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      }
+    };
+
+    // 5. CITIES — dynamic by selected country
+    const updateCities = async (countryCode, selectedCity = null) => {
+      citySelect.innerHTML = '<option value="">Chargement...</option>';
+      citySelect.disabled = true;
+      if (!countryCode) {
+        citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+        citySelect.disabled = false;
+        return;
+      }
+      try {
+        const res = await fetch(`/api/v1/cities/country/${countryCode}`);
+        const cities = await res.json();
+        citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+        cities.filter(c => c.is_active).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.code; opt.textContent = c.name;
           citySelect.appendChild(opt);
         });
+        if (selectedCity) citySelect.value = selectedCity;
+      } catch {
+        citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      } finally {
+        citySelect.disabled = false;
       }
     };
 
-    // 4. EVENT LISTENERS
-    listing_typeRadios.forEach(radio => {
-      radio.addEventListener('change', (e) => applyRules(e.target.value));
-    });
+    // 6. COUNTRIES — dynamic from DB
+    const populateCountries = async () => {
+      try {
+        const res = await fetch('/api/v1/countries?limit=100');
+        const countries = await res.json();
+        countrySelect.innerHTML = '<option value="">Tous les pays</option>';
+        countries.filter(c => c.is_active).forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.code; opt.textContent = c.name;
+          countrySelect.appendChild(opt);
+        });
+        const savedCountry = params.get('country');
+        const savedCity = params.get('city');
+        if (savedCountry) countrySelect.value = savedCountry;
+        await updateCities(countrySelect.value, savedCity);
+      } catch {
+        countrySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      }
+    };
 
+    // 7. EVENT LISTENERS
     countrySelect.addEventListener('change', (e) => updateCities(e.target.value));
 
-    // 5. INITIALIZATION (Sync UI on Page Load)
-    const activelisting_type = document.querySelector('input[name="listing_type"]:checked').value;
-    applyRules(activelisting_type);
-    updateCities(countrySelect.value);
+    // Function D: Quartiers (infrastructure prête, UI non exposée pour l'instant)
+    // const updateAreas = async (cityCode) => {
+    //   const res = await fetch(`/api/v1/areas/city/${cityCode}`);
+    //   // populate areaSelect when the field is added to the UI
+    // };
+
+    // 8. INITIALIZATION
+    await Promise.all([populateListingTypes(), populatePropertyTypes(), populateCountries()]);
   });
 </script>
 {% endmacro %}

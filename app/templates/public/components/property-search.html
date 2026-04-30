@@ -21,7 +21,7 @@
         </div>
         <div
             class="absolute bottom-0 right-0 backdrop-blur-sm bg-white px-3 pt-2 pb-1.5 rounded-tl-xl shadow-lg flex justify-center justify-between items-center gap-1 border-b border-neutral-100">
-            <p class="font-poppins font-[800] text-primary text-[15px]">{{ listing.price }}</p>
+            <p class="font-poppins font-[800] text-primary text-[15px]">{{ listing.price }} {{ listing.currency }}</p>
             {% if listing.has_period %}
             <p class="text-xs text-gray-600">{{ listing.period }}</p>
             {% endif %}

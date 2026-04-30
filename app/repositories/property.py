@@ -68,7 +68,7 @@ class PropertyRepository(BaseRepository[Property]):
         if city:
             query = query.where(self.model.city.ilike(f"%{city}%"))
         if type:
-            query = query.where(self.model.type.ilike(f"%{type}%"))
+            query = query.where(self.model.type == type)
         if price_min is not None:
             query = query.where(self.model.price >= price_min)
         if price_max is not None:
@@ -85,6 +85,16 @@ class PropertyRepository(BaseRepository[Property]):
             query = query.where(self.model.rent_type.in_(SALE_TYPES))
         return query
 
+    _SORT_MAP = {
+        "a_price":       lambda m: m.price.asc(),
+        "d_price":       lambda m: m.price.desc(),
+        "featured_first":lambda m: m.is_featured.desc(),
+        "a_date":        lambda m: m.created_at.asc(),
+        "d_date":        lambda m: m.created_at.desc(),
+        "a_title":       lambda m: m.label.asc(),
+        "d_title":       lambda m: m.label.desc(),
+    }
+
     async def search(
         self,
         city: Optional[str] = None,
@@ -93,6 +103,7 @@ class PropertyRepository(BaseRepository[Property]):
         price_max: Optional[float] = None,
         is_featured: Optional[bool] = None,
         rent_category: Optional[str] = None,
+        sort: Optional[str] = None,
         skip: int = 0,
         limit: int = 12,
     ) -> List[Property]:
@@ -101,7 +112,8 @@ class PropertyRepository(BaseRepository[Property]):
             self.model.archived.is_(False),
         )
         query = self._apply_search_filters(query, city, type, price_min, price_max, is_featured, rent_category)
-        query = query.order_by(self.model.created_at.desc()).offset(skip).limit(limit)
+        order = self._SORT_MAP.get(sort)(self.model) if sort in self._SORT_MAP else self.model.created_at.desc()
+        query = query.order_by(order).offset(skip).limit(limit)
         result = await self.db.execute(query)
         return result.scalars().all()
 

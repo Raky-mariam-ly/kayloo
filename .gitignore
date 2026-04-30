@@ -37,5 +37,7 @@ htmlcov/
 # Logs
 *.log
 
+.claude/
+.github/
 app/static/uploads/
 CLAUDE.md

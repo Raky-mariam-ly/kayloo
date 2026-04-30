@@ -269,7 +269,7 @@ class FastapiUsersAuthProvider(AuthProvider):
         token = request.session.get("session", None)
         user: User = await token_manager.read_token(token, user_manager)
 
-        # Si pas de session admin, tenter le cookie JWT du frontend
+        # No admin session found — try the frontend JWT cookie
         if user is None:
             jwt_cookie = request.cookies.get("fastapiusersauth")
             if jwt_cookie:
@@ -308,4 +308,5 @@ class FastapiUsersAuthProvider(AuthProvider):
 
     async def logout(self, request: Request, response: Response) -> Response:
         request.session.clear()
+        response.delete_cookie("fastapiusersauth")
         return response

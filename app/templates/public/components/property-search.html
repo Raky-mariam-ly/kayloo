@@ -1,14 +1,11 @@
-{% macro display_card(listing) %}
-{% if listing.type == "sale" %}
-{% set tag_label = "À Vendre" %}
-{% elif listing.type == "rent" %}
-{% set tag_label = "À Louer" %}
-{% elif listing.type == "furnished" %}
-{% set tag_label = "Location Meublée" %}
-{% endif %}
+{% macro display_card(listing) %} {% if listing.type == "sale" %} {% set tag_label = "À Vendre" %} {% elif listing.type
+== "rent" %} {% set tag_label = "À Louer" %} {% elif listing.type == "furnished" %} {% set tag_label = "Location
+Meublée" %} {% endif %}
 <article class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col relative">
     <div class="relative h-[220px] overflow-hidden">
-        <img src="{{ listing.bg_image | default('/static/images/placeholder-listing.webp') }}" alt="{{ listing.title }}"
+        <img
+            src="{{ listing.bg_image | default('/static/images/placeholder-listing.webp') }}"
+            alt="{{ listing.title }}"
             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
         <div class="absolute top-3 left-3 flex items-center gap-2 flex-wrap">
             {% if listing.is_featured %}
@@ -41,47 +38,52 @@
                 </h2>
             </a>
 
-            {# <div class="text-right shrink-0">
+            {#
+            <div class="text-right shrink-0">
                 <p class="font-jakarta font-bold text-primary text-base">{{ listing.price }}</p>
                 {% if listing.has_period %}
                 <p class="text-xs text-gray-400">{{ listing.period }}</p>
                 {% endif %}
-            </div> #}
+            </div>
+            #}
         </div>
         <p class="flex items-center gap-1.5 text-sm text-neutral-600 mb-3">
             <i class="fa-solid fa-location-dot text-primary text-xs shrink-0"></i>
             {{ listing.location }}
         </p>
-        <div class="flex items-center gap-3 text-xs text-neutral-600 border-t border-neutral-100 pt-3">
-            <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-house-chimney text-neutral-400 text-xs"></i>
+        <div
+            class="flex items-center text-xs text-neutral-600 border-t divide-x divide-neutral-200 border-neutral-100 pt-3">
+            <span class="flex items-center gap-1.5 px-2">
+                <i class="fa-solid fa-house-chimney text-primary text-xs"></i>
                 {{ listing.property_type }}
             </span>
             {% if listing.land_size %}
-            <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-vector-square text-neutral-400 text-xs"></i>
-                {{ listing.land_size }}
+            <span class="flex items-center gap-1.5 px-2">
+                <i class="fa-solid fa-vector-square text-primary text-xs"></i>
+                {{ listing.land_size }} m2
             </span>
-            {% endif %}
-            {% if listing.bedroom_nbr %}
-            <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-bed text-neutral-400 text-xs"></i>
+            {% endif %} {% if listing.bedroom_nbr %}
+            <span class="flex items-center gap-1.5 px-2">
+                <i class="fa-solid fa-bed text-primary text-xs"></i>
                 {{ listing.bedroom_nbr }} Ch.
             </span>
-            {% endif %}
-            {% if listing.bthroom_nbr %}
-            <span class="flex items-center gap-1.5">
-                <i class="fa-solid fa-bath text-neutral-400 text-xs"></i>
+            {% endif %} {% if listing.bthroom_nbr %}
+            <span class="flex items-center gap-1.5 px-2">
+                <i class="fa-solid fa-bath text-primary text-xs"></i>
                 {{ listing.bthroom_nbr }} SDB
             </span>
             {% endif %}
         </div>
-        {# <div class="flex items-center justify-end mt-auto pt-1">
-            <a href="{{ listing.link }}"
+        {#
+        <div class="flex items-center justify-end mt-auto pt-1">
+            <a
+                href="{{ listing.link }}"
                 class="bg-primary hover:bg-primary-hover text-white text-xs font-semibold pr-3 pl-2.5 py-1.5 rounded-lg transition-colors flex gap-1.5 items-center">
                 <i class="fa-solid fa-eye"></i>
-                Détails</a>
-        </div> #}
+                Détails</a
+            >
+        </div>
+        #}
     </div>
 </article>
 {% endmacro %}

@@ -38,6 +38,6 @@ htmlcov/
 *.log
 
 .claude/
-.github/
 app/static/uploads/
 CLAUDE.md
+notes.txt

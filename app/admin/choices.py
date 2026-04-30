@@ -32,16 +32,18 @@ async def warm_choices_cache(session: AsyncSession) -> None:
     ]
 
     _city_choices = [
-        (r[0], f"{r[1]} ({r[0]})" if r[1] else r[0])
+        (r[1], f"{r[1]} ({r[0]})" if r[1] else r[0])
         for r in await fetch(
             "SELECT code, name FROM city ORDER BY name"
         )
     ]
 
     _zone_choices = [
-        (r[0], f"{r[1]} ({r[2]})" if r[2] else r[1])
+        (r[0], f"{r[0]} ({r[2]})" if r[2] else r[0])
         for r in await fetch(
-            "SELECT name, name, city FROM area WHERE is_active = true ORDER BY city, name"
+            "SELECT area.name, area.name, city.name"
+            " FROM area JOIN city ON city.code = area.city"
+            " WHERE area.is_active = true ORDER BY city.name, area.name"
         )
     ]
 

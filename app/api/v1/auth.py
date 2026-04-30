@@ -138,7 +138,7 @@ async def jwt_refresh(
 
 @router.get("/auth/me")
 async def auth_me(user: User = Depends(current_optional_user)):
-    """Retourne les infos de base si l'utilisateur est connecté (cookie), sinon 401."""
+    """Return basic user info if authenticated (cookie), otherwise 401."""
     if user is None:
         return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
     return {"id": str(user.id), "email": user.email, "first_name": user.first_name}

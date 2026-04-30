@@ -3,12 +3,12 @@ from typing import Any, Dict
 
 from fastapi import Request
 from starlette_admin.fields import (
-    BooleanField, DateField, DateTimeField, DecimalField, EnumField,
+    BooleanField, DateField, DateTimeField, EnumField,
     FloatField, ImageField, IntegerField, StringField, TextAreaField,
 )
 from starlette_admin.exceptions import FormValidationError
 
-from admin.base import AdminModelView, SafeEnumField, SectionField, UUIDEnumField
+from admin.base import AdminModelView, SafeEnumField, SectionField, SmartDecimalField, UUIDEnumField, _is_full_admin, _is_agent
 from admin.choices import (
     load_agency_choices,
     load_building_choices,
@@ -77,24 +77,6 @@ RATE_FIELDS = ["vat_rate", "tom_rate", "ir_rate", "mgmt_rate", "commission_rate"
 DECIMAL_FIELDS = ["surface", "lng", "lat", "acquisition_price", "acquisition_fee", "price", "base_price", "extra_price", "sale_price", "rent_price", "syndic_amount", "vat_rate", "tom_rate", "ir_rate", "mgmt_rate", "commission_rate", "deposit_rate"]
 
 
-def get_user_roles(request: Request) -> tuple[bool, bool]:
-    user = getattr(request.state, "user", None)
-    if user is None:
-        return False, False
-    is_full_admin = user.is_superuser or getattr(user, "role", "") in ("superadmin", "admin")
-    is_agent = getattr(user, "role", "") == "manager"
-    return is_full_admin, is_agent
-
-
-def is_full_admin(request: Request) -> bool:
-    is_admin, _ = get_user_roles(request)
-    return is_admin
-
-
-def is_agent(request: Request) -> bool:
-    _, is_agent = get_user_roles(request)
-    return is_agent
-
 
 def validate_rate_fields(data: Dict[str, Any]) -> Dict[str, str]:
     errors = {}
@@ -122,10 +104,9 @@ def clean_data_for_populate(data: Dict[str, Any]) -> Dict[str, Any]:
     """Nettoie les données pour _populate_obj en supprimant les valeurs None problématiques."""
     cleaned = {}
     for key, value in data.items():
-        # Ignorer les champs images car ils sont traités séparément
         if key in ["image_url", "gallery_images"]:
             continue
-        # Convertir les chaînes vides en None
+        # Convert empty strings to None
         if value == "":
             cleaned[key] = None
         else:
@@ -224,14 +205,14 @@ class PropertyView(AdminModelView):
         ImageField("gallery_images", label="Photo Gallery", multiple=True, exclude_from_list=True),
 
         SectionField("_sec_features", label="Features", exclude_from_list=True),
-        DecimalField("surface", label="Surface (m²)", min=0, step="0.01"),
+        SmartDecimalField("surface", label="Surface (m²)", min=0, step="0.01"),
         IntegerField("bed_room_count", label="Bedrooms", min=0),
         IntegerField("bath_room_count", label="Bathrooms", min=0),
         IntegerField("kitchen_count", label="Kitchens", min=0),
         IntegerField("living_room_count", label="Living Rooms", min=0),
         IntegerField("build_year", label="Year Built", min=1800, max=2100, exclude_from_list=True),
-        DecimalField("lng", label="Longitude", min=-180, max=180, step="0.000001", exclude_from_list=True),
-        DecimalField("lat", label="Latitude", min=-90, max=90, step="0.000001", exclude_from_list=True),
+        SmartDecimalField("lng", label="Longitude", min=-180, max=180, step="0.000001", exclude_from_list=True),
+        SmartDecimalField("lat", label="Latitude", min=-90, max=90, step="0.000001", exclude_from_list=True),
 
         SectionField("_sec_acquisition", label="Acquisition", exclude_from_list=True),
         DateField("acquisition_date", label="Acquisition Date", exclude_from_list=True),
@@ -251,12 +232,12 @@ class PropertyView(AdminModelView):
         FloatField("syndic_amount", label="Condo Fees", exclude_from_list=True),
 
         SectionField("_sec_rates", label="Rates", exclude_from_list=True),
-        DecimalField("vat_rate", label="VAT", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("tom_rate", label="TOM", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("ir_rate", label="IR", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("mgmt_rate", label="Management", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("commission_rate", label="Commission", min=0, max=100, step="0.01", exclude_from_list=True),
-        DecimalField("deposit_rate", label="Deposit", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("vat_rate", label="VAT", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("tom_rate", label="TOM", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("ir_rate", label="IR", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("mgmt_rate", label="Management", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("commission_rate", label="Commission", min=0, max=100, step="0.01", exclude_from_list=True),
+        SmartDecimalField("deposit_rate", label="Deposit", min=0, max=100, step="0.01", exclude_from_list=True),
 
         SectionField("_sec_flags", label="Options", exclude_from_list=True),
         BooleanField("is_hidden", label="Hidden"),
@@ -273,16 +254,16 @@ class PropertyView(AdminModelView):
     ]
 
     def is_accessible(self, request: Request) -> bool:
-        return is_full_admin(request) or is_agent(request)
+        return _is_full_admin(request) or _is_agent(request)
 
     def can_create(self, request: Request) -> bool:
-        return is_full_admin(request) or is_agent(request)
+        return _is_full_admin(request) or _is_agent(request)
 
     def can_edit(self, request: Request) -> bool:
-        return is_full_admin(request) or is_agent(request)
+        return _is_full_admin(request) or _is_agent(request)
 
     def can_delete(self, request: Request) -> bool:
-        return is_full_admin(request)
+        return _is_full_admin(request)
 
     def _apply_agency_filter(self, query, agency_id):
         if agency_id:
@@ -313,10 +294,9 @@ class PropertyView(AdminModelView):
         return data
 
     async def _populate_obj(self, request, obj, data, **kwargs):
-        # Injecter des sentinelles no-op pour les ImageFields :
-        # starlette_admin itère sur TOUS les champs de la vue (pas seulement les clés de data)
-        # et appelle not_none(data.get(name)) → crash si None.
-        # (None, False) = "ni upload, ni suppression" → starlette_admin ne touche pas l'attribut.
+        # Inject no-op sentinels for ImageFields: starlette_admin iterates over ALL view fields
+        # (not just keys in data) and calls not_none(data.get(name)) → crash if None.
+        # (None, False) = "no upload, no deletion" → starlette_admin leaves the attribute untouched.
         clean = dict(data)
         clean["image_url"] = (None, False)
         clean["gallery_images"] = (None, False)
@@ -336,11 +316,11 @@ class PropertyView(AdminModelView):
         return result
 
     async def create(self, request: Request, data: Dict[str, Any]) -> Any:
-        # Extraire les images AVANT de nettoyer les données
+        # Extract images BEFORE cleaning the data
         raw_gallery = data.pop("gallery_images", None)
         raw_cover = data.pop("image_url", None)
 
-        # Nettoyer les données pour _populate_obj
+        # Clean data for _populate_obj
         clean_data = clean_data_for_populate(data)
         clean_data = await self._arrange_data(request, clean_data)
         await self.validate(request, clean_data)
@@ -351,7 +331,7 @@ class PropertyView(AdminModelView):
         await self.before_create(request, clean_data, obj)
         await session.flush()
 
-        # Forcer le chargement de l'agence
+        # Force-load the agency relationship
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
         result = await session.execute(
@@ -377,11 +357,11 @@ class PropertyView(AdminModelView):
         return obj
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
-        # Extraire les images AVANT de nettoyer les données
+        # Extract images BEFORE cleaning the data
         raw_gallery = data.pop("gallery_images", None)
         raw_cover = data.pop("image_url", None)
 
-        # Nettoyer les données pour _populate_obj
+        # Clean data for _populate_obj
         clean_data = clean_data_for_populate(data)
         clean_data = await self._arrange_data(request, clean_data, is_edit=True)
         await self.validate(request, clean_data)
@@ -393,7 +373,7 @@ class PropertyView(AdminModelView):
         await self._populate_obj(request, obj, clean_data)
         await self.before_edit(request, clean_data, obj)
 
-        # Forcer le chargement de l'agence si nécessaire
+        # Force-load the agency relationship si nécessaire
         if obj.agency is None:
             from sqlalchemy import select
             from sqlalchemy.orm import selectinload

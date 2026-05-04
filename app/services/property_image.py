@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from core.files import PropertyImageFile
 from models.property import Property
@@ -41,23 +41,6 @@ class PropertyUploadService:
         
         if prop and prop.agency:
             return prop.agency.name
-        
-        # Fallback: get agency_id and query separately
-        result = await self.session.execute(
-            select(Property.agency_id)
-            .where(Property.id == property_id)
-        )
-        agency_id = result.scalar_one_or_none()
-        
-        if agency_id:
-            result = await self.session.execute(
-                select(Property.agency)
-                .where(Property.id == property_id)
-            )
-            agency = result.scalar_one_or_none()
-            if agency:
-                return agency.name
-        
         return None
 
     def unpack_cover_image(
@@ -192,11 +175,9 @@ class PropertyUploadService:
     ) -> None:
         """Apply gallery images to a property."""
         if delete_gallery:
-            # Delete existing gallery
             await self.session.execute(
-                select(PropertyGallery)
+                delete(PropertyGallery)
                 .where(PropertyGallery.property_id == property_id)
-                .delete(synchronize_session=False)
             )
         elif gallery_files:
             # Create or update gallery

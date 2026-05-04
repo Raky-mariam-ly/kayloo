@@ -269,6 +269,19 @@ class FastapiUsersAuthProvider(AuthProvider):
         token = request.session.get("session", None)
         user: User = await token_manager.read_token(token, user_manager)
 
+        # No admin session found — try the frontend JWT cookie
+        if user is None:
+            jwt_cookie = request.cookies.get("fastapiusersauth")
+            if jwt_cookie:
+                try:
+                    jwt_user = await get_jwt_strategy().read_token(jwt_cookie, user_manager)
+                    if jwt_user and jwt_user.is_active:
+                        new_token = await token_manager.write_token(jwt_user)
+                        request.session["session"] = new_token
+                        user = jwt_user
+                except Exception:
+                    pass
+
         if user and user.is_active:
             request.state.user = user
             if user.role == "manager":
@@ -295,4 +308,5 @@ class FastapiUsersAuthProvider(AuthProvider):
 
     async def logout(self, request: Request, response: Response) -> Response:
         request.session.clear()
+        response.delete_cookie("fastapiusersauth")
         return response

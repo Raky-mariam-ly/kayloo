@@ -36,6 +36,11 @@ htmlcov/
 
 # Logs
 *.log
+web_logs.txt
+
+# Claude & Github config
+.claude/
+.github/
 
 .claude/
 app/static/uploads/

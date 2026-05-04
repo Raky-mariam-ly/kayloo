@@ -8,9 +8,25 @@ from starlette.datastructures import FormData, UploadFile
 from starlette.requests import Request
 from starlette_admin import BaseField, ExportType
 from starlette_admin.contrib.sqla import ModelView
-from starlette_admin.fields import EnumField, ImageField
+from starlette_admin.fields import DecimalField, EnumField, ImageField
 from starlette_admin.helpers import RequestAction
 
+
+
+class SmartDecimalField(DecimalField):
+    """DecimalField that strips trailing zeros: 123.000 → 123, 12.50 → 12.5."""
+
+    async def serialize_value(self, request: Request, value: Any, action: RequestAction) -> Any:
+        if value is None:
+            return None
+        try:
+            from decimal import Decimal
+            d = Decimal(str(value))
+            if d == d.to_integral_value():
+                return str(int(d))
+            return "{:f}".format(d.normalize())
+        except Exception:
+            return str(value)
 
 
 def _extract_file_url(v) -> str | None:

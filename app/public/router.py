@@ -327,6 +327,7 @@ async def get_search_result(
     country: Optional[str] = Query(None),
     city: Optional[str] = Query(None),
     max_price: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
     session: AsyncSession = Depends(get_db),
 ):
     city_val = city.strip() or None if city else None
@@ -346,7 +347,7 @@ async def get_search_result(
     rent_cat = _LISTING_TYPE_MAP.get(listing_type) if listing_type else None
 
     repo = PropertyRepository(session)
-    props = await repo.search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat, limit=24)
+    props = await repo.search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat, sort=sort, limit=24)
     total = await repo.count_search(city=city_val, type=type_val, price_max=price_max, rent_category=rent_cat)
     listings = [_property_to_listing(p) for p in props]
     return templates.TemplateResponse(

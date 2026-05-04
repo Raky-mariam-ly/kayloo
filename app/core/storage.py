@@ -51,8 +51,7 @@ def configure_storage() -> None:
         container = _get_or_create_container(driver, settings.s3_bucket)
         StorageManager.add_storage("images", container)
         
-        logger.info("Stockage: DO Spaces actif — bucket=%s region=%s", 
-                   settings.s3_bucket, settings.s3_region)
+        logger.info("Storage: DO Spaces active — bucket=%s region=%s", settings.s3_bucket, settings.s3_region)
         return
 
     # Stockage local (fallback)
@@ -61,4 +60,4 @@ def configure_storage() -> None:
     cls = get_driver("local")
     driver = cls(UPLOAD_DIR)
     StorageManager.add_storage("images", _get_or_create_container(driver, "images"))
-    logger.warning("Stockage: Backend LOCAL actif (%s) — variables S3 manquantes", UPLOAD_DIR)
+    logger.warning("Storage: LOCAL backend active (%s) — S3 variables missing", UPLOAD_DIR)

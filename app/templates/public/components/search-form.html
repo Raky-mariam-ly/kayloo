@@ -1,204 +1,234 @@
 {% macro search_feature() %}
 <div class="max-w-full w-full lg:max-w-[90%] mx-auto mt-6">
-  <form id="search-form" action="{{ url_for('get_search_result') }}" method="GET">
-    <div class="flex flex-row gap-1 z-2 justify-center" id="contract-button-group">
-      <!-- populated dynamically via JS -->
-    </div>
-    <div
-      class="box-border bg-neutral-200/25 backdrop-blur-md border border-white/20 shadow-xl flex flex-wrap gap-2 p-4 font-jakarta items-end rounded-xl z-3">
-      <div class="flex flex-col basis-full box-border md:flex-1">
-        <label for="property-type" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
-          Type de bien
-        </label>
-        <select id="property-type" name="property_type"
-          class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-          <option value="">Tous les types</option>
-        </select>
-      </div>
-      <div class="grid grid-cols-2 gap-2 basis-full md:flex-2">
-        <div class=" flex flex-col">
-          <label for="country" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">Pays</label>
-          <select id="country" name="country"
-            class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-            <option value="">Tous les pays</option>
-          </select>
+    <form id="search-form" action="{{ url_for('get_search_result') }}" method="GET">
+        <div class="flex flex-row gap-1 z-2 justify-center" id="contract-button-group">
+            <!-- populated dynamically via JS -->
         </div>
-        <div class="flex flex-col">
-          <label for="city" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
-            Ville</label>
-          <select id="city" name="city"
-            class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-            <option value="">Toutes les villes</option>
-          </select>
+        <div
+            class="box-border bg-neutral-200/25 backdrop-blur-md border border-white/20 shadow-xl flex flex-wrap gap-2 p-4 font-jakarta items-end rounded-xl z-3">
+            <div class="flex flex-col basis-full box-border md:flex-1">
+                <label for="property-type" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+                    Type de bien
+                </label>
+                <select
+                    id="property-type"
+                    name="property_type"
+                    class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+                    <option value="">Tous les types</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2 basis-full md:flex-2">
+                <div class="flex flex-col">
+                    <label for="country" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left"
+                        >Pays</label
+                    >
+                    <select
+                        id="country"
+                        name="country"
+                        class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+                        <option value="">Tous les pays</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="city" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+                        Ville</label
+                    >
+                    <select
+                        id="city"
+                        name="city"
+                        class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
+                        <option value="">Toutes les villes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex-col basis-full box-border md:flex-1">
+                <label
+                    id="price-label"
+                    for="max-price"
+                    class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
+                    Prix de vente maximum
+                </label>
+                <input
+                    type="number"
+                    id="max-price"
+                    name="max_price"
+                    placeholder="Ex: 50 000 000"
+                    class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm" />
+            </div>
+            <button
+                type="submit"
+                class="flex flex-1 basis-[100%] md:basis-1 bg-primary text-white font-jakarta font-bold text-sm items-center justify-center gap-1 rounded-lg h-8.5 mt-2 md:mt-0">
+                <i class="fa-solid fa-search"></i>Recherche
+            </button>
         </div>
-      </div>
-      <div class="flex flex-col basis-full box-border md:flex-1">
-        <label id="price-label" for="max-price" class="text-xs font-semibold text-neutral-300 uppercase mb-1 text-left">
-          Prix de vente maximum
-        </label>
-        <input type="number" id="max-price" name="max_price" placeholder="Ex: 50 000 000"
-          class="border px-2 py-1.5 rounded-md text-neutral-50 bg-white/5 border-white/20 text-sm">
-      </div>
-      <button type="submit"
-        class="flex flex-1 basis-[100%] md:basis-1 bg-primary text-white font-jakarta font-bold text-sm items-center justify-center gap-1 rounded-lg h-8.5 mt-2 md:mt-0"><i
-          class="fa-solid fa-search"></i>Recherche</button>
-    </div>
-
-  </form>
+    </form>
 </div>
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
+    document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(window.location.search);
 
-    // 1. DOM SELECTORS
-    const group        = document.getElementById('contract-button-group');
-    const propertySelect = document.getElementById('property-type');
-    const countrySelect  = document.getElementById('country');
-    const citySelect     = document.getElementById('city');
-    const priceLabel     = document.getElementById('price-label');
-    const priceInput     = document.getElementById('max-price');
+        // 1. DOM SELECTORS
+        const group = document.getElementById("contract-button-group");
+        const propertySelect = document.getElementById("property-type");
+        const countrySelect = document.getElementById("country");
+        const citySelect = document.getElementById("city");
+        const priceLabel = document.getElementById("price-label");
+        const priceInput = document.getElementById("max-price");
 
-    // 2. PRICE RULES PER RENT TYPE CODE
-    const PRICE_RULES = {
-      "RENT_EMPTY":     { label: "Loyer max",             placeholder: "250 000"    },
-      "RENT_FURNISHED": { label: "Loyer max (par jour)",   placeholder: "40 000"     },
-      "SALE":           { label: "Prix de vente max",      placeholder: "50 000 000" },
-    };
-    const DEFAULT_PRICE_RULE = { label: "Prix max", placeholder: "" };
+        // 2. PRICE RULES PER RENT TYPE CODE
+        const PRICE_RULES = {
+            RENT_EMPTY: { label: "Loyer max", placeholder: "250 000" },
+            RENT_FURNISHED: { label: "Loyer max (par jour)", placeholder: "40 000" },
+            SALE: { label: "Prix de vente max", placeholder: "50 000 000" },
+        };
+        const DEFAULT_PRICE_RULE = { label: "Prix max", placeholder: "" };
 
-    const applyRules = (code) => {
-      const config = PRICE_RULES[code] ?? DEFAULT_PRICE_RULE;
-      priceLabel.textContent = config.label;
-      priceInput.placeholder = config.placeholder;
-    };
+        const applyRules = (code) => {
+            const config = PRICE_RULES[code] ?? DEFAULT_PRICE_RULE;
+            priceLabel.textContent = config.label;
+            priceInput.placeholder = config.placeholder;
+        };
 
-    // 3. LISTING TYPES — dynamic from DB
-    const HIDDEN_RENT_TYPES = ["LEASE_AGRO"]; // hidden from public search until ready
-    const TAB_CLASS = "cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3";
+        // 3. LISTING TYPES — dynamic from DB
+        const HIDDEN_RENT_TYPES = ["LEASE_AGRO"]; // hidden from public search until ready
+        const TAB_CLASS =
+            "cursor-pointer text-center rounded-t-lg bg-neutral-500/15 backdrop-blur-md border-t border-x text-neutral-100 border-white/10 peer-checked:bg-white peer-checked:text-primary transition-all text-xs md:text-sm font-bold px-3.5 py-3 md:px-6 md:py-3";
 
-    const renderFallbackTabs = () => {
-      const fallbacks = [
-        { code: "RENT_EMPTY",     label: "Location"         },
-        { code: "RENT_FURNISHED", label: "Location meublée" },
-        { code: "SALE",           label: "Vente"            },
-      ];
-      fallbacks.forEach((f, i) => {
-        const lbl = document.createElement('label');
-        lbl.className = 'flex text-left';
-        lbl.innerHTML = `<input type="radio" name="listing_type" value="${f.code}" class="hidden peer"${i === 0 ? ' checked' : ''}>
+        const renderFallbackTabs = () => {
+            const fallbacks = [
+                { code: "RENT_EMPTY", label: "Location" },
+                { code: "RENT_FURNISHED", label: "Location meublée" },
+                { code: "SALE", label: "Vente" },
+            ];
+            fallbacks.forEach((f, i) => {
+                const lbl = document.createElement("label");
+                lbl.className = "flex text-left";
+                lbl.innerHTML = `<input type="radio" name="listing_type" value="${f.code}" class="hidden peer"${i === 0 ? " checked" : ""}>
           <div class="${TAB_CLASS}">${f.label}</div>`;
-        group.appendChild(lbl);
-      });
-    };
+                group.appendChild(lbl);
+            });
+        };
 
-    const populateListingTypes = async () => {
-      try {
-        const res = await fetch('/api/v1/property-rent-types?limit=100');
-        const types = await res.json();
-        const active = types.filter(t => t.is_active && !HIDDEN_RENT_TYPES.includes(t.code));
-        if (!active.length) { renderFallbackTabs(); return; }
+        const populateListingTypes = async () => {
+            try {
+                const res = await fetch("/api/v1/property-rent-types?limit=100");
+                const types = await res.json();
+                const active = types.filter((t) => t.is_active && !HIDDEN_RENT_TYPES.includes(t.code));
+                if (!active.length) {
+                    renderFallbackTabs();
+                    return;
+                }
 
-        const savedCode = params.get('listing_type');
-        let firstCode = null;
+                const savedCode = params.get("listing_type");
+                let firstCode = null;
 
-        active.forEach((t, i) => {
-          if (i === 0) firstCode = t.code;
-          const checked = savedCode ? savedCode === t.code : i === 0;
-          const lbl = document.createElement('label');
-          lbl.className = 'flex text-left';
-          lbl.innerHTML = `<input type="radio" name="listing_type" value="${t.code}" class="hidden peer"${checked ? ' checked' : ''}>
+                active.forEach((t, i) => {
+                    if (i === 0) firstCode = t.code;
+                    const checked = savedCode ? savedCode === t.code : i === 0;
+                    const lbl = document.createElement("label");
+                    lbl.className = "flex text-left";
+                    lbl.innerHTML = `<input type="radio" name="listing_type" value="${t.code}" class="hidden peer"${checked ? " checked" : ""}>
             <div class="${TAB_CLASS}">${t.label}</div>`;
-          group.appendChild(lbl);
-        });
+                    group.appendChild(lbl);
+                });
 
-        document.querySelectorAll('input[name="listing_type"]').forEach(r =>
-          r.addEventListener('change', (e) => applyRules(e.target.value))
-        );
-        applyRules(savedCode && active.some(t => t.code === savedCode) ? savedCode : firstCode);
-      } catch {
-        renderFallbackTabs();
-        document.querySelectorAll('input[name="listing_type"]').forEach(r =>
-          r.addEventListener('change', (e) => applyRules(e.target.value))
-        );
-        applyRules('RENT_EMPTY');
-      }
-    };
+                document
+                    .querySelectorAll('input[name="listing_type"]')
+                    .forEach((r) => r.addEventListener("change", (e) => applyRules(e.target.value)));
+                applyRules(savedCode && active.some((t) => t.code === savedCode) ? savedCode : firstCode);
+            } catch {
+                renderFallbackTabs();
+                document
+                    .querySelectorAll('input[name="listing_type"]')
+                    .forEach((r) => r.addEventListener("change", (e) => applyRules(e.target.value)));
+                applyRules("RENT_EMPTY");
+            }
+        };
 
-    // 4. PROPERTY TYPES — dynamic from DB
-    const populatePropertyTypes = async () => {
-      try {
-        const res = await fetch('/api/v1/property-types?limit=100');
-        const types = await res.json();
-        propertySelect.innerHTML = '<option value="">Tous les types</option>';
-        types.filter(t => t.is_active).forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.code; opt.textContent = t.label;
-          propertySelect.appendChild(opt);
-        });
-        const savedType = params.get('property_type');
-        if (savedType) propertySelect.value = savedType;
-      } catch {
-        propertySelect.innerHTML = '<option value="">Erreur de chargement</option>';
-      }
-    };
+        // 4. PROPERTY TYPES — dynamic from DB
+        const populatePropertyTypes = async () => {
+            try {
+                const res = await fetch("/api/v1/property-types?limit=100");
+                const types = await res.json();
+                propertySelect.innerHTML = '<option value="">Tous les types</option>';
+                types
+                    .filter((t) => t.is_active)
+                    .forEach((t) => {
+                        const opt = document.createElement("option");
+                        opt.value = t.code;
+                        opt.textContent = t.label;
+                        propertySelect.appendChild(opt);
+                    });
+                const savedType = params.get("property_type");
+                if (savedType) propertySelect.value = savedType;
+            } catch {
+                propertySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+            }
+        };
 
-    // 5. CITIES — dynamic by selected country
-    const updateCities = async (countryCode, selectedCity = null) => {
-      citySelect.innerHTML = '<option value="">Chargement...</option>';
-      citySelect.disabled = true;
-      if (!countryCode) {
-        citySelect.innerHTML = '<option value="">Toutes les villes</option>';
-        citySelect.disabled = false;
-        return;
-      }
-      try {
-        const res = await fetch(`/api/v1/cities/country/${countryCode}`);
-        const cities = await res.json();
-        citySelect.innerHTML = '<option value="">Toutes les villes</option>';
-        cities.filter(c => c.is_active).forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.code; opt.textContent = c.name;
-          citySelect.appendChild(opt);
-        });
-        if (selectedCity) citySelect.value = selectedCity;
-      } catch {
-        citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
-      } finally {
-        citySelect.disabled = false;
-      }
-    };
+        // 5. CITIES — dynamic by selected country
+        const updateCities = async (countryCode, selectedCity = null) => {
+            citySelect.innerHTML = '<option value="">Chargement...</option>';
+            citySelect.disabled = true;
+            if (!countryCode) {
+                citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+                citySelect.disabled = false;
+                return;
+            }
+            try {
+                const res = await fetch(`/api/v1/cities/country/${countryCode}`);
+                const cities = await res.json();
+                citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+                cities
+                    .filter((c) => c.is_active)
+                    .forEach((c) => {
+                        const opt = document.createElement("option");
+                        opt.value = c.name;
+                        opt.textContent = c.name;
+                        citySelect.appendChild(opt);
+                    });
+                if (selectedCity) citySelect.value = selectedCity;
+            } catch {
+                citySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+            } finally {
+                citySelect.disabled = false;
+            }
+        };
 
-    // 6. COUNTRIES — dynamic from DB
-    const populateCountries = async () => {
-      try {
-        const res = await fetch('/api/v1/countries?limit=100');
-        const countries = await res.json();
-        countrySelect.innerHTML = '<option value="">Tous les pays</option>';
-        countries.filter(c => c.is_active).forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c.code; opt.textContent = c.name;
-          countrySelect.appendChild(opt);
-        });
-        const savedCountry = params.get('country');
-        const savedCity = params.get('city');
-        if (savedCountry) countrySelect.value = savedCountry;
-        await updateCities(countrySelect.value, savedCity);
-      } catch {
-        countrySelect.innerHTML = '<option value="">Erreur de chargement</option>';
-      }
-    };
+        // 6. COUNTRIES — dynamic from DB
+        const populateCountries = async () => {
+            try {
+                const res = await fetch("/api/v1/countries?limit=100");
+                const countries = await res.json();
+                countrySelect.innerHTML = '<option value="">Tous les pays</option>';
+                countries
+                    .filter((c) => c.is_active)
+                    .forEach((c) => {
+                        const opt = document.createElement("option");
+                        opt.value = c.code;
+                        opt.textContent = c.name;
+                        countrySelect.appendChild(opt);
+                    });
+                const savedCountry = params.get("country");
+                const savedCity = params.get("city");
+                if (savedCountry) countrySelect.value = savedCountry;
+                await updateCities(countrySelect.value, savedCity);
+            } catch {
+                countrySelect.innerHTML = '<option value="">Erreur de chargement</option>';
+            }
+        };
 
-    // 7. EVENT LISTENERS
-    countrySelect.addEventListener('change', (e) => updateCities(e.target.value));
+        // 7. EVENT LISTENERS
+        countrySelect.addEventListener("change", (e) => updateCities(e.target.value));
 
-    // Function D: Quartiers (infrastructure prête, UI non exposée pour l'instant)
-    // const updateAreas = async (cityCode) => {
-    //   const res = await fetch(`/api/v1/areas/city/${cityCode}`);
-    //   // populate areaSelect when the field is added to the UI
-    // };
+        // Function D: Quartiers (infrastructure prête, UI non exposée pour l'instant)
+        // const updateAreas = async (cityCode) => {
+        //   const res = await fetch(`/api/v1/areas/city/${cityCode}`);
+        //   // populate areaSelect when the field is added to the UI
+        // };
 
-    // 8. INITIALIZATION
-    await Promise.all([populateListingTypes(), populatePropertyTypes(), populateCountries()]);
-  });
+        // 8. INITIALIZATION
+        await Promise.all([populateListingTypes(), populatePropertyTypes(), populateCountries()]);
+    });
 </script>
 {% endmacro %}

@@ -557,10 +557,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const cities = await res.json();
             citySelect.innerHTML = '<option value="">Toutes les villes</option>';
             cities.filter(c => c.is_active).forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.code;
-                opt.textContent = c.name;
-                citySelect.appendChild(opt);
+            const opt = document.createElement('option');
+            opt.value = c.name;
+            opt.textContent = c.name;
+            citySelect.appendChild(opt);
             });
             if (selectedCity) citySelect.value = selectedCity;
         } catch {

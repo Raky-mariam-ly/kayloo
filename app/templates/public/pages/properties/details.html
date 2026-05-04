@@ -431,7 +431,7 @@ select | join(', ') %} {% set price_num = (property.sale_price or property.price
                         </div>
                         {% endif %}
 
-                        <form method="post" action="#" class="flex flex-col gap-2">
+                        <form id="inquiry-form" class="flex flex-col gap-2">
                             <div class="grid grid-cols-2 gap-2">
                                 <input
                                     type="text"
@@ -513,4 +513,85 @@ Bonjour, je suis intéressé(e) par [{{ property.label }}]</textarea
         </div>
     </div>
 </section>
-{% endif %} {% endif %}{# end if property #} {% endblock %}
+{% endif %} {% endif %}{# end if property #}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("inquiry-form");
+        if (!form) return;
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Disable button to prevent double submit
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi en cours...';
+
+            // Map HTML field names → API field names
+            const payload = {
+                first_name: form.querySelector('[name="firstname"]').value.trim(),
+                last_name: form.querySelector('[name="lastname"]').value.trim(),
+                phone_number: form.querySelector('[name="mobile"]').value.trim(),
+                email: form.querySelector('[name="email"]').value.trim(),
+                message: form.querySelector('[name="message"]').value.trim(),
+                source: "website",
+            };
+
+            // Basic validation
+            if (!payload.first_name || !payload.last_name || !payload.email) {
+                showFeedback("Veuillez remplir tous les champs obligatoires (Prénom, Nom, Email).", "error");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+
+            try {
+                const propertyId = "{{ property.id }}";
+                const url = `/api/v1/properties/${propertyId}/inquire`;
+                const resp = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!resp.ok) {
+                    throw new Error("Erreur serveur");
+                }
+
+                showFeedback(
+                    "Votre message a été envoyé avec succès ! Un conseiller vous contactera bientôt.",
+                    "success",
+                );
+                form.reset();
+            } catch (err) {
+                showFeedback("Une erreur est survenue. Veuillez réessayer ou nous contacter par téléphone.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+
+        function showFeedback(msg, type) {
+            // Remove existing feedback
+            const old = form.querySelector(".inquiry-feedback");
+            if (old) old.remove();
+
+            const div = document.createElement("div");
+            div.className =
+                "inquiry-feedback text-sm font-medium px-3 py-2 rounded-md " +
+                (type === "success"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200");
+            div.textContent = msg;
+            form.insertBefore(div, form.firstChild);
+
+            // Auto-remove success after 6s
+            if (type === "success") {
+                setTimeout(() => div.remove(), 6000);
+            }
+        }
+    });
+</script>
+{% endblock %}
